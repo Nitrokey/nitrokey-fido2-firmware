@@ -1,7 +1,5 @@
 #!/usr/bin/make -f
 
-include Makefile.obsolete
-
 #define uECC_arch_other 0
 #define uECC_x86        1
 #define uECC_x86_64     2
@@ -36,6 +34,8 @@ name = main
 
 .PHONY: all
 all: main
+
+include Makefile.obsolete
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
