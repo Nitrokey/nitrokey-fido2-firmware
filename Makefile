@@ -92,6 +92,7 @@ cppcheck:
 
 test: main cppcheck black_test
 
+.PHONY: clean
 clean:
 	rm -f *.o main.exe main $(obj)
 	rm -rf env2 env3
