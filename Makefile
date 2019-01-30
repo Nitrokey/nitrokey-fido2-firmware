@@ -65,6 +65,10 @@ env3:
 black: env3
 	env3/bin/black --skip-string-normalization tools/
 
+black_test: env3
+	env3/bin/black --skip-string-normalization --check tools/
+
+
 wink2: env2
 	env2/bin/python tools/solotool.py solo --wink
 
@@ -86,7 +90,7 @@ cppcheck:
 	cppcheck $(CPPCHECK_FLAGS) tinycbor --force
 	cppcheck $(CPPCHECK_FLAGS) crypto/micro-ecc/ --force
 
-test: main cppcheck
+test: main cppcheck black_test
 
 clean:
 	rm -f *.o main.exe main $(obj)
