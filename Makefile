@@ -22,7 +22,9 @@ else
   export LDFLAGS = -Wl,--gc-sections
 endif
 LDFLAGS += $(LIBCBOR)
-CFLAGS = -O2 -fdata-sections -ffunction-sections
+LDFLAGS += -static-libasan
+#LDFLAGS += -L/usr/lib/gcc/x86_64-redhat-linux/8 -lasan
+CFLAGS = -fdata-sections -ffunction-sections -fsanitize=address -O1 -g -fno-omit-frame-pointer
 
 INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
 
@@ -44,7 +46,7 @@ tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 cbor: $(LIBCBOR)
 
 $(LIBCBOR): tinycbor/Makefile
-	cd tinycbor/ && $(MAKE) clean && $(MAKE) -j8
+	cd tinycbor/ && $(MAKE) clean && $(MAKE) -j8 CFLAGS=$(CFLAGS) LDFLAGS=$(LDFLAGS)
 
 $(name): $(obj) $(LIBCBOR)
 	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
@@ -87,13 +89,38 @@ cppcheck:
 	cppcheck $(CPPCHECK_FLAGS) fido2
 	cppcheck $(CPPCHECK_FLAGS) pc
 	cppcheck $(CPPCHECK_FLAGS) targets/stm32l432 --force
-	cppcheck $(CPPCHECK_FLAGS) tinycbor --force
+	-cppcheck $(CPPCHECK_FLAGS) tinycbor --force
 	cppcheck $(CPPCHECK_FLAGS) crypto/micro-ecc/ --force
+
+.PHONY: clang_check
+clang_check:
+	clang-check --version
+	find . -name '*.c' -o -name '*.h' | xargs clang-check -p .
+
+.PHONY: clang_tidy
+clang_tidy:
+	clang-tidy --version
+	find pc -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
+	find fido2 -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
+	find targets/stm32l432  -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
+
+.PHONY: scan_build
+CHECKERS=-enable-checker security -enable-checker alpha  -enable-checker nullability -enable-checker valist
+scan_build: clean
+	mkdir -p reports/scan-build
+	clang-7 --version
+	-scan-build -o reports/scan-build --show-description --status-bugs $(CHECKERS) $(MAKE)
+	xdg-open reports/scan-build/ &
+
+.PHONY: scan_build_arm
+scan_build_arm: clean
+	$(MAKE) scan_build -C targets/stm32l432/
 
 test: main cppcheck black_test
 
 .PHONY: clean
 clean:
+	make -C tinycbor clean
 	rm -f *.o main.exe main $(obj)
 	rm -rf env2 env3
 	for f in crypto/tiny-AES-c/Makefile tinycbor/Makefile ; do \

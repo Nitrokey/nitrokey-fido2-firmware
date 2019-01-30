@@ -1,8 +1,6 @@
-ifndef DEBUG
-DEBUG=0
-endif
+DEBUG := 0
 
-merge_hex=python ../../tools/solotool.py mergehex
+merge_hex=python3 ../../tools/solotool.py mergehex
 
 all:
 	$(MAKE) -f application.mk -j8 solo.hex PREFIX=$(PREFIX) DEBUG=$(DEBUG) EXTRA_DEFINES='-DFLASH_ROP=1'
@@ -73,3 +71,15 @@ solo.hex:
 
 cbor:
 	$(MAKE) -f application.mk -j8 cbor
+
+
+.PHONY: scan_build
+ARM_GCC=$(shell which arm-none-eabi-gcc)
+# --status-bugs
+SBO=--use-cc=$(ARM_GCC) --analyzer-target=arm-none-eabi -o reports/scan-build --show-description
+scan_build: clean2 cbor
+# 	boot-no-sig clean all-hacker
+	scan-build $(SBO) $(MAKE) boot-no-sig
+	make clean2
+	scan-build $(SBO) $(MAKE) all-hacker
+	xdg-open reports/scan-build

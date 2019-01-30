@@ -19,7 +19,6 @@
  * This code is available under licenses for commercial use.
  * Please contact SoloKeys for more information.
  */
-#include <stdio.h>
 #include "device.h"
 #include "util.h"
 #include "ctap.h"

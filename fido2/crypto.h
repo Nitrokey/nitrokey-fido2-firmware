@@ -23,6 +23,7 @@
 #define _CRYPTO_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define USE_SOFTWARE_IMPLEMENTATION
 

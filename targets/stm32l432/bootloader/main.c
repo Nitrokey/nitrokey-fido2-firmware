@@ -19,7 +19,7 @@
  * This code is available under licenses for commercial use.
  * Please contact SoloKeys for more information.
  */
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 

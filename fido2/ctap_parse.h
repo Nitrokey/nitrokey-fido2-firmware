@@ -22,6 +22,7 @@
 #ifndef _CTAP_PARSE_H
 #define _CTAP_PARSE_H
 
+#include <stdint.h>
 
 #define check_ret(r)    _check_ret(r,__LINE__, __FILE__);\
                         if ((r) != CborNoError) return CTAP2_ERR_CBOR_PARSING;
