@@ -89,13 +89,17 @@ wink3: env3
 fido2-test: env3
 	env3/bin/python tools/ctap_test.py
 
-CPPCHECK_FLAGS=--quiet --error-exitcode=2
-
+CPPCHECK_FLAGS := --quiet --error-exitcode=2
+.PHONY: cppcheck
 cppcheck:
+	cppcheck --version
 	cppcheck $(CPPCHECK_FLAGS) crypto/aes-gcm
 	cppcheck $(CPPCHECK_FLAGS) crypto/sha256
 	cppcheck $(CPPCHECK_FLAGS) fido2
 	cppcheck $(CPPCHECK_FLAGS) pc
+	cppcheck $(CPPCHECK_FLAGS) targets/stm32l432 --force
+	cppcheck $(CPPCHECK_FLAGS) tinycbor --force
+	cppcheck $(CPPCHECK_FLAGS) crypto/micro-ecc/ --force
 
 test: main cppcheck
 
