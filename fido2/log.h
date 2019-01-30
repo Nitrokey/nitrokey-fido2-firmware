@@ -58,7 +58,7 @@ typedef enum
     TAG_BOOT = (1 << 17),
     TAG_EXT = (1 << 17),
 
-    TAG_FILENO = (1<<31)
+    TAG_FILENO = (1U<<31)
 } LOG_TAG;
 
 #if DEBUG_LEVEL > 0
