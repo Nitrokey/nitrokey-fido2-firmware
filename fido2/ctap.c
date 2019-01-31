@@ -443,6 +443,13 @@ done_rk:
 }
 
 
+/**
+ *
+ * @param sigbuf
+ * @param sigder
+ * @return size?
+ * // FIXME add tests for maximum and minimum length of the input and output
+ */
 int ctap_encode_der_sig(uint8_t * sigbuf, uint8_t * sigder)
 {
     // Need to caress into dumb der format ..
@@ -471,7 +478,7 @@ int ctap_encode_der_sig(uint8_t * sigbuf, uint8_t * sigder)
     sigder[4 + 32 + pad_r - lead_r] = 0x02;
     sigder[5 + 32 + pad_r + pad_s - lead_r] = 0;
     sigder[5 + 32 + pad_r - lead_r] = 0x20 + pad_s - lead_s;
-    memmove(sigder + 6 + 32 + pad_r + pad_s - lead_r, sigbuf + 32 + lead_s, 32);
+    memmove(sigder + 6 + 32 + pad_r + pad_s - lead_r, sigbuf + 32 + lead_s, 32); // FIXME buffer overflow (1)
     //
     return 0x46 + pad_s + pad_r - lead_r - lead_s;
 }
