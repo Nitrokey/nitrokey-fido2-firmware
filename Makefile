@@ -88,6 +88,7 @@ env3_sim:
 	cd python-fido2 && ../env3_sim/bin/python3 setup.py install
 
 test_simulation: env3_sim $(name)
+	./env3_sim/bin/python3 --version
 	-killall $(name)
 	./$(name) &
 	./env3_sim/bin/python3 tools/ctap_test.py
@@ -95,7 +96,7 @@ test_simulation: env3_sim $(name)
 	./env3_sim/bin/python3 python-fido2/examples/get_info.py
 	./env3_sim/bin/python3 python-fido2/examples/multi_device.py
 	killall $(name)
-	@echo "test finished"
+	@echo "!!! All tests returned non-error code"
 
 fido2-test: env3
 	# tests real device
@@ -137,7 +138,7 @@ scan_build: clean
 scan_build_arm: clean
 	$(MAKE) scan_build -C targets/stm32l432/
 
-test: $(name) cppcheck black_test
+test: $(name) test_simulation
 
 .PHONY: clean
 clean:
