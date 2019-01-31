@@ -34,6 +34,10 @@ LDFLAGS_ASAN = -lasan
 #CFLAGS_ASAN= -fsanitize=leak -O1 -g -fno-omit-frame-pointer
 #LDFLAGS_ASAN = -llsan
 
+# clang only
+#CFLAGS_ASAN= -fsanitize=memory -fsanitize-memory-track-origins  -O1 -g -fno-omit-frame-pointer -fPIE -pie
+#LDFLAGS_ASAN = -lmsan
+
 CFLAGS += $(CFLAGS_ASAN)
 LDFLAGS += $(LDFLAGS_ASAN)
 
