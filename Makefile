@@ -37,10 +37,10 @@ CFLAGS += $(INCLUDES)
 # for crypto/tiny-AES-c
 CFLAGS += -DAES256=1 -DAPP_CONFIG=\"app.h\"
 
-name = main
+name = solo-simulation-main
 
 .PHONY: all
-all: main
+all: $(name)
 
 include Makefile.obsolete
 
@@ -136,12 +136,12 @@ scan_build: clean
 scan_build_arm: clean
 	$(MAKE) scan_build -C targets/stm32l432/
 
-test: main cppcheck black_test
+test: $(name) cppcheck black_test
 
 .PHONY: clean
 clean:
 	make -C tinycbor clean
-	rm -f *.o main.exe main $(obj)
+	rm -f *.o $(name).exe $(name) $(obj)
 	rm -rf env2 env3
 	for f in crypto/tiny-AES-c/Makefile tinycbor/Makefile ; do \
 	    if [ -f "$$f" ]; then \
