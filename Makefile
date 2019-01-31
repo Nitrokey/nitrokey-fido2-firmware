@@ -148,3 +148,11 @@ clean:
 	    	(cd `dirname $$f` ; git checkout -- .) ;\
 	    fi ;\
 	done
+
+.PHONY: info
+info:
+	@echo Sources: $(src)
+	@echo Objects: $(obj)
+	@echo CFLAGS: $(CFLAGS)
+	@echo LDFLAGS: $(LDFLAGS)
+	@echo Commands: `egrep '^\w+:' Makefile | awk '{print $$1}' | sort | tr -d '\r\n' `
