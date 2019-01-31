@@ -22,9 +22,14 @@ else
   export LDFLAGS = -Wl,--gc-sections
 endif
 LDFLAGS += $(LIBCBOR)
-LDFLAGS += -static-libasan
-#LDFLAGS += -L/usr/lib/gcc/x86_64-redhat-linux/8 -lasan
-CFLAGS = -fdata-sections -ffunction-sections -fsanitize=address -O1 -g -fno-omit-frame-pointer
+CFLAGS = -fdata-sections -ffunction-sections
+
+# Enable / disable ASAN
+CFLAGS_ASAN= -fsanitize=address -O1 -g -fno-omit-frame-pointer
+LDFLAGS_ASAN = -lasan
+
+CFLAGS += $(CFLAGS_ASAN)
+LDFLAGS += $(LDFLAGS_ASAN)
 
 INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
 
@@ -46,7 +51,8 @@ tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 cbor: $(LIBCBOR)
 
 $(LIBCBOR): tinycbor/Makefile
-	cd tinycbor/ && $(MAKE) clean && $(MAKE) -j8 CFLAGS=$(CFLAGS) LDFLAGS=$(LDFLAGS)
+	cd tinycbor/ && $(MAKE) clean && $(MAKE) "CFLAGS_EXTRA=$(CFLAGS_ASAN)" "LDFLAGS_EXTRA=$(LDFLAGS_ASAN)"
+#	cd tinycbor/ && $(MAKE) clean && $(MAKE)
 
 $(name): $(obj) $(LIBCBOR)
 	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
