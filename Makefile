@@ -98,7 +98,8 @@ test_simulation: env3_sim $(name)
 	@echo "test finished"
 
 fido2-test: env3
-	env3/bin/python tools/ctap_test.py
+	# tests real device
+	env3/bin/python3 tools/ctap_test.py
 
 CPPCHECK_FLAGS := --quiet --error-exitcode=2
 .PHONY: cppcheck
