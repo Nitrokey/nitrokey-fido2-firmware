@@ -8,6 +8,8 @@ addons:
     packages:
       - gcc-7
       - cppcheck
+      - python3
+      - python3-venv
 script:
   - export CC=gcc-7
   - make test
