@@ -77,6 +77,20 @@ wink2: env2
 wink3: env3
 	env3/bin/python tools/solotool.py solo --wink
 
+env3_sim:
+	python3 -m venv env3_sim
+	cd python-fido2 && ../env3_sim/bin/python3 setup.py install
+
+test_simulation: env3_sim $(name)
+	-killall $(name)
+	./$(name) &
+	./env3_sim/bin/python3 tools/ctap_test.py
+	./env3_sim/bin/python3 python-fido2/examples/credential.py
+	./env3_sim/bin/python3 python-fido2/examples/get_info.py
+	./env3_sim/bin/python3 python-fido2/examples/multi_device.py
+	killall $(name)
+	@echo "test finished"
+
 fido2-test: env3
 	env3/bin/python tools/ctap_test.py
 
