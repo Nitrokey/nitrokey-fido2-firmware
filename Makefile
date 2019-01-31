@@ -142,12 +142,16 @@ test: $(name) cppcheck black_test
 clean:
 	make -C tinycbor clean
 	rm -f *.o $(name).exe $(name) $(obj)
-	rm -rf env2 env3
 	for f in crypto/tiny-AES-c/Makefile tinycbor/Makefile ; do \
 	    if [ -f "$$f" ]; then \
 	    	(cd `dirname $$f` ; git checkout -- .) ;\
 	    fi ;\
 	done
+
+.PHONY: clean_all
+clean_all: clean
+	rm -rf env2 env3 env3_sim
+
 
 .PHONY: info
 info:
