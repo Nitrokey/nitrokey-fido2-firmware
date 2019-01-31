@@ -144,7 +144,7 @@ scan_build: clean
 scan_build_arm: clean
 	$(MAKE) scan_build -C targets/stm32l432/
 
-test: $(name) test_simulation
+test: $(name) cppcheck
 
 .PHONY: clean
 clean:
