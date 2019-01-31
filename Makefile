@@ -28,6 +28,12 @@ CFLAGS = -fdata-sections -ffunction-sections
 CFLAGS_ASAN= -fsanitize=address -O1 -g -fno-omit-frame-pointer
 LDFLAGS_ASAN = -lasan
 
+#CFLAGS_ASAN= -fsanitize=undefined -O1 -g -fno-omit-frame-pointer
+#LDFLAGS_ASAN = -lubsan
+#
+#CFLAGS_ASAN= -fsanitize=leak -O1 -g -fno-omit-frame-pointer
+#LDFLAGS_ASAN = -llsan
+
 CFLAGS += $(CFLAGS_ASAN)
 LDFLAGS += $(LDFLAGS_ASAN)
 
