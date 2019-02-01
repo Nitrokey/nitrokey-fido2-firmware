@@ -617,6 +617,7 @@ class Tester:
 
         print('get info')
         inf = self.ctap.get_info()
+        print(inf)
         print('PASS')
 
         self.test_fido2_simple(PIN)
