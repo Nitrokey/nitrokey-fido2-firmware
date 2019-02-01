@@ -335,7 +335,7 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
 
     if((sizeof(CTAP_authDataHeader)) > len)
     {
-        printf1(TAG_ERR,"assertion fail, auth_data_buf must be at least %d bytes\n", sizeof(CTAP_authData) - sizeof(CTAP_attestHeader));
+        printf1(TAG_ERR,"assertion fail, auth_data_buf must be at least %d bytes, is: %d\n", sizeof(CTAP_authData) - sizeof(CTAP_attestHeader), len);
         exit(1);
     }
 
