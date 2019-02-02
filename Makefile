@@ -24,6 +24,7 @@ endif
 LDFLAGS += $(LIBCBOR)
 CFLAGS = -fdata-sections -ffunction-sections
 
+ifeq ($(TRAVIS_COMPILER),)
 # Enable / disable ASAN
 CFLAGS_ASAN= -fsanitize=address -O1 -g -fno-omit-frame-pointer
 LDFLAGS_ASAN = -lasan
@@ -40,6 +41,7 @@ LDFLAGS_ASAN = -lasan
 
 CFLAGS += $(CFLAGS_ASAN)
 LDFLAGS += $(LDFLAGS_ASAN)
+endif
 
 INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
 
