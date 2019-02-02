@@ -173,6 +173,7 @@ clean_subrepo:
 
 .PHONY: info
 info:
+	@echo DEBUG: $(DEBUG)
 	@echo Sources: $(src)
 	@echo Objects: $(obj)
 	@echo CFLAGS: $(CFLAGS)

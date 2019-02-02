@@ -72,3 +72,14 @@ all: $(TARGET).elf
 
 clean:
 	rm -f *.o src/*.o bootloader/*.o src/*.elf  $(OBJ)
+
+
+.PHONY: info
+info:
+	@echo
+	@echo DEBUG: $(DEBUG)
+	@echo Sources: $(SRC)
+	@echo Objects: $(OBJ)
+	@echo CFLAGS: $(CFLAGS)
+	@echo LDFLAGS: $(LDFLAGS)
+#	@echo Commands: `egrep '^\w+:' Makefile | awk '{print $$1}' | sort | tr -d '\r\n' `

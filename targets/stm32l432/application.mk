@@ -71,9 +71,22 @@ all: $(TARGET).elf
 clean:
 	rm -f *.o src/*.o src/*.elf  bootloader/*.o $(OBJ)
 
+.PHONY: cbor_clean
+cbor_clean:
+	cd ../../tinycbor/ && make clean
 
 cbor:
 	cd ../../tinycbor/ && make clean
 	cd ../../tinycbor/ && make CC="$(CC)" AR=$(AR) \
 LDFLAGS="$(LDFLAGS_LIB)" \
 CFLAGS="$(CFLAGS)"
+
+.PHONY: info
+info:
+	@echo
+	@echo DEBUG: $(DEBUG)
+	@echo Sources: $(SRC)
+	@echo Objects: $(OBJ)
+	@echo CFLAGS: $(CFLAGS)
+	@echo LDFLAGS: $(LDFLAGS)
+#	@echo Commands: `egrep '^\w+:' Makefile | awk '{print $$1}' | sort | tr -d '\r\n' `

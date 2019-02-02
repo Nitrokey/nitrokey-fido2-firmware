@@ -83,3 +83,10 @@ scan_build: clean2 cbor
 	make clean2
 	scan-build $(SBO) $(MAKE) all-hacker
 	xdg-open reports/scan-build
+
+.PHONY: info
+info:
+	@echo DEBUG: $(DEBUG)
+	@echo Commands: `egrep '^\w+:' Makefile | awk '{print $$1}' | sort | tr -d '\r\n' `
+	$(MAKE) info -f bootloader.mk
+	$(MAKE) info -f application.mk
