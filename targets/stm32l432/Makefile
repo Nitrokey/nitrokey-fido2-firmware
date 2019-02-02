@@ -33,7 +33,14 @@ build-release-locked: clean2 boot-sig-checking clean all-locked
 build-release: clean2 boot-sig-checking clean all
 	$(merge_hex) solo.hex bootloader.hex all.hex
 
+VERSION=$(shell git describe --always --long), build time: $(shell date)
+.PHONY: update_version
+update_version:
+	@echo Update version string to \"${VERSION}\"
+	sed -e "s/@VERSION_STRING@/${VERSION}/g" ../../fido2/version.h.in > ../../fido2/version.h
+
 build-hacker:
+	$(MAKE) update_version
 	$(MAKE) clean2
 	$(MAKE) boot-no-sig
 	$(MAKE) clean

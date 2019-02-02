@@ -30,6 +30,7 @@
 #include "util.h"
 #include "log.h"
 #include "ctap.h"
+#include "version.h"
 #include APP_CONFIG
 
 #if !defined(TEST)
@@ -70,6 +71,8 @@ int main(int argc, char * argv[])
 
     ctap_init();
     printf1(TAG_GEN,"init ctap\n");
+
+    printf1(TAG_GREEN,"Firmware version: " VERSION_STRING "\n");
 
     memset(hidmsg,0,sizeof(hidmsg));
 
