@@ -66,7 +66,14 @@ $(LIBCBOR): tinycbor/Makefile
 	cd tinycbor/ && $(MAKE) clean && $(MAKE) "CFLAGS_EXTRA=$(CFLAGS_ASAN)" "LDFLAGS_EXTRA=$(LDFLAGS_ASAN)"
 #	cd tinycbor/ && $(MAKE) clean && $(MAKE)
 
-$(name): $(obj) $(LIBCBOR)
+VERSION=$(shell git describe --always --long), build time: $(shell date)
+.PHONY: update_version
+update_version:
+	@echo Update version string to \"${VERSION}\"
+	sed -e "s/@VERSION_STRING@/${VERSION}/g" fido2/version.h.in > fido2/version.h
+
+
+$(name): update_version $(obj) $(LIBCBOR)
 	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
 
 uECC.o: ./crypto/micro-ecc/uECC.c
