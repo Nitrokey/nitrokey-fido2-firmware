@@ -1,6 +1,7 @@
 DEBUG := 0
 
-merge_hex=python3 ../../tools/solotool.py mergehex
+venv=../../env3/bin/python3
+merge_hex=$(venv) ../../tools/solotool.py mergehex
 
 all:
 	$(MAKE) -f application.mk -j8 solo.hex PREFIX=$(PREFIX) DEBUG=$(DEBUG) EXTRA_DEFINES='-DFLASH_ROP=1'
@@ -32,8 +33,14 @@ build-release-locked: clean2 boot-sig-checking clean all-locked
 build-release: clean2 boot-sig-checking clean all
 	$(merge_hex) solo.hex bootloader.hex all.hex
 
-build-hacker: clean2 boot-no-sig clean all-hacker
+build-hacker:
+	$(MAKE) clean2
+	$(MAKE) boot-no-sig
+	$(MAKE) clean
+	$(MAKE) all-hacker
 	$(merge_hex) solo.hex bootloader.hex all.hex
+	@ls -lh solo.hex bootloader.hex all.hex
+	@readlink -f all.hex
 
 clean:
 	$(MAKE) -f application.mk clean
@@ -41,6 +48,7 @@ clean:
 clean2:
 	rm -f solo.hex bootloader.hex all.hex
 	$(MAKE) -f application.mk clean
+#	$(MAKE) -f application.mk cbor_clean
 	$(MAKE) -f bootloader.mk clean
 
 
