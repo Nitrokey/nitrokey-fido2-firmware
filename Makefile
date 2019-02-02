@@ -100,6 +100,7 @@ env3_sim:
 	cd python-fido2 && ../env3_sim/bin/python3 setup.py install
 
 test_simulation: env3_sim $(name)
+	$(CC) --version
 	./env3_sim/bin/python3 --version
 	-killall $(name)
 	./$(name) &

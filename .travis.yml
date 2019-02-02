@@ -1,15 +1,33 @@
-dist: xenial
 language: c
-compiler: gcc
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-7
-      - cppcheck
-      - python3
-      - python3-venv
+dist: trusty
+
+services:
+  - docker
+
+env:
+  - OS=fedora
+
+install:
+  - ln -vs Dockerfile-$OS Dockerfile
+  - docker build . -t test-$OS
+
 script:
-  - export CC=gcc-7
-  - make test
+  - docker run -e CI=true -t -v $PWD:/build test-$OS
+
+
+
+#dist: xenial
+#language: c
+#compiler: gcc
+#addons:
+#  apt:
+#    sources:
+#      - ubuntu-toolchain-r-test
+#    packages:
+#      - gcc-7
+#      - cppcheck
+#      - python3
+#      - python3-venv
+#script:
+#  - export CC=gcc-7
+#  - make test
