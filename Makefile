@@ -81,6 +81,10 @@ update_version:
 
 $(name): update_version $(obj) $(LIBCBOR)
 	$(CC) $(LDFLAGS) -o $@ $(obj) $(LDFLAGS)
+	@echo
+	@echo Output binary:
+	@ls -lh $(name)
+	@readlink -f $(name)
 
 uECC.o: ./crypto/micro-ecc/uECC.c
 	$(CC) -c -o $@ $^ -O2 -fdata-sections -ffunction-sections -DuECC_PLATFORM=$(ecc_platform) -I./crypto/micro-ecc/
