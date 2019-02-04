@@ -116,6 +116,11 @@ env3_sim:
 	python3 -m venv env3_sim
 	cd python-fido2 && ../env3_sim/bin/python3 setup.py install
 
+.PHONY: test_only
+test_only: env3_sim
+	./env3_sim/bin/python3 -u tools/ctap_test.py
+
+.PHONY: test_simulation
 test_simulation: env3_sim $(name)
 	$(CC) --version
 	./env3_sim/bin/python3 --version
