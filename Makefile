@@ -89,6 +89,23 @@ $(name): update_version $(obj) $(LIBCBOR)
 uECC.o: ./crypto/micro-ecc/uECC.c
 	$(CC) -c -o $@ $^ -O2 -fdata-sections -ffunction-sections -DuECC_PLATFORM=$(ecc_platform) -I./crypto/micro-ecc/
 
+
+.PHONY: coverage
+COV_FILES=$(src:.c=.gcda) $(src:.c=.gcno) $(src:.c=.gcov)
+DATE_WITH_TIME=$(shell date "+%Y%m%d-%H%M%S")
+COV_TARGET_DIR=reports/coverage/${DATE_WITH_TIME}
+coverage: | test_simulation $(src:.c=.gcov)
+	mkdir -p ${COV_TARGET_DIR}
+	lcov -b . -d . -c -o ${COV_TARGET_DIR}/simulation-run.info
+	genhtml -o ${COV_TARGET_DIR}/html/ ${COV_TARGET_DIR}/simulation-run.info
+	-mv -v *.gcov ${COV_TARGET_DIR}/
+	xdg-open ${COV_TARGET_DIR}/html/index.html
+
+
+%.gcov: %.c
+	gcov -p -c -j $<
+
+
 env2:
 	virtualenv --python=python2.7 env2
 	env2/bin/pip install --upgrade -r tools/requirements.txt
@@ -178,7 +195,7 @@ test: $(name) cppcheck
 .PHONY: clean
 clean:
 	make -C tinycbor clean
-	rm -f *.o $(name).exe $(name) $(obj)
+	rm -f *.o $(name).exe $(name) $(obj) $(COV_FILES)
 
 
 .PHONY: clean_all
