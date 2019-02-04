@@ -846,8 +846,14 @@ if __name__ == '__main__':
     t.find_device()
     # t.test_hid()  # works for virtual device
     # t.test_long_ping()  # works for virtual device
-    for i in range(10):
-        t.test_fido2() # works for virtual device
+    # for i in range(10):
+    t.test_fido2() # works for virtual device
+    print('sending !SIMEXIT command')
+    try:
+        with Timeout(1.0) as event:
+            t.dev.call(CTAPHID.PING, b'!SIMEXIT', None)
+    except:
+        pass
     # t.test_rk() # not implemented for virtual device
     # t.test_responses() # works for virtual device
     # test_find_brute_force()  # does not work for virtual device

@@ -86,6 +86,16 @@ int udp_server()
     return fd;
 }
 
+static int32_t _strnstr(const char * const hay, const char * const needle, uint32_t hay_size){
+    uint32_t j = 0;
+    const size_t needle_size = strnlen(needle, 1000);
+    for (uint32_t gpos=0; gpos<hay_size; gpos++){
+        for (j=0; hay[gpos+j] == needle[j] && j < needle_size; j++);
+        if (j == needle_size) return gpos;
+    }
+    return -1;
+}
+
 int udp_recv(int fd, uint8_t * buf, int size)
 {
 
@@ -105,11 +115,18 @@ int udp_recv(int fd, uint8_t * buf, int size)
     {
 
     }
-    int length = recvfrom( fd, buf, size, 0, NULL, 0 );
+
+    int32_t length = recvfrom( fd, buf, size, 0, NULL, 0 );
     if ( length < 0 ) {
         perror( "recvfrom failed" );
         exit(1);
     }
+
+    if (length > 0 && _strnstr((const char *) buf, "!SIMEXIT", MIN(length,100u)) != -1){
+        printf( "RECEIVED EXIT COMMAND\n" );
+        exit(1);
+    }
+
     return length;
 }
 
