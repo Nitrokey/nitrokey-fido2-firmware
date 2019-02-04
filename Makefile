@@ -43,6 +43,12 @@ CFLAGS += $(CFLAGS_ASAN)
 LDFLAGS += $(LDFLAGS_ASAN)
 endif
 
+COV_FLAGS = --coverage
+ifeq ($(RUN_COV),1)
+CFLAGS += $(COV_FLAGS)
+LDFLAGS += $(COV_FLAGS)
+endif
+
 INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
 
 CFLAGS += $(INCLUDES)
