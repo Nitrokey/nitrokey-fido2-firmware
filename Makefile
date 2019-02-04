@@ -143,11 +143,10 @@ test_simulation: env3_sim $(name)
 	./env3_sim/bin/python3 --version
 	-killall $(name)
 	./$(name) &
-	./env3_sim/bin/python3 -u tools/ctap_test.py
 	./env3_sim/bin/python3 -u python-fido2/examples/credential.py
 	./env3_sim/bin/python3 -u python-fido2/examples/get_info.py
 	./env3_sim/bin/python3 -u python-fido2/examples/multi_device.py
-	killall $(name)
+	./env3_sim/bin/python3 -u tools/ctap_test.py
 	@echo "!!! All tests returned non-error code"
 
 fido2-test: env3
