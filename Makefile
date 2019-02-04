@@ -141,6 +141,7 @@ test_only: env3_sim
 test_simulation: env3_sim $(name)
 	$(CC) --version
 	./env3_sim/bin/python3 --version
+	rm -v authenticator*
 	-killall $(name)
 	./$(name) &
 	./env3_sim/bin/python3 -u python-fido2/examples/credential.py
