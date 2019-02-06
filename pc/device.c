@@ -89,7 +89,8 @@ int udp_server()
 static int32_t _strnstr(const char * const hay, const char * const needle, uint32_t hay_size){
     uint32_t j = 0;
     const size_t needle_size = strnlen(needle, 1000);
-    for (uint32_t gpos=0; gpos<hay_size; gpos++){
+    if (hay_size < needle_size) return -1;
+    for (uint32_t gpos=0; gpos<hay_size-needle_size; gpos++){
         for (j=0; j < needle_size && hay[gpos+j] == needle[j]; j++);
         if (j == needle_size) return gpos;
     }
