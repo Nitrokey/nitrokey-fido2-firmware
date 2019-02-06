@@ -82,3 +82,8 @@ targets/*/docs/
 main
 fido2/version.h
 
+cmake-build-debug/
+reports/
+.idea/
+env3_sim/
+solo-simulation-main
