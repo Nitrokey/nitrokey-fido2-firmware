@@ -143,12 +143,12 @@ test: $(name) cppcheck
 .PHONY: clean
 clean:
 	$(MAKE) -C tinycbor clean
-	rm -f *.o $(name).exe $(name) $(obj) $(COV_FILES)
+	rm -f *.o $(name).exe $(name) $(obj)
 
 
 .PHONY: clean_all
 clean_all: clean clean_subrepo
-	rm -rf env2 env3 env3_sim
+	-rm -rf env2 env3 env3_sim
 	-rm -v ${CLEAN_ADDITIONAL}
 
 .PHONY: clean_subrepo

@@ -7,11 +7,13 @@ CFLAGS += -fdump-rtl-expand
 endif
 
 .PHONY: callg
-callg: rtl2dot.py | clean $(name)
+CG_WD=reports/CG
+CG_OUT=$(CG_WD)/call-graph.svg
+callg: $(CG_WD)/rtl2dot.py | clean $(name)
 #$(src:.c=.svg)
-	-rm full-graph.svg
-	$(MAKE) full-graph.svg
-	-xdg-open full-graph.svg
+	-rm $(CG_OUT)
+	$(MAKE) $(CG_OUT)
+	-xdg-open $(CG_OUT)
 
 # FIXME choose best generators
 GG_ALL=dot neato twopi circo fdp sfdp
@@ -21,12 +23,14 @@ GG_PREF=sfdp
 	for G in $(GG_ALL); do echo $${G}; $${G} -Goverlap=false -Tsvg > $@-$${G}.svg <$@-tmp ; xdg-open $@-$${G}.svg;  done
 	cp $@-${GG_PREF}.svg -fv $@
 
-full-graph.c.234r.expand:
+$(CG_WD)/call-graph.c.234r.expand:
+	mkdir -p $(CG_WD)
 	-rm $@
 	find . -name "*.expand" -type f | grep -v -e cbor -e $@ | xargs cat > $@
 
-rtl2dot.py:
+$(CG_WD)/rtl2dot.py:
+	mkdir -p $(CG_WD)
 	# https://github.com/cbdevnet/rtl2dot
-	wget https://raw.githubusercontent.com/cbdevnet/rtl2dot/master/rtl2dot.py
+	wget https://raw.githubusercontent.com/cbdevnet/rtl2dot/master/rtl2dot.py -O $@
 
-CLEAN_ADDITIONAL += rtl2dot.py
+CLEAN_ADDITIONAL += $(CG_WD)/rtl2dot.py $(src:.c=.c.234r.expand) $(src:.c=.svg) $(CG_WD)/full-graph.c.234r.expand

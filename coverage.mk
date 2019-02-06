@@ -14,3 +14,5 @@ coverage: | test_simulation $(src:.c=.gcov)
 
 %.gcov: %.c
 	gcov -p -c -j $<
+
+CLEAN_ADDITIONAL += $(COV_FILES)
