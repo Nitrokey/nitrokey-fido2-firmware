@@ -61,6 +61,7 @@ name = solo-simulation-main
 all: $(name)
 
 include Makefile.obsolete
+include callgraph.mk
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
@@ -194,13 +195,14 @@ test: $(name) cppcheck
 
 .PHONY: clean
 clean:
-	make -C tinycbor clean
+	$(MAKE) -C tinycbor clean
 	rm -f *.o $(name).exe $(name) $(obj) $(COV_FILES)
 
 
 .PHONY: clean_all
 clean_all: clean clean_subrepo
 	rm -rf env2 env3 env3_sim
+	rm -v rtl2dot.py
 
 .PHONY: clean_subrepo
 clean_subrepo:
