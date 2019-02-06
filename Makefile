@@ -24,7 +24,12 @@ endif
 LDFLAGS += $(LIBCBOR)
 CFLAGS = -fdata-sections -ffunction-sections
 
+# Disable ASAN, while running on CI
 ifeq ($(TRAVIS_COMPILER),)
+RUN_ASAN := 1
+endif
+
+ifeq ($(RUN_ASAN),1)
 # Enable / disable ASAN
 CFLAGS_ASAN= -fsanitize=address -O1 -g -fno-omit-frame-pointer
 LDFLAGS_ASAN = -lasan
@@ -35,7 +40,7 @@ LDFLAGS_ASAN = -lasan
 #CFLAGS_ASAN= -fsanitize=leak -O1 -g -fno-omit-frame-pointer
 #LDFLAGS_ASAN = -llsan
 
-# clang only
+# Tested on clang only
 #CFLAGS_ASAN= -fsanitize=memory -fsanitize-memory-track-origins  -O1 -g -fno-omit-frame-pointer -fPIE -pie
 #LDFLAGS_ASAN = -lmsan
 

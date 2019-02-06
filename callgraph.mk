@@ -1,6 +1,6 @@
 
 # Run like:
-# make callg RUN_CALLG=1 TRAVIS_COMPILER=1
+# make callg RUN_CALLG=1 RUN_ASAN=0
 
 ifeq ($(RUN_CALLG),1)
 CFLAGS += -fdump-rtl-expand
