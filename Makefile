@@ -67,6 +67,8 @@ all: $(name)
 
 include Makefile.obsolete
 include callgraph.mk
+include coverage.mk
+include code_check.mk
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
@@ -96,26 +98,6 @@ uECC.o: ./crypto/micro-ecc/uECC.c
 	$(CC) -c -o $@ $^ -O2 -fdata-sections -ffunction-sections -DuECC_PLATFORM=$(ecc_platform) -I./crypto/micro-ecc/
 
 
-.PHONY: coverage
-COV_FILES=$(src:.c=.gcda) $(src:.c=.gcno) $(src:.c=.gcov)
-DATE_WITH_TIME=$(shell date "+%Y%m%d-%H%M%S")
-COV_TARGET_DIR=reports/coverage/${DATE_WITH_TIME}
-coverage: | test_simulation $(src:.c=.gcov)
-	mkdir -p ${COV_TARGET_DIR}
-	lcov -b . -d . -c -o ${COV_TARGET_DIR}/simulation-run.info
-	genhtml -o ${COV_TARGET_DIR}/html/ ${COV_TARGET_DIR}/simulation-run.info
-	-mv -v *.gcov ${COV_TARGET_DIR}/
-	xdg-open ${COV_TARGET_DIR}/html/index.html
-
-
-%.gcov: %.c
-	gcov -p -c -j $<
-
-
-env2:
-	virtualenv --python=python2.7 env2
-	env2/bin/pip install --upgrade -r tools/requirements.txt
-
 env3:
 	python3 -m venv env3
 	env3/bin/pip install --upgrade -r tools/requirements.txt
@@ -127,10 +109,6 @@ black: env3
 
 black_test: env3
 	env3/bin/black --skip-string-normalization --check tools/
-
-
-wink2: env2
-	env2/bin/python tools/solotool.py solo --wink
 
 wink3: env3
 	env3/bin/python tools/solotool.py solo --wink
@@ -160,42 +138,6 @@ fido2-test: env3
 	# tests real device
 	env3/bin/python3 tools/ctap_test.py
 
-CPPCHECK_FLAGS := --quiet --error-exitcode=2
-.PHONY: cppcheck
-cppcheck:
-	cppcheck --version
-	cppcheck $(CPPCHECK_FLAGS) crypto/aes-gcm
-	cppcheck $(CPPCHECK_FLAGS) crypto/sha256
-	cppcheck $(CPPCHECK_FLAGS) fido2
-	cppcheck $(CPPCHECK_FLAGS) pc
-	cppcheck $(CPPCHECK_FLAGS) targets/stm32l432 --force
-	-cppcheck $(CPPCHECK_FLAGS) tinycbor --force
-	cppcheck $(CPPCHECK_FLAGS) crypto/micro-ecc/ --force
-
-.PHONY: clang_check
-clang_check:
-	clang-check --version
-	find . -name '*.c' -o -name '*.h' | xargs clang-check -p .
-
-.PHONY: clang_tidy
-clang_tidy:
-	clang-tidy --version
-	find pc -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
-	find fido2 -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
-	find targets/stm32l432  -name '*.c' -o -name '*.h' | xargs -I '{}'	clang-tidy '{}' -- ${CFLAGS}
-
-.PHONY: scan_build
-CHECKERS=-enable-checker security -enable-checker alpha  -enable-checker nullability -enable-checker valist
-scan_build: clean
-	mkdir -p reports/scan-build
-	clang-7 --version
-	-scan-build -o reports/scan-build --show-description --status-bugs $(CHECKERS) $(MAKE)
-	xdg-open reports/scan-build/ &
-
-.PHONY: scan_build_arm
-scan_build_arm: clean
-	$(MAKE) scan_build -C targets/stm32l432/
-
 test: $(name) cppcheck
 
 .PHONY: clean
@@ -207,7 +149,7 @@ clean:
 .PHONY: clean_all
 clean_all: clean clean_subrepo
 	rm -rf env2 env3 env3_sim
-	rm -v rtl2dot.py
+	-rm -v ${CLEAN_ADDITIONAL}
 
 .PHONY: clean_subrepo
 clean_subrepo:

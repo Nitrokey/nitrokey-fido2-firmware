@@ -29,3 +29,4 @@ rtl2dot.py:
 	# https://github.com/cbdevnet/rtl2dot
 	wget https://raw.githubusercontent.com/cbdevnet/rtl2dot/master/rtl2dot.py
 
+CLEAN_ADDITIONAL += rtl2dot.py

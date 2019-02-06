@@ -20,3 +20,12 @@ efm32read: efm32com
 	commander swo read $(EFM32_DEBUGGER)
 efm32bootprog: efm32com
 	commander flash './efm32boot/GNU ARM v7.2.1 - Debug/efm32boot.hex' $(EFM32_DEBUGGER) --masserase
+
+
+env2:
+	virtualenv --python=python2.7 env2
+	env2/bin/pip install --upgrade -r tools/requirements.txt
+
+
+wink2: env2
+	env2/bin/python tools/solotool.py solo --wink
