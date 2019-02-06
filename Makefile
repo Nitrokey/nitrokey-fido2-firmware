@@ -24,36 +24,6 @@ endif
 LDFLAGS += $(LIBCBOR)
 CFLAGS = -fdata-sections -ffunction-sections
 
-# Disable ASAN, while running on CI
-ifeq ($(TRAVIS_COMPILER),)
-RUN_ASAN := 1
-endif
-
-ifeq ($(RUN_ASAN),1)
-# Enable / disable ASAN
-CFLAGS_ASAN= -fsanitize=address -O1 -g -fno-omit-frame-pointer
-LDFLAGS_ASAN = -lasan
-
-#CFLAGS_ASAN= -fsanitize=undefined -O1 -g -fno-omit-frame-pointer
-#LDFLAGS_ASAN = -lubsan
-#
-#CFLAGS_ASAN= -fsanitize=leak -O1 -g -fno-omit-frame-pointer
-#LDFLAGS_ASAN = -llsan
-
-# Tested on clang only
-#CFLAGS_ASAN= -fsanitize=memory -fsanitize-memory-track-origins  -O1 -g -fno-omit-frame-pointer -fPIE -pie
-#LDFLAGS_ASAN = -lmsan
-
-CFLAGS += $(CFLAGS_ASAN)
-LDFLAGS += $(LDFLAGS_ASAN)
-endif
-
-COV_FLAGS = --coverage
-ifeq ($(RUN_COV),1)
-CFLAGS += $(COV_FLAGS)
-LDFLAGS += $(COV_FLAGS)
-endif
-
 INCLUDES = -I./tinycbor/src -I./crypto/sha256 -I./crypto/micro-ecc/ -Icrypto/tiny-AES-c/ -I./fido2/ -I./pc -I./fido2/extensions
 
 CFLAGS += $(INCLUDES)
@@ -69,6 +39,8 @@ include Makefile.obsolete
 include callgraph.mk
 include coverage.mk
 include code_check.mk
+include sanitazers.mk
+include simulation_test.mk
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
@@ -112,27 +84,6 @@ black_test: env3
 
 wink3: env3
 	env3/bin/python tools/solotool.py solo --wink
-
-env3_sim:
-	python3 -m venv env3_sim
-	cd python-fido2 && ../env3_sim/bin/python3 setup.py install
-
-.PHONY: test_only
-test_only: env3_sim
-	./env3_sim/bin/python3 -u tools/ctap_test.py
-
-.PHONY: test_simulation
-test_simulation: env3_sim $(name)
-	$(CC) --version
-	./env3_sim/bin/python3 --version
-	-rm -v authenticator*
-	-killall $(name)
-	./$(name) &
-	./env3_sim/bin/python3 -u python-fido2/examples/credential.py
-	./env3_sim/bin/python3 -u python-fido2/examples/get_info.py
-	./env3_sim/bin/python3 -u python-fido2/examples/multi_device.py
-	./env3_sim/bin/python3 -u tools/ctap_test.py
-	@echo "!!! All tests returned non-error code"
 
 fido2-test: env3
 	# tests real device
