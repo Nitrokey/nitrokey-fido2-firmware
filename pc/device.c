@@ -90,7 +90,7 @@ static int32_t _strnstr(const char * const hay, const char * const needle, uint3
     uint32_t j = 0;
     const size_t needle_size = strnlen(needle, 1000);
     for (uint32_t gpos=0; gpos<hay_size; gpos++){
-        for (j=0; hay[gpos+j] == needle[j] && j < needle_size; j++);
+        for (j=0; j < needle_size && hay[gpos+j] == needle[j]; j++);
         if (j == needle_size) return gpos;
     }
     return -1;
