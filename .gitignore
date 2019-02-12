@@ -87,3 +87,6 @@ reports/
 .idea/
 env3_sim/
 solo-simulation-main
+*.234r.expand
+*.gcda
+*.gcno
