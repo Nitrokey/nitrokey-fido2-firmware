@@ -117,4 +117,4 @@ info:
 	@echo Objects: $(obj)
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
-	@echo Commands: `egrep '^\w+:' Makefile | awk '{print $$1}' | sort | tr -d '\r\n' `
+	@echo Commands: `egrep -h '^\w+:' Makefile *.mk | awk '{print $$1}' | sort | tr -d '\r\n' | tr : " " `
