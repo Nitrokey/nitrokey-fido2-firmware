@@ -40,11 +40,13 @@
 
 #define IS_BUTTON_PRESSED()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
 
-#define LED_ON()                 { LL_GPIO_SetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
-#define LED_OFF()                { LL_GPIO_ResetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
+extern uint8_t LED_STATE;
+
+#define LED_ON()                 { LED_STATE = 1; }
+#define LED_OFF()                { LED_STATE = 0; }
 #define BUTTON_RESET_ON()        {}
 #define BUTTON_RESET_OFF()       {}
-#define IS_LED_ON()              ( (LL_GPIO_ReadOutputPort(SOLO_LED_PORT) & SOLO_LED_PIN) == 0)
+#define IS_LED_ON()              (LED_STATE == 1)
 
 #define get_ms()                  millis()
 

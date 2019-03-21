@@ -227,6 +227,8 @@ void device_wink()
     winkt1 = 0;
 }
 
+uint8_t LED_STATE = 0;
+
 void heartbeat()
 {
     static int state = 0;
@@ -277,8 +279,12 @@ void heartbeat()
     {
         if (but)
             led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
-        else
-            led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
+        else {
+            if (LED_STATE)
+                led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
+            else
+                led_rgb(0);
+        }
     }
 
 }
