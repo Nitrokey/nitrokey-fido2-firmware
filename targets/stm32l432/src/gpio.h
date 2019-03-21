@@ -84,5 +84,7 @@ typedef enum {
 } BUTTON_STATE_T;
 
 BUTTON_STATE_T button_get_press_state (void);
+uint8_t button_get_press (void);
+
 
 #endif /* GPIO_H_ */

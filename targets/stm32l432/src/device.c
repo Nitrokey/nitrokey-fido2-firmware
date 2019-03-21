@@ -37,6 +37,8 @@
 
 void wait_for_usb_tether();
 
+#undef IS_BUTTON_PRESSED
+#define IS_BUTTON_PRESSED()     (button_get_press() == 1)
 
 uint32_t __90_ms = 0;
 uint32_t __device_status = 0;
