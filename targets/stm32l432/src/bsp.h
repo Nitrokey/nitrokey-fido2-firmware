@@ -38,22 +38,20 @@
 //SI_SBIT(U2F_LED,          SFR_P0, 6);
 //SI_SBIT(U2F_BUTTON_RESET, SFR_P0, 7);
 
-extern uint8_t U2F_BUTTON_RESET;
-extern uint8_t U2F_BUTTON;
-extern uint8_t U2F_LED;
 
 /*
  * U2F_BUTTON_RESET is a MTPM pin. Requires HIGH state to keep
  * NORMAL power mode on MTCH101
  * */
 
+#define IS_BUTTON_PRESSED()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
+//LL_GPIO_ReadOutputPort
 
-#define IS_BUTTON_PRESSED()      (U2F_BUTTON == 0)
-#define LED_ON()                 { U2F_LED = 0; }
-#define LED_OFF()                { U2F_LED = 1; }
-#define BUTTON_RESET_ON()        { U2F_BUTTON_RESET = 0; }
-#define BUTTON_RESET_OFF()       { U2F_BUTTON_RESET = 1; }
-#define IS_LED_ON()              (U2F_LED == 0)
+#define LED_ON()                 { LL_GPIO_SetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
+#define LED_OFF()                { LL_GPIO_ResetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
+#define BUTTON_RESET_ON()        { LL_GPIO_ResetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
+#define BUTTON_RESET_OFF()       { LL_GPIO_SetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
+#define IS_LED_ON()              ((LL_GPIO_ReadOutputPort(SOLO_LED_PORT) & SOLO_LED_PIN) == 0)
 
 //
 //#define GetEp(epAddr)            (&myUsbDevice.ep0 + epAddr)

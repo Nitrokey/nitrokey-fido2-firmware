@@ -44,7 +44,6 @@ extern PCD_HandleTypeDef hpcd;
 static bool haveNFC = 0;
 static bool isLowFreq = 0;
 
-#define IS_BUTTON_PRESSED()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
 
 // Timer6 overflow handler.  happens every ~90ms.
 void TIM6_DAC_IRQHandler()
