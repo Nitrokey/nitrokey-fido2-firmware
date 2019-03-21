@@ -29,6 +29,7 @@
 #include "usbd_cdc_if.h"
 #include "nfc.h"
 #include "init.h"
+#include "gpio.h"
 
 #define LOW_FREQUENCY        1
 #define HIGH_FREQUENCY       0

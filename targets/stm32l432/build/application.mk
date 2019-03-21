@@ -5,6 +5,7 @@ SRC = src/main.c src/init.c src/redirect.c src/flash.c src/rng.c src/led.c src/d
 SRC += src/fifo.c src/crypto.c src/attestation.c src/nfc.c src/ams.c
 SRC += src/startup_stm32l432xx.s src/system_stm32l4xx.c
 SRC += $(DRIVER_LIBS) $(USB_LIB)
+SRC += src/gpio.c
 
 # FIDO2 lib
 SRC += ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c
