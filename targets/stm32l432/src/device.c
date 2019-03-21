@@ -47,6 +47,10 @@ extern PCD_HandleTypeDef hpcd;
 static bool haveNFC = 0;
 static bool isLowFreq = 0;
 
+void run_drivers(){
+    button_manager();
+    led_blink_manager();
+}
 
 // Timer6 overflow handler.  happens every ~90ms.
 void TIM6_DAC_IRQHandler()
@@ -103,7 +107,7 @@ void delay(uint32_t ms)
 {
     uint32_t time = millis();
     while ((millis() - time) < ms)
-        ;
+        run_drivers();
 }
 void device_reboot()
 {
@@ -420,7 +424,6 @@ uint32_t ctap_atomic_count(int sel)
 }
 
 
-
 void device_manage()
 {
 #if NON_BLOCK_PRINTING
@@ -445,8 +448,7 @@ void device_manage()
 	// if(device_is_nfc())
 		nfc_loop();
 #endif
-    button_manager();
-    led_blink_manager();
+    run_drivers();
 }
 
 static int handle_packets()
@@ -470,6 +472,7 @@ static int handle_packets()
 
 int ctap_user_presence_test()
 {
+    run_drivers();
     // FIXME replace with U2F FIDO code
     int ret;
 #if SKIP_BUTTON_CHECK_WITH_DELAY
@@ -497,6 +500,7 @@ while (IS_BUTTON_PRESSED())
         printf1(TAG_GEN,"Button not pressed\n");
         goto fail;
     }
+    run_drivers();
     ret = handle_packets();
     if (ret) return ret;
 }
