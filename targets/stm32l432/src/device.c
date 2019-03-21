@@ -437,6 +437,8 @@ void device_manage()
 	// if(device_is_nfc())
 		nfc_loop();
 #endif
+    button_manager();
+    led_blink_manager();
 }
 
 static int handle_packets()
@@ -460,6 +462,7 @@ static int handle_packets()
 
 int ctap_user_presence_test()
 {
+    // FIXME replace with U2F FIDO code
     int ret;
 #if SKIP_BUTTON_CHECK_WITH_DELAY
     int i=500;
