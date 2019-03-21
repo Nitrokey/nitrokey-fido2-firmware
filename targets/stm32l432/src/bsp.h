@@ -50,9 +50,9 @@
 
 #define LED_ON()                 { LL_GPIO_SetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
 #define LED_OFF()                { LL_GPIO_ResetOutputPin(SOLO_LED_PORT, SOLO_LED_PIN); }
-#define BUTTON_RESET_ON()        { LL_GPIO_ResetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
-#define BUTTON_RESET_OFF()       { LL_GPIO_SetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
-#define IS_LED_ON()              ((LL_GPIO_ReadOutputPort(SOLO_LED_PORT) & SOLO_LED_PIN) == 0)
+#define BUTTON_RESET_ON()        {}
+#define BUTTON_RESET_OFF()       {}
+#define IS_LED_ON()              ( (LL_GPIO_ReadOutputPort(SOLO_LED_PORT) & SOLO_LED_PIN) == 0)
 
 //
 //#define GetEp(epAddr)            (&myUsbDevice.ep0 + epAddr)
