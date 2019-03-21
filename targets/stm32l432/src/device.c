@@ -30,6 +30,7 @@
 #include "nfc.h"
 #include "init.h"
 #include "gpio.h"
+#include "bsp.h"
 
 #define LOW_FREQUENCY        1
 #define HIGH_FREQUENCY       0

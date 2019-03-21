@@ -28,9 +28,10 @@
 #ifndef BSP_H_
 #define BSP_H_
 
-#include "device.h"
 #include <stdint.h>
-#define data
+#include "app.h"
+#include "device.h"
+#include "stm32l4xx_ll_gpio.h"
 
 //extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 

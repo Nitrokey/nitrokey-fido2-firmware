@@ -40,6 +40,8 @@ uint8_t U2F_BUTTON = 0;
 uint8_t U2F_LED = 0;
 
 #define u2f_delay(ms)       delay(ms)
+#define data
+
 
 data  uint32_t        button_press_t;                   // Timer for TaskButton() timings
 data  BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
