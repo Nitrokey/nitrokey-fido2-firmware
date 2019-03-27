@@ -21,7 +21,6 @@
  */
 
 #include <stdint.h>
-#include "version.h"
 #include "extensions.h"
 #include "u2f.h"
 #include "wallet.h"
