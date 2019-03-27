@@ -32,13 +32,17 @@
 #include "gpio.h"
 
 #include "u2f_compat.h"
+#include "log.h"
 
 // Enable, if device should handle touch button HW clearing
 //#define BUTTON_HW_CLEARING
 
+#define LOG_STATE_CHANGE
 
-data  uint32_t        button_press_t;                   // Timer for TaskButton() timings
-data  BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
+
+uint32_t        button_press_t;                   // Timer for TaskButton() timings
+BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
+BUTTON_STATE_T  button_state_old = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 
 static data uint32_t  led_blink_tim = 0;                    // Timer for TaskLedBlink() timings
 static data uint16_t  led_blink_period_t;                // Period time register
@@ -92,6 +96,14 @@ void button_manager (void) {                          // Requires at least a 750
 	} else {                                          // Button is unprssed
 		button_state = BST_UNPRESSED;                  // Update button state
 	}
+
+#ifdef LOG_STATE_CHANGE
+	if (button_state != button_state_old){
+        printf1(TAG_BUTTON, "State changed: %02d => %02d\n", button_state_old, button_state);
+	    button_state_old = button_state;
+    }
+#endif
+
 }
 
 uint8_t button_get_press (void) {

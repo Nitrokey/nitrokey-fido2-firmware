@@ -2,6 +2,7 @@
 
 #include "bsp.h"
 #include "gpio.h"
+#include "log.h"
 
 #include "u2f_compat.h"
 
@@ -22,13 +23,16 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         && (target_button_state == BST_PRESSED_REGISTERED) ){
         first_request_accepted = true;
         led_off();
+        printf1(TAG_BUTTON, "first_request_accepted\n");
         return 0;
     }
 
     // Reject all requests, if device is not ready yet for touch button feedback,
     // or if the touch is already consumed
-    if (button_press_is_consumed() || button_get_press_state() < BST_META_READY_TO_USE)
+    if (button_press_is_consumed() || button_get_press_state() < BST_META_READY_TO_USE) {
+        printf1(TAG_BUTTON, "Touch consumed or button not ready\n");
         return 1;
+    }
 
     if (blink == true && led_is_blinking() == false)
         led_blink(10, LED_BLINK_PERIOD);
@@ -55,6 +59,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         if (true)
 #endif
     {
+        printf1(TAG_BUTTON, "Touch registered\n");
         // Button has been pushed in time
         user_presence = 1;
         button_press_set_consumed();
