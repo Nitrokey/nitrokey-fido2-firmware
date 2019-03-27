@@ -47,8 +47,10 @@ static bool haveNFC = 0;
 static bool isLowFreq = 0;
 
 void run_drivers(){
+#ifndef IS_BOOTLOADER
     button_manager();
     led_blink_manager();
+#endif
 }
 
 // Timer6 overflow handler.  happens every ~90ms.
@@ -99,7 +101,11 @@ void device_set_status(uint32_t status)
 
 int device_is_button_pressed()
 {
+#ifndef IS_BOOTLOADER
     return IS_BUTTON_PRESSED();
+#else // bootloader only
+    return IS_BUTTON_PRESSED_RAW();
+#endif
 }
 
 void delay(uint32_t ms)
@@ -445,9 +451,9 @@ void device_manage()
 #endif
 #ifndef IS_BOOTLOADER
 	// if(device_is_nfc())
-		nfc_loop();
-#endif
+    nfc_loop();
     clear_button_press();
+#endif
     run_drivers();
 }
 
