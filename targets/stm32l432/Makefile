@@ -33,6 +33,17 @@ bootloader-verifying:
 full-clean: clean2
 
 
+.PHONY: debug-release-build
+debug-release-build: | full-clean cbor bootloader-nonverifying clean firmware-hacker-debug-1
+	echo "done"
+
+.PHONY: debug-release-archive
+ARCH_OUT=nitrokey-fido2-`git describe --long`.zip
+debug-release-archive: solo.hex all.hex bootloader.hex
+	7za a $(ARCH_OUT) solo.hex all.hex bootloader.hex
+	gpg2 --detach-sign $(ARCH_OUT)
+	ls -hl $(ARCH_OUT)*
+
 # The older targets, may be re-organised
 all:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=$(DEBUG) EXTRA_DEFINES='-DFLASH_ROP=1'
