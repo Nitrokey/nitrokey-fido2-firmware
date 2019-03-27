@@ -38,7 +38,7 @@
  * NORMAL power mode on MTCH101
  * */
 
-#define IS_BUTTON_PRESSED()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
+#define IS_BUTTON_PRESSED_RAW()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
 
 extern uint8_t LED_STATE;
 

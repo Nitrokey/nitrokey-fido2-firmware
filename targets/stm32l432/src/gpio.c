@@ -63,7 +63,7 @@ void button_manager (void) {                          // Requires at least a 750
 		return;
 	}
 
-	if (IS_BUTTON_PRESSED()) {                        // Button's physical state: pressed
+	if (IS_BUTTON_PRESSED_RAW()) {                        // Button's physical state: pressed
 		switch (button_state) {                        // Handle press phase
 		    case BST_UNPRESSED: {                     // It happened at this moment
 				button_state  = BST_PRESSED_RECENTLY;  // Update button state
@@ -219,7 +219,7 @@ void _clear_button_press(bool forced){
 	BUTTON_RESET_ON();
 	do {
 		u2f_delay(6); 				//6ms activation time + 105ms maximum sleep in NORMAL power mode
-	} while (IS_BUTTON_PRESSED()); // Wait to release button
+	} while (IS_BUTTON_PRESSED_RAW()); // Wait to release button
 	BUTTON_RESET_OFF();
 #endif
 

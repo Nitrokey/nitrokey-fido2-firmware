@@ -37,7 +37,6 @@
 
 void wait_for_usb_tether();
 
-#undef IS_BUTTON_PRESSED
 #define IS_BUTTON_PRESSED()     (button_get_press() == 1)
 
 uint32_t __90_ms = 0;
@@ -242,7 +241,7 @@ void heartbeat()
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;
     uint8_t g = (LED_INIT_VALUE >> 8) & 0xff;
     uint8_t b = (LED_INIT_VALUE >> 0) & 0xff;
-    int but = IS_BUTTON_PRESSED();
+    int but = IS_BUTTON_PRESSED_RAW();
 
     if (state)
     {
