@@ -471,7 +471,7 @@ static int handle_packets()
 }
 
 int ctap_get_status_data(uint8_t * ctap_buffer){
-    ctap_buffer[0] = IS_BUTTON_PRESSED();
+    ctap_buffer[0] = IS_BUTTON_PRESSED_RAW();
     ctap_buffer[1] = button_get_press_state();
     ctap_buffer[2] = last_button_cleared_time_delta();
     ctap_buffer[3] = last_button_pushed_time_delta();
