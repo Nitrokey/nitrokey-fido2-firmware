@@ -143,7 +143,7 @@ void device_init()
     flash_option_bytes_init(0);
 #endif
 
-
+    clear_button_press();
 }
 
 bool device_is_nfc()
@@ -448,6 +448,7 @@ void device_manage()
 	// if(device_is_nfc())
 		nfc_loop();
 #endif
+    clear_button_press();
     run_drivers();
 }
 
