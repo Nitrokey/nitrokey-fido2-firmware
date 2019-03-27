@@ -37,6 +37,9 @@
 #define u2f_delay(ms)       delay(ms)
 #define data
 
+// Enable, if device should handle touch button HW clearing
+//#define BUTTON_HW_CLEARING
+
 
 data  uint32_t        button_press_t;                   // Timer for TaskButton() timings
 data  BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
@@ -216,13 +219,13 @@ void _clear_button_press(bool forced){
 	last_button_cleared_time = get_ms();
 	led_off();
 
-
+#ifdef BUTTON_HW_CLEARING
 	BUTTON_RESET_ON();
 	do {
 		u2f_delay(6); 				//6ms activation time + 105ms maximum sleep in NORMAL power mode
 	} while (IS_BUTTON_PRESSED()); // Wait to release button
 	BUTTON_RESET_OFF();
-
+#endif
 
 	if (button_get_press_state() == BST_INITIALIZING_READY_TO_CLEAR){
 		set_button_cleared();
