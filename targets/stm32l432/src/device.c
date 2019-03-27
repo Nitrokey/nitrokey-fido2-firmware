@@ -485,7 +485,7 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 #include "user_feedback.h"
 
 int ctap_user_presence_test(){
-    return u2f_get_user_feedback();
+    return u2f_get_user_feedback() == 0;
 }
 
 int _ctap_user_presence_test()
