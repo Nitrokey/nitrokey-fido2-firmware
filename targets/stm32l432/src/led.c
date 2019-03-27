@@ -49,6 +49,22 @@ void led_rgb(uint32_t hex)
     TIM2->CCR4 = 1000 - (g * 100)/(256);
 }
 
+typedef struct color {
+  union {
+      struct {
+        uint8_t _padding;
+        uint8_t b;
+        uint8_t g;
+        uint8_t r;
+      };
+      uint32_t raw;
+  };
+} color;
+
+void test(){
+    led_rgb( (color){1,1,1}.raw );
+}
+
 void led_test_colors()
 {
     // Should produce pulsing of various colors
