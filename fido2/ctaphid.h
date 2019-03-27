@@ -30,6 +30,7 @@
 #define CTAPHID_GETRNG          (TYPE_INIT | 0x60)
 // reserved for debug, not implemented except for HACKER and DEBUG_LEVEl > 0
 #define CTAPHID_PROBE           (TYPE_INIT | 0x70)
+#define CTAPHID_GETSTATUS          (TYPE_INIT | 0x71)
 
     #define ERR_INVALID_CMD         0x01
     #define ERR_INVALID_PAR         0x02
