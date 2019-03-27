@@ -534,9 +534,6 @@ static int ctaphid_buffer_packet(uint8_t * pkt_raw, uint8_t * cmd, uint32_t * ci
     return buffer_status();
 }
 
-#include "gpio.h"
-#include "bsp.h"
-
 extern void _check_ret(CborError ret, int line, const char * filename);
 #define check_hardcore(r)   _check_ret(r,__LINE__, __FILE__);\
                             if ((r) != CborNoError) exit(1);
@@ -743,16 +740,7 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
         if (!wb.bcnt)
             wb.bcnt = 8;
         memset(ctap_buffer,0,wb.bcnt);
-
-        ctap_buffer[0] = IS_BUTTON_PRESSED();
-        ctap_buffer[1] = button_get_press_state();
-        ctap_buffer[2] = last_button_cleared_time_delta();
-        ctap_buffer[3] = last_button_pushed_time_delta();
-        ctap_buffer[4] = led_is_blinking();
-        ctap_buffer[5] = U2F_MS_CLEAR_BUTTON_PERIOD / 100;
-        ctap_buffer[6] = U2F_MS_INIT_BUTTON_PERIOD / 100;
-        ctap_buffer[7] = BUTTON_MIN_PRESS_T_MS / 10;
-
+        ctap_get_status_data(ctap_buffer);
         ctaphid_write(&wb, &ctap_buffer, wb.bcnt);
         ctaphid_write(&wb, NULL, 0);
         is_busy = 0;

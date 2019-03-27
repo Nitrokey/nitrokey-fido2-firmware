@@ -59,6 +59,9 @@ extern int ctap_user_presence_test();
 // return 1 if success, error otherwise
 extern int ctap_generate_rng(uint8_t * dst, size_t num);
 
+
+extern int ctap_get_status_data(uint8_t * dst);
+
 // Increment atomic counter and return it.
 // Must support two counters, @sel selects counter0 or counter1.
 uint32_t ctap_atomic_count(int sel);

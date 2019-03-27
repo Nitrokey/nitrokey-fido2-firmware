@@ -243,6 +243,11 @@ uint32_t ctap_atomic_count(int sel)
     }
 }
 
+int ctap_get_status_data(uint8_t * dst){
+    printf2(TAG_ERR,"ctap_get_status_data not imple\n");
+    return 0;
+}
+
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
     int ret;

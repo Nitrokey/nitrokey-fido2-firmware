@@ -471,6 +471,19 @@ static int handle_packets()
     return 0;
 }
 
+int ctap_get_status_data(uint8_t * dst){
+    ctap_buffer[0] = IS_BUTTON_PRESSED();
+    ctap_buffer[1] = button_get_press_state();
+    ctap_buffer[2] = last_button_cleared_time_delta();
+    ctap_buffer[3] = last_button_pushed_time_delta();
+    ctap_buffer[4] = led_is_blinking();
+    ctap_buffer[5] = U2F_MS_CLEAR_BUTTON_PERIOD / 100;
+    ctap_buffer[6] = U2F_MS_INIT_BUTTON_PERIOD / 100;
+    ctap_buffer[7] = BUTTON_MIN_PRESS_T_MS / 10;
+    return 0;
+}
+
+
 int ctap_user_presence_test()
 {
     run_drivers();
