@@ -84,7 +84,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
 }
 
 int8_t u2f_get_user_feedback(){
-    return _u2f_get_user_feedback(BST_PRESSED_REGISTERED, true);
+    return _u2f_get_user_feedback(BST_PRESSED_REGISTERED, false);
 }
 
 int8_t u2f_get_user_feedback_extended_wipe(){
