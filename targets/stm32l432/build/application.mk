@@ -6,6 +6,7 @@ SRC += src/fifo.c src/crypto.c src/attestation.c src/nfc.c src/ams.c
 SRC += src/startup_stm32l432xx.s src/system_stm32l4xx.c
 SRC += $(DRIVER_LIBS) $(USB_LIB)
 SRC += src/gpio.c
+SRC += src/user_feedback.c
 
 # FIDO2 lib
 SRC += ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c

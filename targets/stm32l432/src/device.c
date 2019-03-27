@@ -483,8 +483,13 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
     return 0;
 }
 
+#include "user_feedback.h"
 
-int ctap_user_presence_test()
+int ctap_user_presence_test(){
+    return u2f_get_user_feedback();
+}
+
+int _ctap_user_presence_test()
 {
     run_drivers();
     // FIXME replace with U2F FIDO code

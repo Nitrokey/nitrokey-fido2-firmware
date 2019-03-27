@@ -31,11 +31,7 @@
 #include "bsp.h"
 #include "gpio.h"
 
-// FIXME finish or remove sanity check handling
-#define sanity_check_passed     (1)
-
-#define u2f_delay(ms)       delay(ms)
-#define data
+#include "u2f_compat.h"
 
 // Enable, if device should handle touch button HW clearing
 //#define BUTTON_HW_CLEARING
