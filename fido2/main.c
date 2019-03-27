@@ -25,6 +25,7 @@ int main()
     uint32_t t1 = 0;
 
     set_logging_mask(
+        -1 |
 		/*0*/
 		//TAG_GEN|
 		//TAG_MC |
