@@ -83,3 +83,6 @@ targets/*/docs/
 main
 
 builds/*
+*.gcda
+*.gcno
+*.234r.expand
