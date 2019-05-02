@@ -35,7 +35,7 @@
 #include "log.h"
 
 // Enable, if device should handle touch button HW clearing
-//#define BUTTON_HW_CLEARING
+#define BUTTON_HW_CLEARING
 
 #define LOG_STATE_CHANGE
 
@@ -56,6 +56,7 @@ void button_manager (void) {                          // Requires at least a 750
 	if (button_state == BST_INITIALIZING){
 		if (button_manager_start_t == 0){
 			button_manager_start_t = get_ms();
+      BUTTON_RESET_OFF();
 			return;
 		}
 		if (get_ms() - button_manager_start_t <= U2F_MS_INIT_BUTTON_PERIOD){
@@ -190,7 +191,8 @@ void led_blink_manager (void) {
 }
 
 static void set_button_cleared(){
-	button_state = BST_UNPRESSED;
+  printf1(TAG_BUTTON, "Button cleared -> ready to use\n");
+  button_state = BST_UNPRESSED;
 }
 
 

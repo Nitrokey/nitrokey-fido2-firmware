@@ -64,6 +64,8 @@ void hw_init(int lf);
 // Button
 #define SOLO_BUTTON_PORT        GPIOA
 #define SOLO_BUTTON_PIN         LL_GPIO_PIN_0
+#define SOLO_BUTTON_R_PORT        GPIOA
+#define SOLO_BUTTON_R_PIN         LL_GPIO_PIN_15
 
 #define SOLO_AMS_CS_PORT        GPIOB
 #define SOLO_AMS_CS_PIN         LL_GPIO_PIN_0

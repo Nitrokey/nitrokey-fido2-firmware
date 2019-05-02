@@ -44,8 +44,8 @@ extern uint8_t LED_STATE;
 
 #define LED_ON()                 { LED_STATE = 1; }
 #define LED_OFF()                { LED_STATE = 0; }
-#define BUTTON_RESET_ON()        {}
-#define BUTTON_RESET_OFF()       {}
+#define BUTTON_RESET_ON()        { LL_GPIO_ResetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
+#define BUTTON_RESET_OFF()       { LL_GPIO_SetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
 #define IS_LED_ON()              (LED_STATE == 1)
 
 #define get_ms()                  millis()

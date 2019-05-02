@@ -288,7 +288,7 @@ void heartbeat()
     else
 #endif
     {
-        if (but)
+        if (0 && but)
             led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
         else {
             if (LED_STATE)
@@ -515,7 +515,7 @@ int _ctap_user_presence_test()
     goto done;
 #endif
     uint32_t t1 = millis();
-    led_rgb(0xff3520);
+//    led_rgb(0xff3520);
 
 while (IS_BUTTON_PRESSED())
 {
