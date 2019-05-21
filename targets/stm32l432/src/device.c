@@ -288,7 +288,7 @@ void heartbeat()
     else
 #endif
     {
-        if (0 && but)
+        if (but)
             led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
         else {
             if (LED_STATE)
