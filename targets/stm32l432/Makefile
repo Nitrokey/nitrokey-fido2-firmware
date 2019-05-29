@@ -34,7 +34,8 @@ full-clean: clean2
 
 
 .PHONY: debug-release-build
-debug-release-build: | full-clean cbor bootloader-nonverifying clean firmware-hacker-debug-1
+debug-release-build: | full-clean cbor bootloader-nonverifying clean firmware-hacker
+	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	echo "done"
 
 .PHONY: debug-release-archive
