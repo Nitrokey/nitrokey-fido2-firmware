@@ -34,9 +34,9 @@
 // #define ENABLE_SERIAL_PRINTING
 
 #if defined(SOLO_HACKER)
-#define SOLO_PRODUCT_NAME "Solo Hacker " SOLO_VERSION
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
 #else
-#define SOLO_PRODUCT_NAME "Solo " SOLO_VERSION
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION
 #endif
 
 void printing_init();
