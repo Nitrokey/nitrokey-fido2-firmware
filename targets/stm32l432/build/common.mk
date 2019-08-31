@@ -13,7 +13,10 @@ USB_LIB := lib/usbd/usbd_cdc.c lib/usbd/usbd_cdc_if.c lib/usbd/usbd_composite.c 
        lib/usbd/usbd_ctlreq.c lib/usbd/usbd_desc.c lib/usbd/usbd_hid.c
 
 VERSION:=$(shell git describe --abbrev=0 )
-VERSION_FULL:=$(shell git describe)
+VERSION_FULL_RAW:=$(shell git describe)
+VERSION_FULL:=$(shell python -c 'print("$(VERSION_FULL_RAW)".strip(".nitrokey")) if ".nitrokey" in "$(VERSION_FULL_RAW)" else exit(1)')
+VERSION_FULL:=$(if $(VERSION_FULL),$(VERSION_FULL),$(error Invalid version tag - no '.nitrokey' suffix))
+
 VERSION_MAJ:=$(shell python -c 'print("$(VERSION)".split(".")[0])')
 VERSION_MIN:=$(shell python -c 'print("$(VERSION)".split(".")[1])')
 VERSION_PAT:=$(shell python -c 'print("$(VERSION)".split(".")[2])')
@@ -21,8 +24,10 @@ VERSION_PAT:=$(shell python -c 'print("$(VERSION)".split(".")[2])')
 VERSION_FLAGS= -DSOLO_VERSION_MAJ=$(VERSION_MAJ) -DSOLO_VERSION_MIN=$(VERSION_MIN) \
 	-DSOLO_VERSION_PATCH=$(VERSION_PAT) -DSOLO_VERSION=\"$(VERSION_FULL)\"
 
-_all:
-	echo $(VERSION_FULL)
-	echo $(VERSION_MAJ)
-	echo $(VERSION_MIN)
-	echo $(VERSION_PAT)
+.PHONY: version-all
+version-all:
+	@echo $(VERSION_FULL_RAW)
+	@echo $(VERSION_FULL)
+	@echo $(VERSION_MAJ)
+	@echo $(VERSION_MIN)
+	@echo $(VERSION_PAT)
