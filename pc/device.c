@@ -322,7 +322,6 @@ uint32_t ctap_atomic_count(int sel)
 
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
-    int ret;
     FILE * urand = fopen("/dev/urandom","r");
     if (urand == NULL)
     {
