@@ -317,7 +317,7 @@ void heartbeat()
     uint8_t g = (LED_INIT_VALUE >> 8) & 0xff;
     uint8_t b = (LED_INIT_VALUE >> 0) & 0xff;
     int but = IS_BUTTON_PRESSED_RAW();
-
+/*
     if (state)
     {
         val--;
@@ -336,6 +336,7 @@ void heartbeat()
 		if (val < LED_MIN_SCALER)
 			val = LED_MIN_SCALER;
     }
+    */
 
 #ifdef LED_WINK_VALUE
     if (wink_time)
