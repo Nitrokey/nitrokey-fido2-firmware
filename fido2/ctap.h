@@ -101,7 +101,7 @@
 #define RP_NAME_LIMIT               32  // application limit, name parameter isn't needed.
 #define USER_ID_MAX_SIZE            64
 #define USER_NAME_LIMIT             65  // Must be minimum of 64 bytes but can be more.
-#define DISPLAY_NAME_LIMIT          32  // Must be minimum of 64 bytes but can be more.
+#define DISPLAY_NAME_LIMIT          65  // Must be minimum of 64 bytes but can be more.
 #define ICON_LIMIT                  128 // Must be minimum of 64 bytes but can be more.
 #define CTAP_MAX_MESSAGE_SIZE       1200
 
@@ -154,6 +154,10 @@ struct Credential {
     CTAP_userEntity user;
 };
 typedef struct Credential CTAP_residentKey;
+
+// 10*2048/50 = 409 - 50 RK over a 10 pages by 2048 bytes
+// 5*409 = 2045
+static_assert(sizeof(CTAP_residentKey) <= 409, "RK structure too big to fit");
 
 typedef struct
 {
