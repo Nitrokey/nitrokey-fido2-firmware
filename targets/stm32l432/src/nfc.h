@@ -8,7 +8,7 @@
 // Return number of bytes read if any.
 int nfc_loop();
 
-bool nfc_init();
+int nfc_init();
 
 typedef struct
 {
@@ -39,6 +39,8 @@ typedef struct
 #define IS_RBLOCK(x)                  ( (((x) & 0xc0) == NFC_CMD_RBLOCK) && (((x) & 0x02) == 0x02) )
 #define NFC_CMD_SBLOCK                0xc0
 #define IS_SBLOCK(x)                  ( (((x) & 0xc0) == NFC_CMD_SBLOCK) && (((x) & 0x02) == 0x02) )
+
+extern uint8_t p14443_block_offset(uint8_t pcb);
 
 #define NFC_SBLOCK_DESELECT           0x30
 #define NFC_SBLOCK_WTX                0x30

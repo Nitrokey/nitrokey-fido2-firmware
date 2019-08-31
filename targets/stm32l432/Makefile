@@ -21,6 +21,9 @@ firmware-hacker-debug-1:
 firmware-hacker-debug-2:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0'
 
+firmware-secure-non-solokeys:
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=2'
+
 firmware-secure:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DUSE_SOLOKEYS_CERT -DFLASH_ROP=2'
 
@@ -71,7 +74,6 @@ boot-no-sig:
 
 build-release-locked: cbor clean2 boot-sig-checking clean all-locked
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
-	rm -f solo.hex bootloader.hex  # don't program solo.hex ...
 
 build-release: cbor clean2 boot-sig-checking clean all
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
@@ -104,6 +106,11 @@ flashboot: solo.hex bootloader.hex
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
 	STM32_Programmer_CLI -c port=SWD -halt  -d bootloader.hex -rst
+
+flash-firmware:
+	arm-none-eabi-size -A solo.elf
+	solo program aux enter-bootloader
+	solo program bootloader solo.hex
 
 # tell ST DFU to enter application
 detach:

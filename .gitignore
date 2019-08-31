@@ -83,6 +83,8 @@ targets/*/docs/
 main
 
 builds/*
+tools/testing/.idea/*
+tools/testing/tests/__pycache__/*
 *.gcda
 *.gcno
 *.234r.expand

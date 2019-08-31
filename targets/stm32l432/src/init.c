@@ -20,6 +20,7 @@
 #include "stm32l4xx_ll_rng.h"
 #include "stm32l4xx_ll_spi.h"
 #include "stm32l4xx_ll_usb.h"
+#include "stm32l4xx_ll_exti.h"
 #include "stm32l4xx_hal_pcd.h"
 #include "stm32l4xx_hal.h"
 
@@ -31,6 +32,7 @@
 #include "usbd_cdc_if.h"
 #include "device.h"
 #include "init.h"
+#include "sense.h"
 #include APP_CONFIG
 
 // KHz
@@ -94,8 +96,6 @@ void hw_init(int lowfreq)
         SystemClock_Config();
     }
 
-
-
     if (!lowfreq)
     {
         init_pwm();
@@ -108,6 +108,7 @@ void hw_init(int lowfreq)
 #endif
 
     init_rng();
+
     init_spi();
 
 }
@@ -849,19 +850,17 @@ void init_gpio(void)
   LL_GPIO_SetPinMode(SOLO_BUTTON_PORT,SOLO_BUTTON_PIN,LL_GPIO_MODE_INPUT);
   LL_GPIO_SetPinPull(SOLO_BUTTON_PORT,SOLO_BUTTON_PIN,LL_GPIO_PULL_UP);
 
-#ifdef SOLO_AMS_IRQ_PORT
-// SAVE POWER
-  // LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-  // /**/
-  // LL_GPIO_InitTypeDef GPIO_InitStruct;
-  // GPIO_InitStruct.Pin = SOLO_AMS_IRQ_PIN;
-  // GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-  // GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  // LL_GPIO_Init(SOLO_AMS_IRQ_PORT, &GPIO_InitStruct);
-  //
-  //
-  // LL_GPIO_SetPinMode(SOLO_AMS_IRQ_PORT,SOLO_AMS_IRQ_PIN,LL_GPIO_MODE_INPUT);
-  // LL_GPIO_SetPinPull(SOLO_AMS_IRQ_PORT,SOLO_AMS_IRQ_PIN,LL_GPIO_PULL_UP);
+#ifndef IS_BOOTLOADER
+  LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTA, LL_SYSCFG_EXTI_LINE0);
+  LL_EXTI_InitTypeDef EXTI_InitStruct;
+  EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_0;   // GPIOA_0
+  EXTI_InitStruct.Line_32_63 = LL_EXTI_LINE_NONE;
+  EXTI_InitStruct.LineCommand = ENABLE;
+  EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+  EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
+  LL_EXTI_Init(&EXTI_InitStruct);
+
+  NVIC_EnableIRQ(EXTI0_IRQn);
 #endif
 
 }

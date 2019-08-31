@@ -23,6 +23,7 @@
 //#define USING_DEV_BOARD
 
 #define ENABLE_U2F_EXTENSIONS
+    // #define ENABLE_WALLET
 
 #define ENABLE_U2F
 
@@ -30,12 +31,12 @@
 // #define DISABLE_CTAPHID_WINK
 // #define DISABLE_CTAPHID_CBOR
 
-#define ENABLE_SERIAL_PRINTING
+// #define ENABLE_SERIAL_PRINTING
 
 #if defined(SOLO_HACKER)
-#define SOLO_PRODUCT_NAME "Solo Hacker " SOLO_VERSION
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
 #else
-#define SOLO_PRODUCT_NAME "Solo " SOLO_VERSION
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION
 #endif
 
 void printing_init();

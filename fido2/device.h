@@ -9,7 +9,7 @@
 
 #include "storage.h"
 
-void device_init();
+void device_init(int argc, char *argv[]);
 
 uint32_t millis();
 
@@ -53,11 +53,11 @@ int device_is_button_pressed();
 
 // Test for user presence
 // Return 1 for user is present, 0 user not present, -1 if cancel is requested.
-extern int ctap_user_presence_test();
+int ctap_user_presence_test(uint32_t delay);
 
 // Generate @num bytes of random numbers to @dest
 // return 1 if success, error otherwise
-extern int ctap_generate_rng(uint8_t * dst, size_t num);
+int ctap_generate_rng(uint8_t * dst, size_t num);
 
 
 extern int ctap_get_status_data(uint8_t * dst);
@@ -68,11 +68,11 @@ uint32_t ctap_atomic_count(int sel);
 
 // Verify the user
 // return 1 if user is verified, 0 if not
-extern int ctap_user_verification(uint8_t arg);
+int ctap_user_verification(uint8_t arg);
 
 // Must be implemented by application
 // data is HID_MESSAGE_SIZE long in bytes
-extern void ctaphid_write_block(uint8_t * data);
+void ctaphid_write_block(uint8_t * data);
 
 
 // Resident key
@@ -102,9 +102,14 @@ typedef enum {
 // 2: fastest clock rate.  Generally for USB interface.
 void device_set_clock_rate(DEVICE_CLOCK_RATE param);
 
-// Returns 1 if operating in NFC mode.
-// 0 otherwise.
-bool device_is_nfc();
+// Returns NFC_IS_NA, NFC_IS_ACTIVE, or NFC_IS_AVAILABLE
+#define NFC_IS_NA        0
+#define NFC_IS_ACTIVE    1
+#define NFC_IS_AVAILABLE 2
+int device_is_nfc();
 
+void request_from_nfc(bool request_active);
+
+void device_init_button();
 
 #endif

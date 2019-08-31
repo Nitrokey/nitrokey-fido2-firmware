@@ -15,6 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #include "device.h"
 #include "cbor.h"
@@ -23,6 +24,8 @@
 #include "ctaphid.h"
 
 #define RK_NUM  50
+
+bool use_udp = true;
 
 struct ResidentKeyStore {
     CTAP_residentKey rks[RK_NUM];
@@ -118,12 +121,6 @@ void udp_send(int fd, uint8_t * buf, int size)
     }
 }
 
-void udp_close(int fd)
-{
-    close(fd);
-}
-
-
 
 uint32_t millis()
 {
@@ -134,18 +131,42 @@ uint32_t millis()
 }
 
 
-static int serverfd = 0;
+static int fd = 0;
 
 void usbhid_init()
 {
-    // just bridge to UDP for now for pure software testing
-    serverfd = udp_server();
+    if (use_udp)
+    {
+        fd = udp_server();
+    }
+    else
+    {
+        fd = open("/dev/hidg0", O_RDWR);
+        if (fd < 0)
+        {
+            perror("hidg open");
+            exit(1);
+        }
+    }
 }
 
 // Receive 64 byte USB HID message, don't block, return size of packet, return 0 if nothing
 int usbhid_recv(uint8_t * msg)
 {
-    int l = udp_recv(serverfd, msg, HID_MESSAGE_SIZE);
+    int l = 0;
+    if (use_udp)
+    {
+        l = udp_recv(fd, msg, HID_MESSAGE_SIZE);
+    }
+    else
+    {
+        l = read(fd, msg, HID_MESSAGE_SIZE); /* Flawfinder: ignore */
+        if (l < 0)
+        {
+            perror("hidg read");
+            exit(1);
+        }
+    }
     uint8_t magic_cmd[] = "\xac\x10\x52\xca\x95\xe5\x69\xde\x69\xe0\x2e\xbf"
                           "\xf3\x33\x48\x5f\x13\xf9\xb2\xda\x34\xc5\xa8\xa3"
                           "\x40\x52\x66\x97\xa9\xab\x2e\x0b\x39\x4d\x8d\x04"
@@ -166,12 +187,23 @@ int usbhid_recv(uint8_t * msg)
 // Send 64 byte USB HID message
 void usbhid_send(uint8_t * msg)
 {
-    udp_send(serverfd, msg, HID_MESSAGE_SIZE);
+    if (use_udp)
+    {
+        udp_send(fd, msg, HID_MESSAGE_SIZE);
+    }
+    else
+    {
+        if (write(fd, msg, HID_MESSAGE_SIZE) < 0)
+        {
+            perror("hidg write");
+            exit(1);
+        }
+    }
 }
 
 void usbhid_close()
 {
-    udp_close(serverfd);
+    close(fd);
 }
 
 void int_handler(int i)
@@ -181,10 +213,47 @@ void int_handler(int i)
     exit(0);
 }
 
-void device_init()
+
+
+void usage(const char * cmd)
 {
+    fprintf(stderr, "Usage: %s [-b udp|hidg]\n", cmd);
+    fprintf(stderr, "   -b      backing implementation: udp(default) or hidg\n");
+    exit(1);
+}
+
+void device_init(int argc, char *argv[])
+{
+
+    int opt;
+
+    while ((opt = getopt(argc, argv, "b:")) != -1)
+    {
+        switch (opt)
+        {
+            case 'b':
+                if (strcmp("udp", optarg) == 0)
+                {
+                    use_udp = true;
+                }
+                else if (strcmp("hidg", optarg) == 0)
+                {
+                    use_udp = false;
+                }
+                else
+                {
+                    usage(argv[0]);
+                }
+                break;
+            default:
+                usage(argv[0]);
+                break;
+        }
+    }
+
     signal(SIGINT, int_handler);
 
+    printf1(TAG_GREEN, "Using %s backing\n", use_udp ? "UDP" : "hidg");
     usbhid_init();
 
     authenticator_initialize();
@@ -203,6 +272,14 @@ void main_loop_delay()
     nanosleep(&ts,NULL);
 }
 
+void delay(uint32_t ms)
+{
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 1000*1000*ms;
+    nanosleep(&ts,NULL);
+}
+
 
 void heartbeat()
 {
@@ -216,7 +293,7 @@ void ctaphid_write_block(uint8_t * data)
 }
 
 
-int ctap_user_presence_test()
+int ctap_user_presence_test(uint32_t d)
 {
     return 1;
 }
@@ -250,7 +327,6 @@ int ctap_get_status_data(uint8_t * dst){
 
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
-    int ret;
     FILE * urand = fopen("/dev/urandom","r");
     if (urand == NULL)
     {
@@ -552,7 +628,10 @@ void device_wink()
     printf("*WINK*\n");
 }
 
-bool device_is_nfc()
+int device_is_nfc()
 {
     return 0;
+}
+
+void request_from_nfc(bool request_active) {
 }

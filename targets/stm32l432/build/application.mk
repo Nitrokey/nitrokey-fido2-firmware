@@ -2,17 +2,18 @@ include build/common.mk
 
 # ST related
 SRC = src/main.c src/init.c src/redirect.c src/flash.c src/rng.c src/led.c src/device.c
-SRC += src/fifo.c src/crypto.c src/attestation.c src/nfc.c src/ams.c
+SRC += src/fifo.c src/crypto.c src/attestation.c src/nfc.c src/ams.c src/sense.c
 SRC += src/startup_stm32l432xx.s src/system_stm32l4xx.c
 SRC += $(DRIVER_LIBS) $(USB_LIB)
 SRC += src/gpio.c
 SRC += src/user_feedback.c
 
 # FIDO2 lib
-SRC += ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c
+SRC += ../../fido2/apdu.c ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c
 SRC += ../../fido2/stubs.c ../../fido2/log.c  ../../fido2/ctaphid.c  ../../fido2/ctap.c
 SRC += ../../fido2/ctap_parse.c ../../fido2/main.c
 SRC += ../../fido2/extensions/extensions.c ../../fido2/extensions/solo.c
+SRC += ../../fido2/extensions/wallet.c
 
 # Crypto libs
 SRC += ../../crypto/sha256/sha256.c ../../crypto/micro-ecc/uECC.c ../../crypto/tiny-AES-c/aes.c
@@ -83,4 +84,4 @@ cbor:
 	cd ../../tinycbor/ && make clean
 	cd ../../tinycbor/ && make CC="$(CC)" AR=$(AR) \
 LDFLAGS="$(LDFLAGS_LIB)" \
-CFLAGS="$(CFLAGS)"
+CFLAGS="$(CFLAGS) -Os"

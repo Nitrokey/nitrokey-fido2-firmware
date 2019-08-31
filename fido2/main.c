@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <unistd.h>
 
 #include "cbor.h"
 #include "device.h"
@@ -19,7 +21,8 @@
 
 #if !defined(TEST)
 
-int main()
+
+int main(int argc, char *argv[])
 {
     uint8_t hidmsg[64];
     uint32_t t1 = 0;
@@ -28,31 +31,28 @@ int main()
         -1 |
 		/*0*/
 		//TAG_GEN|
-		//TAG_MC |
-		//TAG_GA |
-		//TAG_WALLET |
+		// TAG_MC |
+		// TAG_GA |
+		TAG_WALLET |
 		TAG_STOR |
 		//TAG_NFC_APDU |
 		TAG_NFC |
 		//TAG_CP |
-		//TAG_CTAP|
+		// TAG_CTAP|
 		//TAG_HID|
-		//TAG_U2F|
+		TAG_U2F|
 		//TAG_PARSE |
 		//TAG_TIME|
-		//TAG_DUMP|
+		// TAG_DUMP|
 		TAG_GREEN|
 		TAG_RED|
+        TAG_EXT|
 		TAG_ERR
 	);
 
-    device_init();
-
-
+    device_init(argc, argv);
 
     memset(hidmsg,0,sizeof(hidmsg));
-
-    // printf1(TAG_GEN,"recv'ing hid msg \n");
 
 
     while(1)
