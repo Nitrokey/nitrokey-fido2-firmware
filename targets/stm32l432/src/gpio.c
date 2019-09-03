@@ -191,7 +191,7 @@ void led_blink_manager (void) {
 }
 
 static void set_button_cleared(){
-  printf1(TAG_BUTTON, "Button cleared -> ready to use\n");
+  printf1(TAG_BUTTON, "Marking button cleared -> ready to use\n");
   button_state = BST_UNPRESSED;
 }
 
