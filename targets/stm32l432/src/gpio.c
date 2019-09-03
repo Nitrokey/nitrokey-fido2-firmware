@@ -230,9 +230,15 @@ void _clear_button_press(bool forced){
 	led_off();
 
 #ifdef BUTTON_HW_CLEARING
-	BUTTON_RESET_ON();
+    uint32_t t0 = get_ms();
+    printf1(TAG_BUTTON, "Real clearing\n");
+    BUTTON_RESET_ON();
 	do {
 		u2f_delay(6); 				//6ms activation time + 105ms maximum sleep in NORMAL power mode
+        if (get_ms() - t0 > 2000) {
+            printf1(TAG_BUTTON, "Clearing timed-out\n");
+            break;
+        }
 	} while (IS_BUTTON_PRESSED_RAW()); // Wait to release button
 	BUTTON_RESET_OFF();
 #endif
