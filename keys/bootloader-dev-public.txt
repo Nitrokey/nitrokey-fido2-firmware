@@ -1,0 +1,9 @@
+Signing key for signing device firmware: bootloader.pem
+Public key in various formats:
+
+[182, 209, 210, 131, 170, 201, 103, 114, 40, 223, 78, 202, 5, 43, 252, 84, 25, 99, 43, 176, 232, 236, 109, 178, 250, 212, 55, 248, 77, 30, 118, 7, 160, 194, 210, 61, 175, 19, 77, 57, 226, 164, 21, 48, 236, 30, 95, 35, 101, 3, 28, 174, 131, 227, 67, 249, 209, 116, 72, 71, 236, 143, 96, 210]
+
+b6d1d283aac9677228df4eca052bfc5419632bb0e8ec6db2fad437f84d1e7607a0c2d23daf134d39e2a41530ec1e5f2365031cae83e343f9d1744847ec8f60d2
+
+"\xb6\xd1\xd2\x83\xaa\xc9\x67\x72\x28\xdf\x4e\xca\x05\x2b\xfc\x54\x19\x63\x2b\xb0\xe8\xec\x6d\xb2\xfa\xd4\x37\xf8\x4d\x1e\x76\x07\xa0\xc2\xd2\x3d\xaf\x13\x4d\x39\xe2\xa4\x15\x30\xec\x1e\x5f\x23\x65\x03\x1c\xae\x83\xe3\x43\xf9\xd1\x74\x48\x47\xec\x8f\x60\xd2"
+
