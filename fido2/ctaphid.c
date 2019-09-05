@@ -699,7 +699,7 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             is_busy = 0;
         break;
 #endif
-#ifdef APP_EXECS_BOOTLOADER
+#if defined(APP_EXECS_BOOTLOADER) && !defined(IS_BOOTLOADER)
         case CTAPHID_ENTERBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT - user presence test\n");
             if (ctap_user_presence_test(5000)){
