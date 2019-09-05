@@ -32,6 +32,7 @@ typedef enum
     BootReboot = 0x45,
     BootBootloader = 0x46,
     BootDisable = 0x47,
+    BootPubkey = 0x48,
 } BootOperation;
 
 
@@ -125,7 +126,7 @@ int bootloader_bridge(int klen, uint8_t * keyh)
         return CTAP1_ERR_INVALID_LENGTH;
     }
 #ifndef SOLO_HACKER
-    uint8_t * pubkey = (uint8_t*)
+    uint8_t pubkey[] =
                             "\xb6\xd1\xd2\x83\xaa\xc9\x67\x72\x28\xdf\x4e\xca\x05\x2b\xfc\x54\x19"
                             "\x63\x2b\xb0\xe8\xec\x6d\xb2\xfa\xd4\x37\xf8\x4d\x1e\x76\x07\xa0\xc2"
                             "\xd2\x3d\xaf\x13\x4d\x39\xe2\xa4\x15\x30\xec\x1e\x5f\x23\x65\x03\x1c"
@@ -207,6 +208,15 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             erase_application();
             return 0;
             break;
+#ifndef SOLO_HACKER
+        case BootPubkey:
+            has_erased = 0;
+            printf1(TAG_BOOT, "BootPubkey.\r\n");
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+            u2f_response_writeback(pubkey, MIN(sizeof(pubkey), 71) );
+            break;
+#undef MIN
+#endif
         case BootVersion:
             has_erased = 0;
             printf1(TAG_BOOT, "BootVersion.\r\n");
