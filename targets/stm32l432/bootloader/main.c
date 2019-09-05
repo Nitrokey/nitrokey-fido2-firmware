@@ -45,7 +45,7 @@ int main()
 {
     uint8_t hidmsg[64];
     uint32_t t1 = 0;
-#ifdef APP_EXECS_BOOTLOADER
+#if defined(APP_EXECS_BOOTLOADER) || defined(SOLO_HACKER)
     uint32_t stboot_time = 0;
 #endif
     uint32_t boot = 1;
