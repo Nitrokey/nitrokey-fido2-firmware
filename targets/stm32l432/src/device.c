@@ -596,6 +596,24 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 #include "user_feedback.h"
 
 int ctap_user_presence_test(uint32_t up_delay){
+    int ret;
+#if SKIP_BUTTON_CHECK_WITH_DELAY
+    int i=500;
+    while(i--)
+    {
+        delay(1);
+        ret = handle_packets();
+        if (ret) return ret;
+    }
+    return 1;
+#elif SKIP_BUTTON_CHECK_FAST
+    delay(2);
+    ret = handle_packets();
+    if (ret)
+        return ret;
+    return 1;
+#endif
+
     return u2f_get_user_feedback() == 0;
 }
 
