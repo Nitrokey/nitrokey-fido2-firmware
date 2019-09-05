@@ -696,7 +696,7 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             is_busy = 0;
         break;
 #endif
-#if defined(SOLO_HACKER)
+#ifdef APP_EXECS_BOOTLOADER
         case CTAPHID_ENTERBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
             boot_solo_bootloader();
@@ -707,6 +707,8 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             ctaphid_write(&wb, NULL, 0);
             is_busy = 0;
         break;
+#endif
+#if defined(SOLO_HACKER)
         case CTAPHID_ENTERSTBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
             boot_st_bootloader();

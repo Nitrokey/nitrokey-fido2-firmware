@@ -50,6 +50,11 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
             output[1] = SOLO_VERSION_MIN;
             output[2] = SOLO_VERSION_PATCH;
             break;
+#ifdef APP_EXECS_BOOTLOADER
+        case WalletBootloader:
+            boot_solo_bootloader();
+            break;
+#endif
         case WalletRng:
             printf1(TAG_WALLET,"SoloRng\n");
 
