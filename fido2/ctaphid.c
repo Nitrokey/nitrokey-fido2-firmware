@@ -718,7 +718,7 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
 #endif
 #if defined(SOLO_HACKER)
         case CTAPHID_ENTERSTBOOT:
-            printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
+            printf1(TAG_HID,"CTAPHID_ENTERSTBOOT\n");
             boot_st_bootloader();
         break;
 #endif
