@@ -28,13 +28,14 @@ int main(int argc, char *argv[])
     uint32_t t1 = 0;
 
     set_logging_mask(
-        -1 |
+//        -1 |
 		/*0*/
 		//TAG_GEN|
 		// TAG_MC |
 		// TAG_GA |
 		TAG_WALLET |
 		TAG_STOR |
+		TAG_BUTTON |
 		//TAG_NFC_APDU |
 		TAG_NFC |
 		//TAG_CP |
