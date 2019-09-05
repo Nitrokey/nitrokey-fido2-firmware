@@ -23,9 +23,6 @@
 #include "memory_layout.h"
 #include "init.h"
 
-#define APP_EXECS_BOOTLOADER
-//#define BUTTON_EXECS_BOOTLOADER
-
 uint8_t REBOOT_FLAG = 0;
 
 void SystemClock_Config(void);

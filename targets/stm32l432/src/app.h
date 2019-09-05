@@ -77,4 +77,8 @@ void hw_init(int lf);
 #define SKIP_BUTTON_CHECK_WITH_DELAY        0
 #define SKIP_BUTTON_CHECK_FAST              1
 
+#define APP_EXECS_BOOTLOADER
+//#define BUTTON_EXECS_BOOTLOADER
+
+
 #endif
