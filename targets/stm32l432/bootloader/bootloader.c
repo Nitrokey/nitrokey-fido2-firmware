@@ -216,6 +216,13 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             u2f_response_writeback(&version,1);
             version = SOLO_VERSION_PATCH;
             u2f_response_writeback(&version,1);
+
+            version = 0xFF;
+            u2f_response_writeback(&version,1);
+            u2f_response_writeback(USBD_PRODUCT_FS_STRING, strlen(USBD_PRODUCT_FS_STRING));
+            u2f_response_writeback(&version,1);
+            u2f_response_writeback(USBD_MANUFACTURER_STRING, strlen(USBD_MANUFACTURER_STRING));
+            u2f_response_writeback(&version,1);
             break;
         case BootReboot:
             printf1(TAG_BOOT, "BootReboot.\r\n");
