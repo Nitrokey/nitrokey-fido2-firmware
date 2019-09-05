@@ -43,13 +43,23 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
 
     printf1(TAG_WALLET, "u2f-solo [%d]: ", keylen); dump_hex1(TAG_WALLET, keyh, keylen);
 
-    switch(req->operation)
-    {
+    switch(req->operation) {
         case WalletVersion:
             output[0] = SOLO_VERSION_MAJ;
             output[1] = SOLO_VERSION_MIN;
             output[2] = SOLO_VERSION_PATCH;
             break;
+#ifdef APP_EXECS_BOOTLOADER
+        case WalletBootloader:
+            printf1(TAG_WALLET,"WalletBootloader\n");
+            if (ctap_user_presence_test(5000)){
+                printf1(TAG_WALLET,"WalletBootloader confirmed\n");
+                boot_solo_bootloader();
+            } else {
+                ret = CTAP2_ERR_OPERATION_DENIED;
+            }
+            break;
+#endif
         case WalletRng:
             printf1(TAG_WALLET,"SoloRng\n");
 

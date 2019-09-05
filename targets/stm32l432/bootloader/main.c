@@ -19,10 +19,12 @@
 #include "util.h"
 #include "log.h"
 #include "ctap.h"
-#include "app.h"
+#include APP_CONFIG
 #include "memory_layout.h"
 #include "init.h"
 
+
+#define APP_EXECS_BOOTLOADER
 
 uint8_t REBOOT_FLAG = 0;
 
@@ -46,7 +48,7 @@ int main()
 {
     uint8_t hidmsg[64];
     uint32_t t1 = 0;
-#ifdef SOLO_HACKER
+#if defined(APP_EXECS_BOOTLOADER) || defined(SOLO_HACKER)
     uint32_t stboot_time = 0;
 #endif
     uint32_t boot = 1;
@@ -87,6 +89,7 @@ int main()
 
     printf1(TAG_GEN,"init device\n");
 
+#ifdef BUTTON_EXECS_BOOTLOADER
     t1 = millis();
     while(device_is_button_pressed())
     {
@@ -96,9 +99,10 @@ int main()
             break;
         }
     }
+#endif
 
 
-#ifdef SOLO_HACKER
+#ifdef APP_EXECS_BOOTLOADER
     if (!is_bootloader_disabled())
     {
         stboot_time = millis();
@@ -119,7 +123,7 @@ int main()
 
         printf1(TAG_RED,"Not authorized to boot (%08x == %08lx)\r\n", AUTH_WORD_ADDR, *(uint32_t*)AUTH_WORD_ADDR);
     }
-#ifdef SOLO_HACKER
+#ifdef APP_EXECS_BOOTLOADER
     start_bootloader:
 #endif
     SystemClock_Config();

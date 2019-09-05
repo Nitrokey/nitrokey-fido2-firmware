@@ -32,6 +32,7 @@ typedef enum
     BootReboot = 0x45,
     BootBootloader = 0x46,
     BootDisable = 0x47,
+    BootPubkey = 0x48,
 } BootOperation;
 
 
@@ -125,10 +126,11 @@ int bootloader_bridge(int klen, uint8_t * keyh)
         return CTAP1_ERR_INVALID_LENGTH;
     }
 #ifndef SOLO_HACKER
-    uint8_t * pubkey = (uint8_t*)"\xd2\xa4\x2f\x8f\xb2\x31\x1c\xc1\xf7\x0c\x7e\x64\x32\xfb\xbb\xb4\xa3\xdd\x32\x20"
-                                 "\x0f\x1b\x88\x9c\xda\x62\xc2\x83\x25\x93\xdd\xb8\x75\x9d\xf9\x86\xee\x03\x6c\xce"
-                                 "\x34\x47\x71\x36\xb3\xb2\xad\x6d\x12\xb7\xbe\x49\x3e\x20\xa4\x61\xac\xc7\x71\xc7"
-                                 "\x1f\xa8\x14\xf2";
+    uint8_t pubkey[] =
+                            "\xb6\xd1\xd2\x83\xaa\xc9\x67\x72\x28\xdf\x4e\xca\x05\x2b\xfc\x54\x19"
+                            "\x63\x2b\xb0\xe8\xec\x6d\xb2\xfa\xd4\x37\xf8\x4d\x1e\x76\x07\xa0\xc2"
+                            "\xd2\x3d\xaf\x13\x4d\x39\xe2\xa4\x15\x30\xec\x1e\x5f\x23\x65\x03\x1c"
+                            "\xae\x83\xe3\x43\xf9\xd1\x74\x48\x47\xec\x8f\x60\xd2";
 
     const struct uECC_Curve_t * curve = NULL;
 #endif
@@ -206,6 +208,15 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             erase_application();
             return 0;
             break;
+#ifndef SOLO_HACKER
+        case BootPubkey:
+            has_erased = 0;
+            printf1(TAG_BOOT, "BootPubkey.\r\n");
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+            u2f_response_writeback(pubkey, MIN(sizeof(pubkey), 71) );
+            break;
+#undef MIN
+#endif
         case BootVersion:
             has_erased = 0;
             printf1(TAG_BOOT, "BootVersion.\r\n");
@@ -214,6 +225,13 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             version = SOLO_VERSION_MIN;
             u2f_response_writeback(&version,1);
             version = SOLO_VERSION_PATCH;
+            u2f_response_writeback(&version,1);
+
+            version = 0xFF;
+            u2f_response_writeback(&version,1);
+            u2f_response_writeback(USBD_PRODUCT_FS_STRING, strlen(USBD_PRODUCT_FS_STRING));
+            u2f_response_writeback(&version,1);
+            u2f_response_writeback(USBD_MANUFACTURER_STRING, strlen(USBD_MANUFACTURER_STRING));
             u2f_response_writeback(&version,1);
             break;
         case BootReboot:

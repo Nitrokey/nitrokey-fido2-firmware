@@ -24,6 +24,7 @@
 
 #include APP_CONFIG
 
+
 typedef enum
 {
     IDLE = 0,
@@ -696,19 +697,26 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             is_busy = 0;
         break;
 #endif
-#if defined(SOLO_HACKER)
+#if defined(APP_EXECS_BOOTLOADER) && !defined(IS_BOOTLOADER)
         case CTAPHID_ENTERBOOT:
-            printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
-            boot_solo_bootloader();
-            ctaphid_write_buffer_init(&wb);
-            wb.cid = cid;
-            wb.cmd = CTAPHID_ENTERBOOT;
-            wb.bcnt = 0;
-            ctaphid_write(&wb, NULL, 0);
-            is_busy = 0;
+            printf1(TAG_HID,"CTAPHID_ENTERBOOT - user presence test\n");
+            if (ctap_user_presence_test(5000)){
+                printf1(TAG_HID,"CTAPHID_ENTERBOOT execution\n");
+                boot_solo_bootloader();
+                ctaphid_write_buffer_init(&wb);
+                wb.cid = cid;
+                wb.cmd = CTAPHID_ENTERBOOT;
+                wb.bcnt = 0;
+                ctaphid_write(&wb, NULL, 0);
+                is_busy = 0;
+            } else {
+                printf1(TAG_HID,"CTAPHID_ENTERBOOT denied\n");
+            }
         break;
+#endif
+#if defined(SOLO_HACKER)
         case CTAPHID_ENTERSTBOOT:
-            printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
+            printf1(TAG_HID,"CTAPHID_ENTERSTBOOT\n");
             boot_st_bootloader();
         break;
 #endif

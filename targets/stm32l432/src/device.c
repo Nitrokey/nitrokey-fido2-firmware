@@ -88,6 +88,7 @@ void TIM6_DAC_IRQHandler()
         }
     }
 
+#ifndef IS_BOOTLOADER
 
     if (is_touch_button_pressed == IS_BUTTON_PRESSED)
     {
@@ -102,7 +103,6 @@ void TIM6_DAC_IRQHandler()
         }
     }
 
-#ifndef IS_BOOTLOADER
 	// NFC sending WTX if needs
 	if (device_is_nfc() == NFC_IS_ACTIVE)
 	{
@@ -596,11 +596,30 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 #include "user_feedback.h"
 
 int ctap_user_presence_test(uint32_t up_delay){
+    int ret;
+#if SKIP_BUTTON_CHECK_WITH_DELAY
+    int i=500;
+    while(i--)
+    {
+        delay(1);
+        ret = handle_packets();
+        if (ret) return ret;
+    }
+    return 1;
+#elif SKIP_BUTTON_CHECK_FAST
+    delay(2);
+    ret = handle_packets();
+    if (ret)
+        return ret;
+    return 1;
+#endif
+
     return u2f_get_user_feedback() == 0;
 }
 
 int _ctap_user_presence_test()
 {
+    uint16_t up_delay = 2000;
     run_drivers();
     // FIXME replace with U2F FIDO code
     int ret;
@@ -634,7 +653,6 @@ int _ctap_user_presence_test()
 
     // Set LED status and wait.
 //    led_rgb(0xff3520);
-    uint16_t up_delay = 2000;
     // Block and wait for some time.
     run_drivers();
     ret = wait_for_button_activate(up_delay);

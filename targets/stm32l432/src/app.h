@@ -33,12 +33,6 @@
 
 // #define ENABLE_SERIAL_PRINTING
 
-#if defined(SOLO_HACKER)
-#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
-#else
-#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION
-#endif
-
 void printing_init();
 void hw_init(int lf);
 
@@ -75,6 +69,16 @@ void hw_init(int lf);
 #define SOLO_AMS_IRQ_PIN        LL_GPIO_PIN_15
 
 #define SKIP_BUTTON_CHECK_WITH_DELAY        0
-#define SKIP_BUTTON_CHECK_FAST              0
+#define SKIP_BUTTON_CHECK_FAST              1
+
+
+#if defined(SOLO_HACKER)
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
+#else
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION
+#endif
+
+#include "app-common.h"
+
 
 #endif

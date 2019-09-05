@@ -635,3 +635,7 @@ int device_is_nfc()
 
 void request_from_nfc(bool request_active) {
 }
+
+void boot_solo_bootloader(){
+    printf1(TAG_ERR,"Bootloader executed\r\n");
+}
