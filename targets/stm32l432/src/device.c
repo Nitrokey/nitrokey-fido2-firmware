@@ -619,6 +619,7 @@ int ctap_user_presence_test(uint32_t up_delay){
 
 int _ctap_user_presence_test()
 {
+    uint16_t up_delay = 2000;
     run_drivers();
     // FIXME replace with U2F FIDO code
     int ret;
@@ -652,7 +653,6 @@ int _ctap_user_presence_test()
 
     // Set LED status and wait.
 //    led_rgb(0xff3520);
-    uint16_t up_delay = 2000;
     // Block and wait for some time.
     run_drivers();
     ret = wait_for_button_activate(up_delay);
