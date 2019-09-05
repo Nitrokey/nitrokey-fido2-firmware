@@ -53,6 +53,8 @@
 #define SKIP_BUTTON_CHECK_FAST              1
 
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Bootloader " SOLO_VERSION
+#include "app-common.h"
+
 
 void printing_init();
 void hw_init(int lf);
