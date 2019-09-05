@@ -1,6 +1,5 @@
-ifndef DEBUG
-DEBUG=0
-endif
+DEBUG ?= 0
+HWREV ?= 3
 
 APPMAKE=build/application.mk
 BOOTMAKE=build/bootloader.mk
@@ -13,13 +12,13 @@ merge_hex=solo mergehex
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware-hacker:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
 firmware-hacker-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
 firmware-hacker-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
 firmware-secure-non-solokeys:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=2'

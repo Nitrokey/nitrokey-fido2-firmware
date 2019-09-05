@@ -57,19 +57,36 @@ void hw_init(int lf);
 // Which will take ~8 * (30)*2 ms
 
 // Button
+#ifndef HWREV
+#pragma message "Using default hardware revision - 3"
+#define HWREV   3
+#endif
+
+#if HWREV <= 2
+#define SOLO_BUTTON_PORT        GPIOA
+#define SOLO_BUTTON_PIN         LL_GPIO_PIN_0
+#elif HWREV == 3
 #define SOLO_BUTTON_PORT        GPIOB
 #define SOLO_BUTTON_PIN         LL_GPIO_PIN_1
+#endif
+
 #define SOLO_BUTTON_R_PORT        GPIOA
 #define SOLO_BUTTON_R_PIN         LL_GPIO_PIN_15
+
+#if HWREV == 0
+#warning "Skipping button check"
+#define SKIP_BUTTON_CHECK_WITH_DELAY        0
+#define SKIP_BUTTON_CHECK_FAST              1
+#else
+#define SKIP_BUTTON_CHECK_WITH_DELAY        0
+#define SKIP_BUTTON_CHECK_FAST              0
+#endif
 
 #define SOLO_AMS_CS_PORT        GPIOB
 #define SOLO_AMS_CS_PIN         LL_GPIO_PIN_0
 
 #define SOLO_AMS_IRQ_PORT       GPIOC
 #define SOLO_AMS_IRQ_PIN        LL_GPIO_PIN_15
-
-#define SKIP_BUTTON_CHECK_WITH_DELAY        0
-#define SKIP_BUTTON_CHECK_FAST              1
 
 
 #if defined(SOLO_HACKER)
