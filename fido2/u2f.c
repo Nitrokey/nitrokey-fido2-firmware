@@ -135,7 +135,7 @@ int8_t u2f_response_writeback(const uint8_t * buf, uint16_t len)
     if ((_u2f_resp->length + len) > _u2f_resp->data_size)
     {
         printf2(TAG_ERR, "Not enough space for U2F response, writeback\n");
-        exit(1);
+        return 1;
     }
     memmove(_u2f_resp->data + _u2f_resp->length, buf, len);
     _u2f_resp->length += len;
