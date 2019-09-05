@@ -37,6 +37,7 @@ void flash_option_bytes_init(int boot_from_dfu)
 #endif
 #if FLASH_ROP == 0
     uint32_t val = 0xfffff8aa;
+#warning ROP==0 selected !
 #elif FLASH_ROP == 2
     uint32_t val = 0xfffff8cc;
 #error ROP==2 selected
