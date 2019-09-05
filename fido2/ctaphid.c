@@ -24,6 +24,9 @@
 
 #include APP_CONFIG
 
+#define APP_EXECS_BOOTLOADER
+
+
 typedef enum
 {
     IDLE = 0,

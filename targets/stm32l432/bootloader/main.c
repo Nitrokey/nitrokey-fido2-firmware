@@ -19,9 +19,12 @@
 #include "util.h"
 #include "log.h"
 #include "ctap.h"
-#include "app.h"
+#include APP_CONFIG
 #include "memory_layout.h"
 #include "init.h"
+
+
+#define APP_EXECS_BOOTLOADER
 
 uint8_t REBOOT_FLAG = 0;
 
