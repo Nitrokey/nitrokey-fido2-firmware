@@ -46,14 +46,15 @@ void hw_init(int lf);
 //#define TEST_POWER
 
 //                              0xRRGGBB
-#define LED_INIT_VALUE			0x000800
-#define LED_WINK_VALUE			0x000010
+#define LED_INIT_VALUE			0xFFFFFF
+#define LED_WINK_VALUE			0xFFFFFF
 #define LED_MAX_SCALER          15
 #define LED_MIN_SCALER          1
 // # of ms between each change in LED
 #define HEARTBEAT_PERIOD        150
 // Each LED channel will be multiplied by a integer between LED_MAX_SCALER
 // and LED_MIN_SCALER to cause the slow pulse.  E.g.
+
 // #define LED_INIT_VALUE			0x301000
 // #define LED_MAX_SCALER          30
 // #define LED_MIN_SCALER          1
@@ -62,8 +63,10 @@ void hw_init(int lf);
 // Which will take ~8 * (30)*2 ms
 
 // Button
-#define SOLO_BUTTON_PORT        GPIOA
-#define SOLO_BUTTON_PIN         LL_GPIO_PIN_0
+#define SOLO_BUTTON_PORT        GPIOB
+#define SOLO_BUTTON_PIN         LL_GPIO_PIN_1
+#define SOLO_BUTTON_R_PORT        GPIOA
+#define SOLO_BUTTON_R_PIN         LL_GPIO_PIN_15
 
 #define SOLO_AMS_CS_PORT        GPIOB
 #define SOLO_AMS_CS_PIN         LL_GPIO_PIN_0

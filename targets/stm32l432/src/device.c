@@ -30,12 +30,15 @@
 #include "nfc.h"
 #include "init.h"
 #include "sense.h"
+#include "gpio.h"
+#include "bsp.h"
 
 #define LOW_FREQUENCY        1
 #define HIGH_FREQUENCY       0
 
 void wait_for_usb_tether();
 
+#define IS_BUTTON_PRESSED()     (button_get_press() == 1)
 
 uint32_t __90_ms = 0;
 uint32_t __last_button_press_time = 0;
@@ -62,6 +65,13 @@ int (*IS_BUTTON_PRESSED)() = is_physical_button_pressed;
 
 void request_from_nfc(bool request_active) {
     _RequestComeFromNFC = request_active;
+}
+
+void run_drivers(){
+#ifndef IS_BOOTLOADER
+    button_manager();
+    led_blink_manager();
+#endif
 }
 
 // Timer6 overflow handler.  happens every ~90ms.
@@ -142,15 +152,18 @@ void device_set_status(uint32_t status)
 
 int device_is_button_pressed()
 {
-
+#ifndef IS_BOOTLOADER
     return IS_BUTTON_PRESSED();
+#else // bootloader only
+    return IS_BUTTON_PRESSED_RAW();
+#endif
 }
 
 void delay(uint32_t ms)
 {
     uint32_t time = millis();
     while ((millis() - time) < ms)
-        ;
+        run_drivers();
 }
 void device_reboot()
 {
@@ -204,7 +217,7 @@ void device_init(int argc, char *argv[])
     flash_option_bytes_init(0);
 #endif
 
-
+    clear_button_press();
 }
 
 int device_is_nfc()
@@ -294,6 +307,8 @@ void device_wink()
     winkt1 = 0;
 }
 
+uint8_t LED_STATE = 0;
+
 void heartbeat()
 {
     static int state = 0;
@@ -301,8 +316,8 @@ void heartbeat()
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;
     uint8_t g = (LED_INIT_VALUE >> 8) & 0xff;
     uint8_t b = (LED_INIT_VALUE >> 0) & 0xff;
-    int but = IS_BUTTON_PRESSED();
-
+    int but = IS_BUTTON_PRESSED_RAW();
+/*
     if (state)
     {
         val--;
@@ -321,6 +336,7 @@ void heartbeat()
 		if (val < LED_MIN_SCALER)
 			val = LED_MIN_SCALER;
     }
+    */
 
 #ifdef LED_WINK_VALUE
     if (wink_time)
@@ -344,8 +360,12 @@ void heartbeat()
     {
         if (but)
             led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
-        else
-            led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
+        else {
+            if (LED_STATE)
+                led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
+            else
+                led_rgb(0);
+        }
     }
 
 }
@@ -479,7 +499,6 @@ uint32_t ctap_atomic_count(int sel)
 }
 
 
-
 void device_manage()
 {
 #if NON_BLOCK_PRINTING
@@ -502,8 +521,10 @@ void device_manage()
 #endif
 #ifndef IS_BOOTLOADER
 	if(device_is_nfc())
-		nfc_loop();
+    nfc_loop();
+    clear_button_press();
 #endif
+    run_drivers();
 }
 
 static int handle_packets()
@@ -560,8 +581,28 @@ static int wait_for_button_release(uint32_t wait)
     return 0;
 }
 
-int ctap_user_presence_test(uint32_t up_delay)
+int ctap_get_status_data(uint8_t * ctap_buffer){
+    ctap_buffer[0] = IS_BUTTON_PRESSED_RAW();
+    ctap_buffer[1] = button_get_press_state();
+    ctap_buffer[2] = last_button_cleared_time_delta();
+    ctap_buffer[3] = last_button_pushed_time_delta();
+    ctap_buffer[4] = led_is_blinking();
+    ctap_buffer[5] = U2F_MS_CLEAR_BUTTON_PERIOD / 100;
+    ctap_buffer[6] = U2F_MS_INIT_BUTTON_PERIOD / 100;
+    ctap_buffer[7] = BUTTON_MIN_PRESS_T_MS / 10;
+    return 0;
+}
+
+#include "user_feedback.h"
+
+int ctap_user_presence_test(uint32_t up_delay){
+    return u2f_get_user_feedback() == 0;
+}
+
+int _ctap_user_presence_test()
 {
+    run_drivers();
+    // FIXME replace with U2F FIDO code
     int ret;
     if (device_is_nfc() == NFC_IS_ACTIVE || _RequestComeFromNFC)
     {
@@ -592,9 +633,10 @@ int ctap_user_presence_test(uint32_t up_delay)
     }
 
     // Set LED status and wait.
-    led_rgb(0xff3520);
-
+//    led_rgb(0xff3520);
+    uint16_t up_delay = 2000;
     // Block and wait for some time.
+    run_drivers();
     ret = wait_for_button_activate(up_delay);
     if (ret) return ret;
     ret = wait_for_button_release(up_delay);
