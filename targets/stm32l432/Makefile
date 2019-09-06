@@ -14,6 +14,10 @@ merge_hex=solo mergehex
 firmware-hacker:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
+firmware-release:
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=0 -DHWREV=$(HWREV)'
+	@echo "Used ROP==0"
+
 firmware-hacker-debug-1:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
@@ -36,8 +40,16 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(shell git describe --abbrev=0)
-signame=fido2-firmware-dev-$(ver).json
+signamedev=fido2-firmware-dev-$(ver).json
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hacker-debug-1
+	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev)
+	sha256sum $(signamedev) > $(signamedev).sha2
+	@echo "done"
+
+.PHONY: release-buildv
+signame=fido2-firmware-$(ver).json
+release-buildv: | full-clean cbor bootloader-verifying clean firmware-release
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
 	sha256sum $(signame) > $(signame).sha2
