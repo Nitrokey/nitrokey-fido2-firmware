@@ -174,6 +174,7 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             // Writing to flash finished. Request code validation.
             printf1(TAG_BOOT, "BootDone: ");
 #ifndef SOLO_HACKER
+#pragma message ("Verifying bootloader enabled")
             if (len != 64)
             {
                 printf1(TAG_BOOT,"Invalid length for signature\r\n");
