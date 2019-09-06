@@ -196,7 +196,14 @@ bool nfc_write_response_ex(uint8_t req0, uint8_t * data, uint8_t len, uint16_t r
 
 	res[len + block_offset + 0] = resp >> 8;
 	res[len + block_offset + 1] = resp & 0xff;
+    
 	nfc_write_frame(res, block_offset + len + 2);
+    
+    if (!ams_wait_for_tx(1))
+    {
+        printf1(TAG_NFC, "TX resp timeout. len: %d \r\n", len);
+        return false;
+    }
 
 	return true;
 }
@@ -852,6 +859,7 @@ int nfc_loop()
                 printf1(TAG_NFC, "NFC_CMD_WUPA\r\n");
             break;
             case NFC_CMD_HLTA:
+                ams_write_command(AMS_CMD_SLEEP);
                 printf1(TAG_NFC, "HLTA/Halt\r\n");
             break;
             case NFC_CMD_RATS:
