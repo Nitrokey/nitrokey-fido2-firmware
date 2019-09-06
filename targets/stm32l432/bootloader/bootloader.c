@@ -162,13 +162,8 @@ int bootloader_bridge(int klen, uint8_t * keyh)
         return CTAP1_ERR_INVALID_LENGTH;
     }
 #ifndef SOLO_HACKER
-    uint8_t pubkey[] =
-                            "\xb6\xd1\xd2\x83\xaa\xc9\x67\x72\x28\xdf\x4e\xca\x05\x2b\xfc\x54\x19"
-                            "\x63\x2b\xb0\xe8\xec\x6d\xb2\xfa\xd4\x37\xf8\x4d\x1e\x76\x07\xa0\xc2"
-                            "\xd2\x3d\xaf\x13\x4d\x39\xe2\xa4\x15\x30\xec\x1e\x5f\x23\x65\x03\x1c"
-                            "\xae\x83\xe3\x43\xf9\xd1\x74\x48\x47\xec\x8f\x60\xd2";
-    extern uint8_t *pubkey_boot;
-
+    extern uint8_t pubkey_boot[];
+    extern const uint8_t pubkey_boot_size;
     const struct uECC_Curve_t * curve = NULL;
 #endif
 
@@ -256,7 +251,7 @@ int bootloader_bridge(int klen, uint8_t * keyh)
             has_erased = 0;
             printf1(TAG_BOOT, "BootPubkey.\r\n");
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-            u2f_response_writeback(pubkey, MIN(sizeof(pubkey), 71) );
+            u2f_response_writeback(pubkey_boot, MIN(pubkey_boot_size, 71) );
             break;
 #undef MIN
 #endif
