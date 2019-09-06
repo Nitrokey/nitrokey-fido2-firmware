@@ -142,6 +142,7 @@ int main()
 
     printf1(TAG_GEN,"recv'ing hid msg \n");
 
+#if DEBUG_LEVEL > 0
     extern volatile version_t current_firmware_version;
     printf1(TAG_BOOT,"Current firmware version address: %p\r\n", &current_firmware_version);
     printf1(TAG_BOOT,"Current firmware version: %d.%d.%d.%d (%02x.%02x.%02x.%02x)\r\n",
@@ -149,7 +150,7 @@ int main()
             current_firmware_version.major, current_firmware_version.minor, current_firmware_version.patch, current_firmware_version.reserved
     );
     dump_hex1(TAG_BOOT, (uint8_t*)(&current_firmware_version) - 16, 32);
-
+#endif
 
     while(1)
     {
