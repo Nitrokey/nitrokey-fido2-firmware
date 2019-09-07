@@ -223,9 +223,12 @@ int bootloader_bridge(int klen, uint8_t * keyh)
                     !uECC_verify(pubkey_boot, hash, 32, req->payload, curve)
             )
             {
-              printf1(TAG_BOOT, "Signature invalid\r\n");
+                printf1(TAG_BOOT, "Signature invalid\r\n");
+                dump_arrl(TAG_BOOT, pubkey_boot, pubkey_boot_size);
+                dump_arrl(TAG_BOOT, hash, 32);
                 return CTAP2_ERR_OPERATION_DENIED;
             }
+            printf1(TAG_BOOT, "Signature valid\r\n");
             if (!is_firmware_version_newer_or_equal()){
               printf1(TAG_BOOT, "Firmware older - update not allowed.\r\n");
               printf1(TAG_BOOT, "Rebooting...\r\n");
