@@ -133,7 +133,7 @@ flashboot: bootloader.hex
 flash-firmware:
 	arm-none-eabi-size -A solo.elf
 	-solo program aux enter-bootloader
-	solo program bootloader solo.hex
+	solo program bootloader $(signame)
 
 # tell ST DFU to enter application
 detach:
