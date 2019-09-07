@@ -132,7 +132,7 @@ flashboot: bootloader.hex
 
 flash-firmware:
 	arm-none-eabi-size -A solo.elf
-	solo program aux enter-bootloader
+	-solo program aux enter-bootloader
 	solo program bootloader solo.hex
 
 # tell ST DFU to enter application
