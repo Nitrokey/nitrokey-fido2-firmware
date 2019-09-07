@@ -6,7 +6,7 @@ uint8_t pubkey_boot[] = "\xb6\xd1\xd2\x83\xaa\xc9\x67\x72\x28\xdf\x4e\xca\x05\x2
                         "\xd2\x3d\xaf\x13\x4d\x39\xe2\xa4\x15\x30\xec\x1e\x5f\x23\x65\x03\x1c"
                         "\xae\x83\xe3\x43\xf9\xd1\x74\x48\x47\xec\x8f\x60\xd2";
 
-const uint8_t pubkey_boot_size = sizeof(pubkey_boot);
+const uint8_t pubkey_boot_size = sizeof(pubkey_boot)-1;
 
-static_assert(sizeof(pubkey_boot) == 65, "Invalid key size");
+static_assert(sizeof(pubkey_boot)-1 == 64, "Invalid key size");
 

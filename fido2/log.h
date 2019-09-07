@@ -57,8 +57,10 @@ void set_logging_mask(uint32_t mask);
 #define printf2(tag,fmt, ...) LOG(tag | TAG_FILENO,__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #define printf3(tag,fmt, ...) LOG(tag | TAG_FILENO,__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
-#define dump_hex1(tag,data,len) LOG_HEX(tag,data,len)
-
+#define _dump_hex1(tag,data,len) LOG_HEX(tag,data,len)
+#define dump_hex1(tag, data, len) printf1(((tag)|TAG_NO_TAG), "%s[%d]: ", #data, len); _dump_hex1(tag, ((uint8_t *) (data)), len);
+#define dump_arr(tag, data) printf1(tag,"Dump of %20s: ", #data); _dump_hex1(tag, data, sizeof(data));
+#define dump_arrl(tag, data, len) printf1(tag,"Dump of %20s: ", #data); _dump_hex1(tag, data, len);
 uint32_t timestamp();
 
 #else
@@ -68,6 +70,8 @@ uint32_t timestamp();
 #define printf2(tag,fmt, ...)
 #define printf3(tag,fmt, ...)
 #define dump_hex1(tag,data,len)
+#define dump_arr(tag, data)
+#define dump_arrl(tag, data, len)
 #define timestamp()
 
 #endif
