@@ -42,7 +42,7 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(shell git describe --abbrev=0)
-signamedev=fido2-firmware-dev-$(ver).json
+signamedev=release/fido2-firmware-dev-$(ver).json
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hacker-debug-1
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev)
@@ -50,7 +50,8 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hack
 	@echo "done"
 
 .PHONY: release-buildv
-signame=fido2-firmware-$(ver).json
+signame1=release/fido2-firmware-$(ver)
+signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware-release
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
