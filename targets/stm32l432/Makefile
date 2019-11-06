@@ -1,10 +1,12 @@
 DEBUG ?= 0
 HWREV ?= 3
+ENDPAGE ?= 20
 
 APPMAKE=build/application.mk
 BOOTMAKE=build/bootloader.mk
 
-merge_hex=solo mergehex
+merge_hex=solo mergehex --end_page $(ENDPAGE)
+
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
@@ -15,14 +17,14 @@ firmware-hacker:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
 
 firmware-release:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=0 -DHWREV=$(HWREV)'
-	@echo "Used ROP==0"
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=1 -DHWREV=$(HWREV)'
+	@echo "Used ROP==1"
 
 firmware-hacker-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV) -DNK_TEST_MODE'
 
 firmware-hacker-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV) -DNK_TEST_MODE'
 
 firmware-secure-non-solokeys:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=2'
@@ -40,7 +42,7 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(shell git describe --abbrev=0)
-signamedev=fido2-firmware-dev-$(ver).json
+signamedev=release/fido2-firmware-dev-$(ver).json
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hacker-debug-1
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev)
@@ -48,12 +50,15 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hack
 	@echo "done"
 
 .PHONY: release-buildv
-signame=fido2-firmware-$(ver).json
+signame1=release/fido2-firmware-$(ver)
+signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware-release
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+	cp all.hex $(signame1)-all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
 	sha256sum $(signame) > $(signame).sha2
 	@echo "done"
+	ls release/
 
 .PHONY: test-signed-flash
 test-signed-flash: | flash
