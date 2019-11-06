@@ -54,9 +54,11 @@ signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware-release
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+	cp all.hex $(signame1)-all.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
 	sha256sum $(signame) > $(signame).sha2
 	@echo "done"
+	ls release/
 
 .PHONY: test-signed-flash
 test-signed-flash: | flash
