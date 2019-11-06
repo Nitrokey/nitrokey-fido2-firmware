@@ -1,10 +1,12 @@
 DEBUG ?= 0
 HWREV ?= 3
+ENDPAGE ?= 20
 
 APPMAKE=build/application.mk
 BOOTMAKE=build/bootloader.mk
 
-merge_hex=solo mergehex
+merge_hex=solo mergehex --end_page $(ENDPAGE)
+
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
