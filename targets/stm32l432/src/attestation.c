@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "crypto.h"
 
-#ifdef USE_SOLOKEYS_CERT
+#ifndef NK_TEST_MODE
 
 #warning "Using production attestation certificate"
 
