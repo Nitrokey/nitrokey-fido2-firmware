@@ -6,6 +6,7 @@
 // copied, modified, or distributed except according to those terms.
 #include <stdint.h>
 #include "crypto.h"
+#include "memory_layout.h"
 
 #ifndef NK_TEST_MODE
 
@@ -33,7 +34,6 @@ const uint8_t attestation_cert_der[] =
 "\xe8\x2b\x5d\xf0\xce\x78\x90\xc7\xad\x02\x4e\x9d\x56\xb7\x49\x46\xde\xe4\xdb\xa5"
 "\x48\xd2\x3e"
 ;
-#else
 
 // For testing/development only
 
@@ -80,8 +80,15 @@ const uint8_t attestation_cert_der[] =
 "\xf3\x87\x61\x82\xd8\xcd\x48\xfc\x57"
 ;
 
-#endif
 
-const uint16_t attestation_cert_der_size = sizeof(attestation_cert_der)-1;
+const uint16_t attestation_solo_cert_der_size = sizeof(attestation_solo_cert_der)-1;
 
-const uint16_t attestation_key_size = 32;
+// const uint16_t attestation_key_size = 32;
+const uint8_t * attestation_cert_der = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert;
+
+#include "log.h"
+uint16_t attestation_cert_der_get_size(){
+    uint16_t sz = (uint16_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert_size;
+    return sz;
+}
+

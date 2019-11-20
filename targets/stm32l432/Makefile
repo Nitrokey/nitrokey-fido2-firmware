@@ -1,11 +1,11 @@
 DEBUG ?= 0
 HWREV ?= 3
-ENDPAGE ?= 20
 
-APPMAKE=build/application.mk
-BOOTMAKE=build/bootloader.mk
+VERSION_FULL?=$(shell git describe)
+APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
+BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
-merge_hex=solo mergehex --end_page $(ENDPAGE)
+merge_hex=solo mergehex
 
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
@@ -13,24 +13,14 @@ merge_hex=solo mergehex --end_page $(ENDPAGE)
 
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
-firmware-hacker:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV)'
+firmware:
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV)'
 
-firmware-release:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=1 -DHWREV=$(HWREV)'
-	@echo "Used ROP==1"
+firmware-debug-1:
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV)'
 
-firmware-hacker-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV) -DNK_TEST_MODE'
-
-firmware-hacker-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DSOLO_HACKER -DFLASH_ROP=0 -DHWREV=$(HWREV) -DNK_TEST_MODE'
-
-firmware-secure-non-solokeys:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DFLASH_ROP=2'
-
-firmware-secure:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DUSE_SOLOKEYS_CERT -DFLASH_ROP=2'
+firmware-debug-2:
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV)'
 
 bootloader-nonverifying:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER' DEBUG=0
@@ -136,7 +126,7 @@ flashboot: bootloader.hex
 	STM32_Programmer_CLI -c port=SWD -halt  -d bootloader.hex -rst
 
 flash-firmware:
-	arm-none-eabi-size -A solo.elf
+	$(SZ) -A solo.elf
 	-solo program aux enter-bootloader
 	solo program bootloader $(signame)
 

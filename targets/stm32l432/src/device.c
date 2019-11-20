@@ -36,7 +36,9 @@
 #define LOW_FREQUENCY        1
 #define HIGH_FREQUENCY       0
 
-void wait_for_usb_tether();
+#define SOLO_FLAG_LOCKED                    0x2
+
+void wait_for_usb_tether(void);
 
 #define IS_BUTTON_PRESSED()     (button_get_press() == 1)
 
@@ -48,23 +50,56 @@ uint32_t __last_update = 0;
 extern PCD_HandleTypeDef hpcd;
 static int _NFC_status = 0;
 static bool isLowFreq = 0;
-static bool _RequestComeFromNFC = false;
+static bool _up_disabled = false;
 
 // #define IS_BUTTON_PRESSED()         (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN))
-static int is_physical_button_pressed()
+static int is_physical_button_pressed(void)
 {
     return (0  == (LL_GPIO_ReadInputPort(SOLO_BUTTON_PORT) & SOLO_BUTTON_PIN));
 }
 
-static int is_touch_button_pressed()
+static int is_touch_button_pressed(void)
 {
-    return tsc_read_button(0) || tsc_read_button(1);
+    int is_pressed = (tsc_read_button(0) || tsc_read_button(1));
+#ifndef IS_BOOTLOADER
+    if (is_pressed)
+    {
+        // delay for debounce, and longer than polling timer period.
+        delay(95);
+        return (tsc_read_button(0) || tsc_read_button(1));
+    }
+#endif
+    return is_pressed;
 }
 
 int (*IS_BUTTON_PRESSED)() = is_physical_button_pressed;
 
-void request_from_nfc(bool request_active) {
-    _RequestComeFromNFC = request_active;
+static void edge_detect_touch_button(void)
+{
+    static uint8_t last_touch = 0;
+    uint8_t current_touch = 0;
+    if (is_touch_button_pressed == IS_BUTTON_PRESSED)
+    {
+        current_touch = (tsc_read_button(0) || tsc_read_button(1));
+
+        // 1 sample per 25 ms
+        if ((millis() - __last_button_bounce_time) > 25)
+        {
+            // Detect "touch / rising edge"
+            if (!last_touch && current_touch)
+            {
+                __last_button_press_time = millis();
+            }
+            __last_button_bounce_time = millis();
+            last_touch = current_touch;
+        }
+    }
+
+}
+
+void device_disable_up(bool disable)
+{
+    _up_disabled = disable;
 }
 
 void run_drivers(){
@@ -75,7 +110,7 @@ void run_drivers(){
 }
 
 // Timer6 overflow handler.  happens every ~90ms.
-void TIM6_DAC_IRQHandler()
+void TIM6_DAC_IRQHandler(void)
 {
     // timer is only 16 bits, so roll it over here
     TIM6->SR = 0;
@@ -88,20 +123,7 @@ void TIM6_DAC_IRQHandler()
         }
     }
 
-#ifndef IS_BOOTLOADER
-
-    if (is_touch_button_pressed == IS_BUTTON_PRESSED)
-    {
-        if (IS_BUTTON_PRESSED())
-        {
-            // Only allow 1 press per 25 ms.
-            if ((millis() - __last_button_bounce_time) > 25)
-            {
-                __last_button_press_time = millis();
-            }
-            __last_button_bounce_time = millis();
-        }
-    }
+    edge_detect_touch_button();
 
 	// NFC sending WTX if needs
 	if (device_is_nfc() == NFC_IS_ACTIVE)
@@ -132,7 +154,7 @@ void USB_IRQHandler(void)
   HAL_PCD_IRQHandler(&hpcd);
 }
 
-uint32_t millis()
+uint32_t millis(void)
 {
     return (((uint32_t)TIM6->CNT) + (__90_ms * 90));
 }
@@ -150,7 +172,7 @@ void device_set_status(uint32_t status)
     __device_status = status;
 }
 
-int device_is_button_pressed()
+int device_is_button_pressed(void)
 {
 #ifndef IS_BOOTLOADER
     return IS_BUTTON_PRESSED();
@@ -165,12 +187,13 @@ void delay(uint32_t ms)
     while ((millis() - time) < ms)
         run_drivers();
 }
-void device_reboot()
+
+void device_reboot(void)
 {
     NVIC_SystemReset();
 }
 
-void device_init_button()
+void device_init_button(void)
 {
     if (tsc_sensor_exists())
     {
@@ -180,6 +203,98 @@ void device_init_button()
     else
     {
         IS_BUTTON_PRESSED = is_physical_button_pressed;
+    }
+}
+
+int solo_is_locked(){
+    uint64_t device_settings = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->device_settings;
+    uint32_t tag = (uint32_t)(device_settings >> 32ull);
+    return tag == ATTESTATION_CONFIGURED_TAG && (device_settings & SOLO_FLAG_LOCKED) != 0;
+}
+
+/** device_migrate
+ * Depending on version of device, migrates:
+ * * Moves attestation certificate to data segment.
+ * * Creates locked variable and stores in data segment.
+ *
+ * Once in place, this allows all devices to accept same firmware,
+ * rather than using "hacker" and "secure" builds.
+*/
+static void device_migrate(){
+    extern const uint16_t attestation_solo_cert_der_size;
+    extern const uint16_t attestation_hacker_cert_der_size;
+
+    extern uint8_t attestation_solo_cert_der[];
+    extern uint8_t attestation_hacker_cert_der[];
+
+    uint64_t device_settings = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->device_settings;
+    uint32_t configure_tag = (uint32_t)(device_settings >> 32);
+
+    if (configure_tag != ATTESTATION_CONFIGURED_TAG)
+    {
+        printf1(TAG_RED,"Migrating certificate and lock information to data segment.\r\n");
+
+        device_settings = ATTESTATION_CONFIGURED_TAG;
+        device_settings <<= 32;
+
+        // Read current device lock level.
+        uint32_t optr = FLASH->OPTR;
+        if ((optr & 0xff) != 0xAA){
+            device_settings |= SOLO_FLAG_LOCKED;
+        }
+
+        uint8_t tmp_attestation_key[32];
+
+        memmove(tmp_attestation_key,
+            ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_key,
+            32);
+
+        flash_erase_page(ATTESTATION_PAGE);
+        flash_write(
+            (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_key,
+            tmp_attestation_key,
+            32
+        );
+
+        // Check if this is Solo Hacker attestation (not confidential)
+        // then write solo or hacker attestation cert to flash page.
+        uint8_t solo_hacker_attestation_key[32] = "\x1b\x26\x26\xec\xc8\xf6\x9b\x0f\x69\xe3\x4f"
+                                                  "\xb2\x36\xd7\x64\x66\xba\x12\xac\x16\xc3\xab"
+                                                  "\x57\x50\xba\x06\x4e\x8b\x90\xe0\x24\x48";
+
+        if (memcmp(solo_hacker_attestation_key,
+                   tmp_attestation_key,
+                   32) == 0)
+        {
+            printf1(TAG_GREEN,"Updating solo hacker cert\r\n");
+            flash_write_dword(
+             (uint32_t)&((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert_size,
+             (uint64_t)attestation_hacker_cert_der_size
+             );
+            flash_write(
+                (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert,
+                attestation_hacker_cert_der,
+                attestation_hacker_cert_der_size
+            );
+        }
+        else
+        {
+            printf1(TAG_GREEN,"Updating solo secure cert\r\n");
+            flash_write_dword(
+             (uint32_t)&((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert_size,
+             (uint64_t)attestation_solo_cert_der_size
+             );
+            flash_write(
+                (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert,
+                attestation_solo_cert_der,
+                attestation_solo_cert_der_size
+            );
+        }
+
+        // Save / done.
+        flash_write_dword(
+            (uint32_t) & ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->device_settings,
+            (uint64_t)device_settings);
     }
 }
 
@@ -211,6 +326,8 @@ void device_init(int argc, char *argv[])
     ctaphid_init();
     ctap_init();
 
+    device_migrate();
+
 #if BOOT_TO_DFU
     flash_option_bytes_init(1);
 #else
@@ -220,12 +337,12 @@ void device_init(int argc, char *argv[])
     clear_button_press();
 }
 
-int device_is_nfc()
+int device_is_nfc(void)
 {
     return _NFC_status;
 }
 
-void wait_for_usb_tether()
+void wait_for_usb_tether(void)
 {
     while (USBD_OK != CDC_Transmit_FS((uint8_t*)"tethered\r\n", 10) )
         ;
@@ -236,7 +353,7 @@ void wait_for_usb_tether()
         ;
 }
 
-void usbhid_init()
+void usbhid_init(void)
 {
     if (!isLowFreq)
     {
@@ -286,12 +403,12 @@ void ctaphid_write_block(uint8_t * data)
 }
 
 
-void usbhid_close()
+void usbhid_close(void)
 {
 
 }
 
-void main_loop_delay()
+void main_loop_delay(void)
 {
 
 }
@@ -301,7 +418,8 @@ static uint32_t winkt1 = 0;
 #ifdef LED_WINK_VALUE
 static uint32_t winkt2 = 0;
 #endif
-void device_wink()
+
+void device_wink(void)
 {
     wink_time = 10;
     winkt1 = 0;
@@ -309,7 +427,7 @@ void device_wink()
 
 uint8_t LED_STATE = 0;
 
-void heartbeat()
+void heartbeat(void)
 {
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
@@ -383,7 +501,7 @@ void authenticator_read_backup_state(AuthenticatorState * a)
 }
 
 // Return 1 yes backup is init'd, else 0
-int authenticator_is_backup_initialized()
+int authenticator_is_backup_initialized(void)
 {
     uint8_t header[16];
     uint32_t * ptr = (uint32_t *)flash_addr(STATE2_PAGE);
@@ -408,7 +526,8 @@ void authenticator_write_state(AuthenticatorState * a, int backup)
     }
 }
 
-uint32_t ctap_atomic_count(int sel)
+#if !defined(IS_BOOTLOADER)
+uint32_t ctap_atomic_count(uint32_t amount)
 {
     int offset = 0;
     uint32_t * ptr = (uint32_t *)flash_addr(COUNTER1_PAGE);
@@ -423,10 +542,12 @@ uint32_t ctap_atomic_count(int sel)
 
     uint32_t lastc = 0;
 
-    if (sel != 0)
+    if (amount == 0)
     {
-        printf2(TAG_ERR,"counter2 not imple\n");
-        exit(1);
+        // Use a random count [1-16].
+        uint8_t rng[1];
+        ctap_generate_rng(rng, 1);
+        amount = (rng[0] & 0x0f) + 1;
     }
 
     for (offset = 0; offset < PAGE_SIZE/4; offset += 2) // wear-level the flash
@@ -459,7 +580,7 @@ uint32_t ctap_atomic_count(int sel)
         return lastc;
     }
 
-    lastc++;
+    lastc += amount;
 
     if (lastc/256 > erases)
     {
@@ -497,9 +618,10 @@ uint32_t ctap_atomic_count(int sel)
 
     return lastc;
 }
+#endif
 
 
-void device_manage()
+void device_manage(void)
 {
 #if NON_BLOCK_PRINTING
     int i = 10;
@@ -527,7 +649,7 @@ void device_manage()
     run_drivers();
 }
 
-static int handle_packets()
+static int handle_packets(void)
 {
     static uint8_t hidmsg[HID_PACKET_SIZE];
     memset(hidmsg,0, sizeof(hidmsg));
@@ -563,6 +685,7 @@ static int wait_for_button_activate(uint32_t wait)
     } while (!IS_BUTTON_PRESSED());
     return 0;
 }
+
 static int wait_for_button_release(uint32_t wait)
 {
     int ret;
@@ -623,9 +746,15 @@ int _ctap_user_presence_test()
     run_drivers();
     // FIXME replace with U2F FIDO code
     int ret;
-    if (device_is_nfc() == NFC_IS_ACTIVE || _RequestComeFromNFC)
+
+    if (device_is_nfc() == NFC_IS_ACTIVE)
     {
         return 1;
+    }
+
+    if (_up_disabled)
+    {
+        return 2;
     }
 
 #if SKIP_BUTTON_CHECK_WITH_DELAY
@@ -689,7 +818,7 @@ int ctap_user_verification(uint8_t arg)
     return 1;
 }
 
-void ctap_reset_rk()
+void ctap_reset_rk(void)
 {
     int i;
     printf1(TAG_GREEN, "resetting RK \r\n");
@@ -699,7 +828,7 @@ void ctap_reset_rk()
     }
 }
 
-uint32_t ctap_rk_size()
+uint32_t ctap_rk_size(void)
 {
     return RK_NUM_PAGES * (PAGE_SIZE / sizeof(CTAP_residentKey));
 }
@@ -761,7 +890,7 @@ void ctap_overwrite_rk(int index,CTAP_residentKey * rk)
     }
 }
 
-void boot_st_bootloader()
+void boot_st_bootloader(void)
 {
     __disable_irq();
 
@@ -773,7 +902,7 @@ void boot_st_bootloader()
     ;
 }
 
-void boot_solo_bootloader()
+void boot_solo_bootloader(void)
 {
     LL_IWDG_Enable(IWDG);
 
