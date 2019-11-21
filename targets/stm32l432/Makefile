@@ -41,12 +41,14 @@ bootloader-verifying:
 full-clean: clean2
 
 .PHONY: debug-release-buildv
-ver=$(shell git describe --abbrev=0)
-signamedev=release/fido2-firmware-dev-$(ver).json
+ver=$(shell git describe --abbrev=4)
+signamedev=release/fido2-firmware-dev-$(ver)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-hacker-debug-1
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
-	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev)
-	sha256sum $(signamedev) > $(signamedev).sha2
+	cp all.hex $(signamedev)-all-to_flash.hex
+	cp solo.hex $(signamedev)-app-to_sign.hex
+	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
+	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
 
 .PHONY: release-buildv
@@ -54,7 +56,8 @@ signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware-release
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
-	cp all.hex $(signame1)-all.hex
+	cp all.hex $(signame1)-all-to_flash.hex
+	cp solo.hex $(signame1)-app-to_sign.hex
 	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
 	sha256sum $(signame) > $(signame).sha2
 	@echo "done"
@@ -136,6 +139,11 @@ flashboot: bootloader.hex
 	STM32_Programmer_CLI -c port=SWD -halt  -d bootloader.hex -rst
 
 flash-firmware:
+	arm-none-eabi-size -A solo.elf
+	-solo program aux enter-bootloader
+	solo program bootloader $(signamedev)
+
+flash-firmware-final:
 	arm-none-eabi-size -A solo.elf
 	-solo program aux enter-bootloader
 	solo program bootloader $(signame)
