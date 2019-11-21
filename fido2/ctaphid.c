@@ -745,24 +745,18 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
             return 1;
         break;
       case CTAPHID_GETSTATUS:
-
-
-          printf1(TAG_HID,"CTAPHID_GETSTATUS\n");
-        ctap_response_init(&ctap_resp);
-        ctaphid_write_buffer_init(&wb);
-        wb.cid = cid;
-        wb.cmd = CTAPHID_GETSTATUS;
-        wb.bcnt = ctap_buffer[0];
-        if (!wb.bcnt)
-            wb.bcnt = 8;
-        memset(ctap_buffer,0,wb.bcnt);
+        printf1(TAG_HID,"CTAPHID_GETSTATUS\n");
+        ctap_response_init(ctap_resp);
+        ctaphid_write_buffer_init(wb);
+        wb->cmd = CTAPHID_GETSTATUS;
+        wb->bcnt = ctap_buffer[0];
+        if (!wb->bcnt)
+            wb->bcnt = 8;
+        memset(ctap_buffer,0,wb->bcnt);
         ctap_get_status_data(ctap_buffer);
-        ctaphid_write(&wb, &ctap_buffer, wb.bcnt);
-        ctaphid_write(&wb, NULL, 0);
-        is_busy = 0;
-
-
-          break;
+        ctaphid_write(wb, &ctap_buffer, wb->bcnt);
+        ctaphid_write(wb, NULL, 0);
+        break;
 #endif
 
         case CTAPHID_GETVERSION:
