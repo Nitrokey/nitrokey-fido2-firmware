@@ -1,5 +1,6 @@
 DEBUG ?= 0
 HWREV ?= 3
+SZ ?= $(PREFIX)arm-none-eabi-size
 
 VERSION_FULL?=$(shell git describe)
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
@@ -128,7 +129,7 @@ flashboot: bootloader.hex
 flash-firmware:
 	$(SZ) -A solo.elf
 	-solo program aux enter-bootloader
-	solo program bootloader $(signame)
+	solo program bootloader $(signamedev)
 
 # tell ST DFU to enter application
 detach:
