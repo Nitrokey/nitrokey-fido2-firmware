@@ -124,7 +124,7 @@ void TIM6_DAC_IRQHandler(void)
     }
 
     edge_detect_touch_button();
-
+#ifndef IS_BOOTLOADER
 	// NFC sending WTX if needs
 	if (device_is_nfc() == NFC_IS_ACTIVE)
 	{
