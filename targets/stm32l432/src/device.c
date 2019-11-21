@@ -258,9 +258,7 @@ static void device_migrate(){
 
         // Check if this is Solo Hacker attestation (not confidential)
         // then write solo or hacker attestation cert to flash page.
-        uint8_t solo_hacker_attestation_key[32] = "\x1b\x26\x26\xec\xc8\xf6\x9b\x0f\x69\xe3\x4f"
-                                                  "\xb2\x36\xd7\x64\x66\xba\x12\xac\x16\xc3\xab"
-                                                  "\x57\x50\xba\x06\x4e\x8b\x90\xe0\x24\x48";
+        extern uint8_t solo_hacker_attestation_key[32];
 
         if (memcmp(solo_hacker_attestation_key,
                    tmp_attestation_key,
