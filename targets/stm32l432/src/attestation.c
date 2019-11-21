@@ -8,11 +8,7 @@
 #include "crypto.h"
 #include "memory_layout.h"
 
-#ifndef NK_TEST_MODE
-
-#warning "Using production attestation certificate"
-
-const uint8_t attestation_cert_der[] =
+const uint8_t attestation_solo_cert_der[] =
 "\x30\x82\x01\x7b\x30\x82\x01\x22\xa0\x03\x02\x01\x02\x02\x09\x00\xda\x88\x21\xd2"
 "\xc5\xcb\x24\xf2\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d\x04\x03\x02\x30\x1d\x31\x1b"
 "\x30\x19\x06\x03\x55\x04\x03\x0c\x12\x4e\x69\x74\x72\x6f\x6b\x65\x79\x20\x52\x6f"
@@ -35,11 +31,7 @@ const uint8_t attestation_cert_der[] =
 "\x48\xd2\x3e"
 ;
 
-// For testing/development only
-
-#warning "Using test attestation certificate"
-
-const uint8_t attestation_cert_der[] =
+const uint8_t attestation_hacker_cert_der[] =
 "\x30\x82\x02\xe9\x30\x82\x02\x8e\xa0\x03\x02\x01\x02\x02\x01\x01\x30\x0a\x06\x08"
 "\x2a\x86\x48\xce\x3d\x04\x03\x02\x30\x81\x82\x31\x0b\x30\x09\x06\x03\x55\x04\x06"
 "\x13\x02\x55\x53\x31\x11\x30\x0f\x06\x03\x55\x04\x08\x0c\x08\x4d\x61\x72\x79\x6c"
@@ -80,8 +72,8 @@ const uint8_t attestation_cert_der[] =
 "\xf3\x87\x61\x82\xd8\xcd\x48\xfc\x57"
 ;
 
-
 const uint16_t attestation_solo_cert_der_size = sizeof(attestation_solo_cert_der)-1;
+const uint16_t attestation_hacker_cert_der_size = sizeof(attestation_hacker_cert_der)-1;
 
 // const uint16_t attestation_key_size = 32;
 const uint8_t * attestation_cert_der = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert;
