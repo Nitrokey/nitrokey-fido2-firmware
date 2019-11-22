@@ -98,7 +98,7 @@ int solo_is_locked();
 #define SOLO_AMS_IRQ_PIN        LL_GPIO_PIN_15
 
 
-#if defined(SOLO_HACKER)
+#if defined(NK_TEST_MODE)
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
 #else
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION

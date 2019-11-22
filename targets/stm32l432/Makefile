@@ -5,7 +5,7 @@ SZ ?= $(PREFIX)arm-none-eabi-size
 # RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
 RELEASE ?= 0
 
-VERSION_FULL?=$(shell git describe)
+include build/common.mk
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
 BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
