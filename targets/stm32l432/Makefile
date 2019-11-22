@@ -2,6 +2,9 @@ DEBUG ?= 0
 HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
 
+# RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
+RELEASE ?= 0
+
 VERSION_FULL?=$(shell git describe)
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
 BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
@@ -11,23 +14,26 @@ merge_hex=solo mergehex
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
+ifeq ($(RELEASE),0)
+TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
+endif
 
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 firmware-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 bootloader-nonverifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER' DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE)' DEBUG=0
 
 bootloader-verifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0
 
 full-clean: clean2
 
