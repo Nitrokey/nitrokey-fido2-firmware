@@ -747,8 +747,6 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
       case CTAPHID_GETSTATUS:
         printf1(TAG_HID,"CTAPHID_GETSTATUS\n");
         ctap_response_init(ctap_resp);
-        ctaphid_write_buffer_init(wb);
-        wb->cmd = CTAPHID_GETSTATUS;
         wb->bcnt = ctap_buffer[0];
         if (!wb->bcnt)
             wb->bcnt = 8;
