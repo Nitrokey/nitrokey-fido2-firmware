@@ -52,7 +52,13 @@
 #define SKIP_BUTTON_CHECK_WITH_DELAY        0
 #define SKIP_BUTTON_CHECK_FAST              1
 
-#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Bootloader " SOLO_VERSION
+#if DEBUG_LEVEL > 0 || defined(NK_TEST_MODE)
+#warning "Selected development name for bootloader"
+#define SOLO_PRODUCT_NAME ("Nitrokey FIDO2 Bootloader Development " SOLO_VERSION)
+#else
+#define SOLO_PRODUCT_NAME ("Nitrokey FIDO2 Bootloader " SOLO_VERSION)
+#endif
+
 #include "app-common.h"
 
 
