@@ -20,8 +20,8 @@
 #define	STATE2_PAGE		      (PAGES - 2)
 #define	STATE1_PAGE		      (PAGES - 1)
 
-#define	STATE1_PAGE_ADDR		(0x08000000 + ((STATE1_PAGE)*PAGE_SIZE)) 
-#define	STATE2_PAGE_ADDR		(0x08000000 + ((STATE2_PAGE)*PAGE_SIZE)) 
+#define	STATE1_PAGE_ADDR		(0x08000000 + ((STATE1_PAGE)*PAGE_SIZE))
+#define	STATE2_PAGE_ADDR		(0x08000000 + ((STATE2_PAGE)*PAGE_SIZE))
 
 // Storage of FIDO2 resident keys
 #define RK_NUM_PAGES    10
@@ -53,12 +53,15 @@
 
 struct flash_memory_st{
   uint8_t bootloader[APPLICATION_START_PAGE*2*1024];
+
   uint8_t application[(APPLICATION_END_PAGE-APPLICATION_START_PAGE)*2*1024-8];
   uint8_t auth_word[4];
   uint8_t bootloader_disabled[4];
+
   // place for more user data
   uint8_t _reserved_application_end_mark[8];
   uint8_t bootloader_data[2*1024-8];
+
   uint8_t user_data[38*1024];
 } __attribute__((packed));
 
