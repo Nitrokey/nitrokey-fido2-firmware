@@ -185,6 +185,11 @@ void led_blink_manager (void) {
 	if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
 		return;
 
+    if (button_get_press_state() == BST_PRESSED_CONSUMED) {
+        led_on_color(LED_COLOR_TOUCH_CONSUMED);
+        return;
+    }
+
 	if (led_blink_num) {                                     // LED blinking is on
 		if (IS_LED_ON()) {                                 // ON state
 			if (get_ms() - led_blink_tim >= led_blink_ON_t) { // ON time expired
