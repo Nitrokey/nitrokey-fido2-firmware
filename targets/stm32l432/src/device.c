@@ -426,6 +426,8 @@ void device_wink(void)
 
 void heartbeat(void)
 {
+    return;
+
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;
