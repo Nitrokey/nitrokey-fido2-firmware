@@ -718,6 +718,10 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 
 int ctap_user_presence_test(uint32_t up_delay){
     int ret;
+
+    if (device_is_nfc() == NFC_IS_ACTIVE) return 1;
+    if (_up_disabled) return 2;
+
 #if SKIP_BUTTON_CHECK_WITH_DELAY
     int i=500;
     while(i--)
