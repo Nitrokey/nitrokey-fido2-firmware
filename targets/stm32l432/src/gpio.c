@@ -131,17 +131,21 @@ uint8_t button_press_is_consumed(void){
 	return ((button_state == BST_PRESSED_CONSUMED)? 1 : 0);
 }
 
+volatile uint8_t LED_STATE = 0;
 
 void led_on (void) {
-	if (sanity_check_passed)
-		led_blink_num = 0;                                  // Stop ongoing blinking
 	LED_ON();                                         // LED physical state -> ON
+	LED_STATE = 1;
 }
 
 void led_off (void) {
-	if (sanity_check_passed)
-		led_blink_num = 0;                                  // Stop ongoing blinking
 	LED_OFF();                                        // LED physical state -> OFF
+    LED_STATE = 0;
+}
+
+void stop_blinking(void){
+    led_blink_num = 0;
+    led_off();
 }
 
 bool led_is_blinking(void){
@@ -159,7 +163,7 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 
 	if ( (button_get_press_state() > BST_META_READY_TO_USE && (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) )
 			|| led_blink_num == 1)
-		LED_ON();
+        led_on();
 	if (!sanity_check_passed)
 		led_blink_num = LED_BLINK_NUM_INF;
 
@@ -173,7 +177,7 @@ void led_blink_manager (void) {
 	if (led_blink_num) {                                     // LED blinking is on
 		if (IS_LED_ON()) {                                 // ON state
 			if (get_ms() - led_blink_tim >= led_blink_ON_t) { // ON time expired
-				LED_OFF();                                 // LED physical state -> OFF
+                led_off();                                 // LED physical state -> OFF
 				if (led_blink_num) {                         // It isnt the last blink round: initialize OFF state:
 					led_blink_tim   = get_ms();		       // Init OFF timer
 					if (led_blink_num != LED_BLINK_NUM_INF) {              // Not endless blinking:
@@ -183,7 +187,7 @@ void led_blink_manager (void) {
 			}
 		} else {                                           // OFF state
 			if (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) { // OFF time expired
-				LED_ON();                                  // LED physical state -> ON
+                led_on();                                  // LED physical state -> ON
 				led_blink_tim   = get_ms();		           // Init ON timer
 			}
 		}
