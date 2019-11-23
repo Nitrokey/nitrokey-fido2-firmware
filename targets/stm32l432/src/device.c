@@ -473,14 +473,6 @@ void heartbeat(void)
     else
 #endif
     {
-        if (but)
-            led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
-        else {
-            if (LED_STATE)
-                led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
-            else
-                led_rgb(0);
-        }
     }
 
 }
