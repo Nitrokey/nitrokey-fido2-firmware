@@ -168,6 +168,7 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 		led_blink_num = LED_BLINK_NUM_INF;
 
 	led_blink_tim     	= get_ms();
+    printf1(TAG_BUTTON, "Blinking set to %d %d\n", blink_num, period_t);
 }
 
 void led_blink_manager (void) {
@@ -183,6 +184,9 @@ void led_blink_manager (void) {
 					if (led_blink_num != LED_BLINK_NUM_INF) {              // Not endless blinking:
 						led_blink_num--;                     // Update the remaining blink num
 					}
+                    if (led_blink_num == 0) {
+                        printf1(TAG_BUTTON, "Blinking finished\n");
+                    }
 				}
 			}
 		} else {                                           // OFF state
