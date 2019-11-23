@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include "led_colors.h"
+
 void led_rgb(uint32_t hex);
 void led_test_colors();
 

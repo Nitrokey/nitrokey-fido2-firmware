@@ -133,9 +133,14 @@ uint8_t button_press_is_consumed(void){
 
 volatile uint8_t LED_STATE = 0;
 
-void led_on (void) {
-	LED_ON();                                         // LED physical state -> ON
+void led_on_color(uint32_t color) {
+    led_rgb(color);
 	LED_STATE = 1;
+}
+
+void led_on(void) {
+    LED_ON();                                         // LED physical state -> ON
+    LED_STATE = 1;
 }
 
 void led_off (void) {
@@ -195,6 +200,8 @@ void led_blink_manager (void) {
 				led_blink_tim   = get_ms();		           // Init ON timer
 			}
 		}
+	} else {
+	    led_off();
 	}
 }
 
