@@ -177,6 +177,11 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 }
 
 void led_blink_manager (void) {
+    if (button_get_press_state() == BST_INITIALIZING_READY_TO_CLEAR) {
+        led_on_color(LED_COLOR_INIT);
+        return;
+    }
+
 	if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
 		return;
 
