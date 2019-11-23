@@ -739,7 +739,19 @@ int ctap_user_presence_test(uint32_t up_delay){
     return 1;
 #endif
 
-    return u2f_get_user_feedback() == 0;
+    printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
+    led_rgb(0xff3520);
+    while (up_delay--){
+        if (u2f_get_user_feedback() == 0) {
+            printf1(TAG_BUTTON, "User's feedback received\n");
+            return 1;
+        }
+        ret = handle_packets();
+        if (ret) return ret;
+        delay(1);
+    }
+    printf1(TAG_BUTTON, "User's feedback NOT received\n");
+    return 0;
 }
 
 int _ctap_user_presence_test()
