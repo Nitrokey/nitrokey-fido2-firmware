@@ -3,6 +3,8 @@ HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
 
 # RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
+# selects the production attestation certificate
+# sets the --lock
 RELEASE ?= 0
 
 include build/common.mk
@@ -59,13 +61,12 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware
+	-rm release/*
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex
 	cp solo.hex $(signame1)-app-to_sign.hex
-	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
-	sha256sum $(signame) > $(signame).sha2
+	ls -la release/
 	@echo "done"
-	ls release/
 
 .PHONY: test-signed-flash
 test-signed-flash: | flash
