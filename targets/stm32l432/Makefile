@@ -3,6 +3,8 @@ HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
 
 # RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
+# selects the production attestation certificate
+# sets the --lock
 RELEASE ?= 0
 
 include build/common.mk
@@ -11,11 +13,18 @@ BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
 merge_hex=solo mergehex
 
+KEY_PATH ?= "../../keys/dummy-key.hex"
+KEY=$(shell xxd -p -c 64 $(KEY_PATH))
+ATTEST_PATH ?= "../../keys/attestation-certificate.der"
+merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
+
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
+else
+merge_hex=$(merge_hex_release)
 endif
 
 # The following are the main targets for reproducible builds.
@@ -52,13 +61,12 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware
+	-rm release/*
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex
 	cp solo.hex $(signame1)-app-to_sign.hex
-	solo sign ../../keys/bootloader-dev.pem solo.hex $(signame)
-	sha256sum $(signame) > $(signame).sha2
+	ls -la release/
 	@echo "done"
-	ls release/
 
 .PHONY: test-signed-flash
 test-signed-flash: | flash
