@@ -50,7 +50,7 @@ int solo_is_locked();
 
 //                              0xRRGGBB
 #define LED_INIT_VALUE			0xFFFFFF
-#define LED_WINK_VALUE			0xFFFFFF
+//#define LED_WINK_VALUE			0xFFFFFF
 #define LED_MAX_SCALER          15
 #define LED_MIN_SCALER          1
 // # of ms between each change in LED

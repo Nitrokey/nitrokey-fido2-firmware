@@ -417,16 +417,17 @@ static uint32_t winkt1 = 0;
 static uint32_t winkt2 = 0;
 #endif
 
+#include "bsp.h"
 void device_wink(void)
 {
-    wink_time = 10;
-    winkt1 = 0;
+    led_blink(10, LED_BLINK_PERIOD);
 }
 
-uint8_t LED_STATE = 0;
 
 void heartbeat(void)
 {
+    return;
+
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;
@@ -474,14 +475,6 @@ void heartbeat(void)
     else
 #endif
     {
-        if (but)
-            led_rgb(((val * r)<<8) | ((val*b) << 16) | (val*g));
-        else {
-            if (LED_STATE)
-                led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
-            else
-                led_rgb(0);
-        }
     }
 
 }
@@ -739,7 +732,22 @@ int ctap_user_presence_test(uint32_t up_delay){
     return 1;
 #endif
 
-    return u2f_get_user_feedback() == 0;
+    printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
+    while (up_delay--){
+        if (u2f_get_user_feedback() == 0) {
+            printf1(TAG_BUTTON, "User's feedback received\n");
+            return 1;
+        }
+        ret = handle_packets();
+        if (ret) {
+            stop_blinking();
+            return ret;
+        }
+        run_drivers();
+        delay(1);
+    }
+    printf1(TAG_BUTTON, "User's feedback NOT received\n");
+    return 0;
 }
 
 int _ctap_user_presence_test()

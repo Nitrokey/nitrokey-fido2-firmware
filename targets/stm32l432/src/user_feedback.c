@@ -22,7 +22,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
     if (!first_request_accepted && (get_ms() < SELF_ACCEPT_MAX_T_MS)
         && (target_button_state == BST_PRESSED_REGISTERED) ){
         first_request_accepted = true;
-        led_off();
+        stop_blinking();
         printf1(TAG_BUTTON, "first_request_accepted\n");
         return 0;
     }
@@ -37,7 +37,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
     if (blink == true && led_is_blinking() == false)
         led_blink(10, LED_BLINK_PERIOD);
     else if (blink == false)
-        led_off();
+        stop_blinking();
 
     t = get_ms();
     while(button_get_press_state() != target_button_state)	// Wait to push button
@@ -63,7 +63,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         // Button has been pushed in time
         user_presence = 1;
         button_press_set_consumed();
-        led_off();
+        stop_blinking();
 #ifdef SHOW_TOUCH_REGISTERED
         //show short confirming animation
 		t = get_ms();
@@ -73,7 +73,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
 			led_off();
 			u2f_delay(25);
 		}
-		led_off();
+        stop_blinking();
 #endif
     } else {                                          // Button hasnt been pushed within the timeout
         user_presence = 0;                                     // Return error code
