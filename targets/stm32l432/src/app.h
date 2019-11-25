@@ -9,11 +9,17 @@
 #include <stdint.h>
 #include "version.h"
 
+#define SOLO
+
 #define DEBUG_UART      USART1
 
 #ifndef DEBUG_LEVEL
+// Enable the CDC ACM USB interface & debug logs (DEBUG_LEVEL > 0)
 #define DEBUG_LEVEL     0
 #endif
+
+// Enable the CCID USB interface
+// #define ENABLE_CCID
 
 #define NON_BLOCK_PRINTING 0
 
@@ -35,6 +41,9 @@
 
 void printing_init();
 void hw_init(int lf);
+
+// Return 1 if Solo is secure/locked.
+int solo_is_locked();
 
 //#define TEST
 //#define TEST_POWER
@@ -89,7 +98,8 @@ void hw_init(int lf);
 #define SOLO_AMS_IRQ_PIN        LL_GPIO_PIN_15
 
 
-#if defined(SOLO_HACKER)
+#if DEBUG_LEVEL > 0 || defined(NK_TEST_MODE)
+#warning "Selected development name"
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
 #else
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION

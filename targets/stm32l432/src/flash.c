@@ -14,12 +14,12 @@
 #include "log.h"
 #include "device.h"
 
-static void flash_lock()
+static void flash_lock(void)
 {
     FLASH->CR |= (1U<<31);
 }
 
-static void flash_unlock()
+static void flash_unlock(void)
 {
     if (FLASH->CR & FLASH_CR_LOCK)
     {
@@ -31,25 +31,20 @@ static void flash_unlock()
 // Locks flash and turns off DFU
 void flash_option_bytes_init(int boot_from_dfu)
 {
-#undef FLASH_ROP
-#ifndef FLASH_ROP
-#define FLASH_ROP 0
-#endif
-#if FLASH_ROP == 0
-    uint32_t val = 0xfffff8aa;
-#warning ROP==0 selected !
-#elif FLASH_ROP == 2
-    uint32_t val = 0xfffff8cc;
-#error ROP==2 selected
-#else
-#warning ROP==1 selected !
-    uint32_t val = 0xfffff8b9;
-#endif
+    uint32_t val = 0xfffff8aa; // ROP==0
 
-    if (boot_from_dfu)
-    {
+    if (boot_from_dfu){
         val &= ~(1<<27); // nBOOT0 = 0  (boot from system rom)
     }
+    else {
+        if (solo_is_locked())
+        {
+//            val = 0xfffff8cc; // ROP==2
+            val = 0xfffff8b9; // ROP==1
+            #warning ROP==2 disabled
+        }
+    }
+
     val &= ~(1<<26); // nSWBOOT0 = 0  (boot from nBoot0)
     val &= ~(1<<25); // SRAM2_RST = 1 (erase sram on reset)
     val &= ~(1<<24); // SRAM2_PE = 1 (parity check en)

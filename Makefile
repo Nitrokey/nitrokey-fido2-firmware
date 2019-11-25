@@ -23,8 +23,8 @@ else
 endif
 LDFLAGS += $(LIBCBOR)
 
-VERSION:=$(shell git describe --abbrev=0 )
 VERSION_FULL:=$(shell git describe)
+VERSION:=$(shell python -c 'print("$(VERSION_FULL)".split("-")[0])')
 VERSION_MAJ:=$(shell python -c 'print("$(VERSION)".split(".")[0])')
 VERSION_MIN:=$(shell python -c 'print("$(VERSION)".split(".")[1])')
 VERSION_PAT:=$(shell python -c 'print("$(VERSION)".split(".")[2])')
@@ -39,7 +39,7 @@ INCLUDES += -I./crypto/cifra/src
 
 CFLAGS += $(INCLUDES)
 # for crypto/tiny-AES-c
-CFLAGS += -DAES256=1 -DAPP_CONFIG=\"app.h\"
+CFLAGS += -DAES256=1 -DAPP_CONFIG=\"app.h\" -DSOLO_EXPERIMENTAL=1
 
 name = main
 
@@ -62,7 +62,7 @@ test: venv
 	$(MAKE) clean
 	$(MAKE) -C . main
 	$(MAKE) clean
-	$(MAKE) -C ./targets/stm32l432 test PREFIX=$(PREFIX) "VENV=$(VENV)"
+	$(MAKE) -C ./targets/stm32l432 test PREFIX=$(PREFIX) "VENV=$(VENV)" VERSION_FULL=${VERSION_FULL}
 	$(MAKE) clean
 	$(MAKE) cppcheck
 
@@ -88,18 +88,30 @@ wink: venv
 fido2-test: venv
 	venv/bin/python tools/ctap_test.py
 
-DOCKER_IMAGE := "solokeys/solo-firmware:local"
-SOLO_VERSIONISH := "master"
-docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+update:
+	git fetch --tags
+	git checkout master
+	git rebase origin/master
+	git submodule update --init --recursive
+
+DOCKER_TOOLCHAIN_IMAGE := "solokeys/solo-firmware-toolchain"
+
+docker-build-toolchain:
+	docker build -t $(DOCKER_TOOLCHAIN_IMAGE) .
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION}
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION_MAJ}
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION_MAJ}.${VERSION_MIN}
+
+uncached-docker-build-toolchain:
+	docker build --no-cache -t $(DOCKER_TOOLCHAIN_IMAGE) .
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION}
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION_MAJ}
+	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${VERSION_MAJ}.${VERSION_MIN}
+
+docker-build-all: 
 	docker run --rm -v "$(CURDIR)/builds:/builds" \
-				    -v "$(CURDIR)/in-docker-build.sh:/in-docker-build.sh" \
-				    $(DOCKER_IMAGE) "./in-docker-build.sh" $(SOLO_VERSIONISH)
-uncached-docker-build:
-	docker build --no-cache -t $(DOCKER_IMAGE) .
-	docker run --rm -v "$(CURDIR)/builds:/builds" \
-				    -v "$(CURDIR)/in-docker-build.sh:/in-docker-build.sh" \
-				    $(DOCKER_IMAGE) "./in-docker-build.sh" $(SOLO_VERSIONISH)
+					-v "$(CURDIR):/solo" \
+				    $(DOCKER_TOOLCHAIN_IMAGE) "solo/in-docker-build.sh" ${VERSION_FULL}
 
 CPPCHECK_FLAGS=--quiet --error-exitcode=2
 
@@ -120,6 +132,14 @@ clean:
 full-clean: clean
 	rm -rf venv
 
+test-docker:
+	rm -rf builds/*
+	$(MAKE) uncached-docker-build-toolchain
+	# Check if there are 4 docker images/tas named "solokeys/solo-firmware-toolchain"
+	NTAGS=$$(docker images | grep -c "solokeys/solo-firmware-toolchain") && [ $$NTAGS -eq 4 ]
+	$(MAKE) docker-build-all
+
 travis:
 	$(MAKE) test VENV=". ../../venv/bin/activate;"
+	$(MAKE) test-docker
 	$(MAKE) black

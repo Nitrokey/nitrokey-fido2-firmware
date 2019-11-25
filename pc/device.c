@@ -26,6 +26,7 @@
 #define RK_NUM  50
 
 bool use_udp = true;
+static bool _up_disabled = false;
 
 struct ResidentKeyStore {
     CTAP_residentKey rks[RK_NUM];
@@ -43,7 +44,11 @@ void device_set_status(uint32_t status)
     __device_status = status;
 }
 
-
+void device_reboot()
+{
+    printf1(TAG_RED, "REBOOT command recieved!\r\n");
+    exit(100);
+}
 
 int udp_server()
 {
@@ -103,6 +108,7 @@ int udp_recv(int fd, uint8_t * buf, int size)
         perror( "recvfrom failed" );
         exit(1);
     }
+    printf1(TAG_DUMP, ">>"); dump_hex1(TAG_DUMP, buf, length);
     return length;
 }
 
@@ -119,6 +125,8 @@ void udp_send(int fd, uint8_t * buf, int size)
         perror( "sendto failed" );
         exit(1);
     }
+
+    printf1(TAG_DUMP, "<<"); dump_hex1(TAG_DUMP, buf, size);
 }
 
 
@@ -295,6 +303,10 @@ void ctaphid_write_block(uint8_t * data)
 
 int ctap_user_presence_test(uint32_t d)
 {
+    if (_up_disabled)
+    {
+        return 2;
+    }
     return 1;
 }
 
@@ -304,20 +316,11 @@ int ctap_user_verification(uint8_t arg)
 }
 
 
-uint32_t ctap_atomic_count(int sel)
+uint32_t ctap_atomic_count(uint32_t amount)
 {
     static uint32_t counter1 = 25;
-    /*return 713;*/
-    if (sel == 0)
-    {
-        printf1(TAG_RED,"counter1: %d\n", counter1);
-        return counter1++;
-    }
-    else
-    {
-        printf2(TAG_ERR,"counter2 not imple\n");
-        exit(1);
-    }
+    counter1 += (amount + 1);
+    return counter1;
 }
 
 int ctap_get_status_data(uint8_t * dst){
@@ -631,6 +634,16 @@ void device_wink()
 int device_is_nfc()
 {
     return 0;
+}
+
+void device_disable_up(bool disable)
+{
+    _up_disabled = disable;
+}
+
+void device_set_clock_rate(DEVICE_CLOCK_RATE param)
+{
+
 }
 
 void request_from_nfc(bool request_active) {

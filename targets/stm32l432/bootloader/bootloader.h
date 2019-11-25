@@ -9,7 +9,6 @@
 #define _APP_H_
 #include <stdint.h>
 #include "version.h"
-
 #define DEBUG_UART      USART1
 
 #ifndef DEBUG_LEVEL
@@ -21,6 +20,7 @@
 #define BOOT_TO_DFU         0
 
 
+#define SOLO                1
 #define IS_BOOTLOADER       1
 
 #define ENABLE_U2F_EXTENSIONS
@@ -52,7 +52,13 @@
 #define SKIP_BUTTON_CHECK_WITH_DELAY        0
 #define SKIP_BUTTON_CHECK_FAST              1
 
-#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Bootloader " SOLO_VERSION
+#if DEBUG_LEVEL > 0 || defined(NK_TEST_MODE)
+#warning "Selected development name for bootloader"
+#define SOLO_PRODUCT_NAME ("Nitrokey FIDO2 Bootloader Development " SOLO_VERSION)
+#else
+#define SOLO_PRODUCT_NAME ("Nitrokey FIDO2 Bootloader " SOLO_VERSION)
+#endif
+
 #include "app-common.h"
 
 
@@ -65,5 +71,10 @@ void device_reboot();
 int is_authorized_to_boot();
 int is_bootloader_disabled();
 void bootloader_heartbeat();
+
+// Return 1 if Solo is secure/locked.
+int solo_is_locked();
+
+
 
 #endif

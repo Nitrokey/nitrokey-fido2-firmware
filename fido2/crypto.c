@@ -47,7 +47,7 @@ typedef enum
 #endif
 
 
-const uint8_t attestation_cert_der[];
+const uint8_t * attestation_cert_der;
 const uint16_t attestation_cert_der_size;
 const uint8_t attestation_key[];
 const uint16_t attestation_key_size;
@@ -262,6 +262,11 @@ void crypto_ecc256_derive_public_key(uint8_t * data, int len, uint8_t * x, uint8
     memmove(y,pubkey+32,32);
 }
 
+void crypto_ecc256_compute_public_key(uint8_t * privkey, uint8_t * pubkey)
+{
+    uECC_compute_public_key(privkey, pubkey, _es256_curve);
+}
+
 void crypto_load_external_key(uint8_t * key, int len)
 {
     _signing_key = key;
@@ -333,7 +338,7 @@ void crypto_aes256_encrypt(uint8_t * buf, int length)
 }
 
 
-const uint8_t attestation_cert_der[] =
+const uint8_t _attestation_cert_der[] =
 "\x30\x82\x01\xfb\x30\x82\x01\xa1\xa0\x03\x02\x01\x02\x02\x01\x00\x30\x0a\x06\x08"
 "\x2a\x86\x48\xce\x3d\x04\x03\x02\x30\x2c\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13"
 "\x02\x55\x53\x31\x0b\x30\x09\x06\x03\x55\x04\x08\x0c\x02\x4d\x44\x31\x10\x30\x0e"
@@ -360,9 +365,11 @@ const uint8_t attestation_cert_der[] =
 "\x7e\x74\x64\x1b\xa3\x7b\xf7\xe6\xd3\xaf\x79\x28\xdb\xdc\xa5\x88\x02\x21\x00\xcd"
 "\x06\xf1\xe3\xab\x16\x21\x8e\xd8\xc0\x14\xaf\x09\x4f\x5b\x73\xef\x5e\x9e\x4b\xe7"
 "\x35\xeb\xdd\x9b\x6d\x8f\x7d\xf3\xc4\x3a\xd7";
+const uint8_t * attestation_cert_der = (const uint8_t *)_attestation_cert_der;
 
-
-const uint16_t attestation_cert_der_size = sizeof(attestation_cert_der)-1;
+uint16_t attestation_cert_der_get_size(){
+    return sizeof(_attestation_cert_der)-1;
+}
 
 
 const uint8_t attestation_key[] = "\xcd\x67\xaa\x31\x0d\x09\x1e\xd1\x6e\x7e\x98\x92\xaa\x07\x0e\x19\x94\xfc\xd7\x14\xae\x7c\x40\x8f\xb9\x46\xb7\x2e\x5f\xe7\x5d\x30";
