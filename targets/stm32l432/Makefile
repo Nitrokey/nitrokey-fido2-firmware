@@ -14,7 +14,7 @@ BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 merge_hex=solo mergehex
 
 KEY_PATH ?= "../../keys/dummy-key.hex"
-KEY=$(shell xxd -p -c 64 $(KEY_PATH))
+KEY=$(shell cat $(KEY_PATH))
 ATTEST_PATH ?= "../../keys/attestation-certificate.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
