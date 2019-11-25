@@ -11,11 +11,18 @@ BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
 merge_hex=solo mergehex
 
+KEY_PATH ?= "../../keys/dummy-key.hex"
+KEY=$(shell xxd -p -c 64 $(KEY_PATH))
+ATTEST_PATH ?= "../../keys/attestation-certificate.der"
+merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
+
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
+else
+merge_hex=$(merge_hex_release)
 endif
 
 # The following are the main targets for reproducible builds.
