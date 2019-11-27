@@ -1,6 +1,6 @@
 # Nitrokey FIDO2
 
-Nitrokey FIDO2 is an open source security key which supports FIDO2 and U2F standards for strong two-factor authentication and password-less login. It protects you against phishing and other online attacks. It's based on [Solokey](https://github.com/solokeys/solo) and currently under development.
+Nitrokey FIDO2 is an open source security key which supports FIDO2 and U2F standards for strong two-factor authentication and password-less login. It protects you against phishing and other online attacks. It's based on [Solokey](https://github.com/solokeys/solo).
 
 This repo contains the firmware, including implementations of FIDO2 and U2F (CTAP2 and CTAP) over USB and NFC. The main implementation is for STM32L432, but it is easily portable.
 
@@ -23,8 +23,8 @@ Nitrokey FIDO2 is based on the STM32L432 microcontroller. It offers the followin
 Clone this repository and build it
 
 ```bash
-git clone --recurse-submodules https://github.com/solokeys/solo
-cd solo
+git clone --recurse-submodules https://github.com//Nitrokey/nitrokey-fido2-firmware
+cd nitrokey-fido2-firmware
 make all
 ```
 
@@ -48,12 +48,10 @@ You can find more details in Solokey's [documentation](https://docs.solokeys.io/
 
 # Documentation
 
-Check out our [official documentation](https://docs.solokeys.io/solo/).
+Check out our [official documentation](https://www.nitrokey.com/documentation/installation) or [Solokey's documentation](https://docs.solokeys.io/solo/).
 
 
 # Contributors
-
-Solo is an upgrade to [U2F Zero](https://github.com/conorpp/u2f-zero). It was born from Conor's passion for making secure hardware, and from our shared belief that security should be open to be trustworthy, in hardware like in software.
 
 Contributors are welcome. The ultimate goal is to have a FIDO2 security key supporting USB, NFC, and BLE interfaces, that can run on a variety of MCUs.
 
@@ -74,8 +72,8 @@ All documentation, unless otherwise noted, is licensed under CC-BY-SA.
 You may use the documentation under the terms of the CC-BY-SA 4.0 license
 
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsolokeys%2Fsolo.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsolokeys%2Fsolo?ref=badge_large)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware?ref=badge_shield)
 
 # Where To Buy
 
-Not available yet. Please subscribe our [newsletter](https://www.nitrokey.com/newsletter) to get informed right away.
+Available in our [online shop](https://shop.nitrokey.com/shop/product/nitrokey-fido2-55).
