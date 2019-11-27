@@ -72,7 +72,7 @@ All documentation, unless otherwise noted, is licensed under CC-BY-SA.
 You may use the documentation under the terms of the CC-BY-SA 4.0 license
 
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FNitrokey%2Fnitrokey-fido2-firmware?ref=badge_large)
 
 # Where To Buy
 
