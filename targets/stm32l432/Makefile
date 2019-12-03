@@ -134,8 +134,8 @@ clean2:
 	$(MAKE) -f $(APPMAKE) clean
 	$(MAKE) -f $(BOOTMAKE) clean
 
-flash: solo.hex bootloader.hex
-	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+flash: solo.hex bootloader.hex all.hex
+#	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
 	STM32_Programmer_CLI -c port=SWD -halt  -d all.hex -rst
 
