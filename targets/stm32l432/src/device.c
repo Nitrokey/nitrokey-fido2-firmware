@@ -230,8 +230,9 @@ static void device_migrate(){
     uint64_t device_settings = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->device_settings;
     uint32_t configure_tag = (uint32_t)(device_settings >> 32);
 
-    if (configure_tag != ATTESTATION_CONFIGURED_TAG)
-    {
+  if (configure_tag != ATTESTATION_CONFIGURED_TAG
+      || attestation_solo_cert_der_size != attestation_cert_der_get_size())
+  {
         printf1(TAG_RED,"Migrating certificate and lock information to data segment.\r\n");
 
         device_settings = ATTESTATION_CONFIGURED_TAG;
