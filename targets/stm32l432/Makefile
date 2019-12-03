@@ -18,11 +18,16 @@ KEY=$(shell cat $(KEY_PATH))
 ATTEST_PATH ?= "../../keys/attestation-certificate.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
+ATTEST_PATH_DEV ?= "../../keys/nk-dev-device_cert.der"
+KEY_PATH_DEV ?= "../../keys/nk-dev-device_key.hex"
+KEY_DEV=$(shell cat $(KEY_PATH_DEV))
+merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
+merge_hex=$(merge_hex_dev)
 else
 merge_hex=$(merge_hex_release)
 endif
