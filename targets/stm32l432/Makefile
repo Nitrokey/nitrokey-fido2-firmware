@@ -15,7 +15,7 @@ merge_hex=solo mergehex
 
 KEY_PATH ?= "../../keys/dummy-key.hex"
 KEY=$(shell cat $(KEY_PATH))
-ATTEST_PATH ?= "../../keys/attestation-certificate.der"
+ATTEST_PATH ?= "../../keys/production_device_cert.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
 ATTEST_PATH_DEV ?= "../../keys/nk-dev-device_cert.der"
