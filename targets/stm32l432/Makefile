@@ -15,14 +15,19 @@ merge_hex=solo mergehex
 
 KEY_PATH ?= "../../keys/dummy-key.hex"
 KEY=$(shell cat $(KEY_PATH))
-ATTEST_PATH ?= "../../keys/attestation-certificate.der"
+ATTEST_PATH ?= "../../keys/production_device_cert.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
+ATTEST_PATH_DEV ?= "../../keys/nk-dev-device_cert.der"
+KEY_PATH_DEV ?= "../../keys/nk-dev-device_key.hex"
+KEY_DEV=$(shell cat $(KEY_PATH_DEV))
+merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
+merge_hex=$(merge_hex_dev)
 else
 merge_hex=$(merge_hex_release)
 endif
@@ -129,8 +134,8 @@ clean2:
 	$(MAKE) -f $(APPMAKE) clean
 	$(MAKE) -f $(BOOTMAKE) clean
 
-flash: solo.hex bootloader.hex
-	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+flash: solo.hex bootloader.hex all.hex
+#	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
 	STM32_Programmer_CLI -c port=SWD -halt  -d all.hex -rst
 
@@ -146,7 +151,7 @@ flashboot: bootloader.hex
 flash-firmware:
 	$(SZ) -A solo.elf
 	-solo program aux enter-bootloader
-	solo program bootloader $(signamedev)
+	solo program bootloader $(signamedev).json
 
 flash-firmware-final:
 	arm-none-eabi-size -A solo.elf
