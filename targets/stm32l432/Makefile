@@ -151,7 +151,7 @@ flashboot: bootloader.hex
 flash-firmware:
 	$(SZ) -A solo.elf
 	-solo program aux enter-bootloader
-	solo program bootloader $(signamedev)
+	solo program bootloader $(signamedev).json
 
 flash-firmware-final:
 	arm-none-eabi-size -A solo.elf
