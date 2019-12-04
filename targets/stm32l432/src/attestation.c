@@ -79,9 +79,10 @@ const uint8_t attestation_hacker_cert_der[] =
 const uint16_t attestation_solo_cert_der_size = sizeof(attestation_solo_cert_der)-1;
 const uint16_t attestation_hacker_cert_der_size = sizeof(attestation_hacker_cert_der)-1;
 
-uint8_t solo_hacker_attestation_key[32] = "\x1b\x26\x26\xec\xc8\xf6\x9b\x0f\x69\xe3\x4f"
-                                          "\xb2\x36\xd7\x64\x66\xba\x12\xac\x16\xc3\xab"
-                                          "\x57\x50\xba\x06\x4e\x8b\x90\xe0\x24\x48";
+uint8_t solo_hacker_attestation_key[32] = "\xfc\x02\x52\xbe\x0c\xb6\x80\xc0\x4c\xc3"
+                                          "\x45\xb9\x2b\x2e\x47\xe0\x8c\xde\x36\x03"
+                                          "\xdf\x53\x8c\xb0\xf9\x6f\xc3\xf2\x88\x50"
+                                          "\x45\xf5";
 
 // const uint16_t attestation_key_size = 32;
 const uint8_t * attestation_cert_der = ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert;
