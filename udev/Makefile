@@ -1,30 +1,25 @@
 # On modern systems, udev has a TAG uaccess, which is used in 73-seat-late.rules
 # On older systems, we use GROUP plugdev with MODE
 # --> Try `make setup` first, if it doesn't work, try `make legacy-setup`.
-#
-# The symlinks are optional, install with `make symlinks`.
-#
-# We keep 99-solo.rules in the parent directory but deprecate it,
-# remove when documentation is updated.
 
 
-setup: install activate
-legacy-setup: install-legacy activate
+setup: | install activate
+	@echo "*** Setup finished. You can now use the Nitrokey FIDO2 device."
 
-# Symlinks can be setup, we don't officially supply any
-# symlinks: install-symlinks activate
+legacy-setup: | install-legacy activate
+	@echo "*** Setup for the legacy systems finished. You can now use the Nitrokey FIDO2 device."
 
 RULES_PATH=/etc/udev/rules.d
 
 activate:
+	@echo "*** This action will reload the udev deamon"
 	sudo udevadm control --reload-rules
 	sudo udevadm trigger
 
 install:
-	sudo cp $(PWD)/70-solokeys-access.rules ${RULES_PATH}/70-solokeys-access.rules
+	@echo "*** This action will copy the rules file to the $(RULES_PATH) directory"
+	sudo cp $(PWD)/70-nitrokey-fido2-access.rules ${RULES_PATH}/70-nitrokey-fido2-access.rules
 
 install-legacy:
-	sudo cp $(PWD)/70-solokeys-legacy-access.rules ${RULES_PATH}/70-solokeys-access.rules
-
-# install-symlinks:
-# 	sudo cp $(PWD)/71-solokeys-symlinks.rules ${RULES_PATH}/71-solokeys-symlinks.rules
+	@echo "*** This action will copy the legacy rules file to the $(RULES_PATH) directory"
+	sudo cp $(PWD)/70-nitrokey-fido2-legacy-access.rules ${RULES_PATH}/70-nitrokey-fido2-access.rules
