@@ -7,11 +7,8 @@ ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", ENV{ID_MM_DEVICE_IGNORE}="1"
 
 LABEL="mm_usb_device_blacklist_end"
 
+# Nitrokey FIDO2
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", MODE="0660", GROUP="plugdev"
 
-# Solo bootloader + firmware access
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", TAG+="uaccess"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", TAG+="uaccess"
-
-
-# ST DFU access
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess"
+# Nitrokey FIDO2 development console (not needed)
+# SUBSYSTEM=="tty", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", MODE="0660", GROUP="plugdev"
