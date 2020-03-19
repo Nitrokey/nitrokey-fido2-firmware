@@ -38,7 +38,15 @@ firmware:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+
+.PHONY: show-warnings
+show-warnings:
+	@echo
+	grep "warning:" build.log | sort -u
+	@echo
+	grep -F '#warning' build-*.log | grep -v "warning:" | sort -u
+	@echo
 
 firmware-debug-2:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
@@ -47,14 +55,14 @@ bootloader-nonverifying:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE)' DEBUG=0
 
 bootloader-verifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0 2>&1 | tee build-bootloader.log
 
 full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(shell git describe --abbrev=4)
 signamedev=release/fido2-firmware-dev-$(ver)
-debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1
+debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
@@ -65,7 +73,7 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 .PHONY: release-buildv
 signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
-release-buildv: | full-clean cbor bootloader-verifying clean firmware
+release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
 	-rm release/*
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex

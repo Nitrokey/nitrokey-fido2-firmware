@@ -56,13 +56,16 @@ all: $(TARGET).elf
 
 
 %.o: %.c
-	$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@echo "*** $<"
+	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
-	$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@echo "*** $<"
+	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 %.o: %.s
-	$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@echo "*** $<"
+	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 %.elf: $(OBJ)
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@
