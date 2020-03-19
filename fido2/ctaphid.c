@@ -754,7 +754,8 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
         ctap_get_status_data(ctap_buffer);
         ctaphid_write(wb, &ctap_buffer, wb->bcnt);
         ctaphid_write(wb, NULL, 0);
-        break;
+        return 1;
+      break;
 #endif
 
         case CTAPHID_GETVERSION:
