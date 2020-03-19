@@ -60,7 +60,7 @@ bootloader-verifying:
 full-clean: clean2
 
 .PHONY: debug-release-buildv
-ver=$(shell git describe --abbrev=4)
+ver=$(VERSION_FULL)
 signamedev=release/fido2-firmware-dev-$(ver)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
