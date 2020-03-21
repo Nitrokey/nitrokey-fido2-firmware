@@ -25,6 +25,8 @@ merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
+#For bootloader update support add this to below targets:
+#EXTRA_DEFINES="-DAPP_UPDATE_BOOTLOADER" BOOT_UPDATE=1
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
 merge_hex=$(merge_hex_dev)
@@ -165,6 +167,10 @@ flash-firmware-final:
 	arm-none-eabi-size -A solo.elf
 	-solo program aux enter-bootloader
 	solo program bootloader $(signamedev)
+
+.PHONY: download-bootloader
+download-bootloader:
+	STM32_Programmer_CLI -c port=SWD -halt  -u 0x08000000 0x5000 download-bootloader.hex -rst
 
 # tell ST DFU to enter application
 detach:

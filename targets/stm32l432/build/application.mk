@@ -8,6 +8,12 @@ SRC += $(DRIVER_LIBS) $(USB_LIB)
 SRC += src/gpio.c
 SRC += src/user_feedback.c
 
+# Bootloader update - payload and execution
+ifdef BOOT_UPDATE
+SRC += src/boot_payload.c
+SRC += src/device-bootloader-update.c
+endif
+
 # FIDO2 lib
 SRC += ../../fido2/apdu.c ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c
 SRC += ../../fido2/stubs.c ../../fido2/log.c  ../../fido2/ctaphid.c  ../../fido2/ctap.c

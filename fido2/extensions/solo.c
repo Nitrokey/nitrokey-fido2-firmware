@@ -31,7 +31,7 @@
 #include "log.h"
 #include APP_CONFIG
 
-
+#include "device-bootloader-update.h"
 
 // output must be at least 71 bytes
 int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
@@ -60,7 +60,17 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
             }
             break;
 #endif
-        case WalletRng:
+#ifdef APP_UPDATE_BOOTLOADER
+            case WalletBootloaderUpdate: {
+                ret = 0;
+                update_bootloader();
+                memset(output, 0, 71);
+                bootloader_calculate_hash(output);
+                break;
+            }
+#endif
+
+            case WalletRng:
             printf1(TAG_WALLET,"SoloRng\n");
 
             ret = ctap_generate_rng(output, 71);
@@ -71,7 +81,6 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
                 goto cleanup;
             }
             ret = 0;
-
             break;
 
 #ifdef ENABLE_WALLET

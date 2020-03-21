@@ -85,6 +85,7 @@ typedef enum
     WalletVersion= 0x14,
     WalletRng = 0x15,
     WalletBootloader = 0x20,
+    WalletBootloaderUpdate = 0x21,
 } WalletOperation;
 
 

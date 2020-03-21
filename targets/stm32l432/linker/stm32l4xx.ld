@@ -63,6 +63,12 @@ SECTIONS
         _edata = .;
     } >ram AT> flash
 
+    .payload :
+    {
+        . = ALIGN(8);
+      KEEP(*(.payload)) ;
+    } > flash
+
     .flag :
     {
         . = ALIGN(8);

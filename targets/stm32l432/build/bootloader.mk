@@ -73,6 +73,10 @@ all: $(TARGET).elf
 
 %.hex: %.elf
 	$(CP) -O ihex $^ $(TARGET).hex
+	srec_cat  bootloader.hex -i -offset -0x08000000 -crop 0 0x0005000  -o boot_payload.c -c-a boot_payload -POSTfix '__attribute__ ((section (".payload"))) __attribute__ ((__used__))' -INClude
+	# -C_COMpressed
+	mv -v boot_payload.* src/
+
 
 clean:
 	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ)

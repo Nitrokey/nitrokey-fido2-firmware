@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 		TAG_RED|
         TAG_EXT|
         TAG_CCID|
+      TAG_TIME |
 		TAG_ERR
 	);
 

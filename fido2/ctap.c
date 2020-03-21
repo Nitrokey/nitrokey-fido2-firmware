@@ -495,8 +495,8 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
         check_retr(but);
         authData->head.flags = (1 << 0);        // User presence
     }
-    
-    
+
+
     device_set_status(CTAPHID_STATUS_PROCESSING);
 
     authData->head.flags |= (ctap_is_pin_set() << 2);
@@ -1765,7 +1765,7 @@ static void ctap_state_init()
 
 /** Overwrite master secret from external source.
  * @param keybytes an array of KEY_SPACE_BYTES length.
- * 
+ *
  * This function should only be called from a privilege mode.
 */
 void ctap_load_external_keys(uint8_t * keybytes){
@@ -1775,6 +1775,7 @@ void ctap_load_external_keys(uint8_t * keybytes){
     crypto_load_master_secret(STATE.key_space);
 }
 
+#include "device-bootloader-update.h"
 #include "version.h"
 void ctap_init()
 {
@@ -1840,6 +1841,9 @@ void ctap_init()
     wallet_init();
 #endif
 
+#if !defined(IS_BOOTLOADER) && defined(APP_UPDATE_BOOTLOADER)
+    update_bootloader();
+#endif
 
 }
 

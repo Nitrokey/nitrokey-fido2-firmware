@@ -42,6 +42,7 @@
 // NOT included in application
 #define APPLICATION_END_PAGE	((PAGES - 20))
 #define APPLICATION_END_ADDR	((0x08000000 + ((APPLICATION_END_PAGE)*PAGE_SIZE))-8)
+#define BOOTLOADER_START_ADDR	(0x08000000)
 
 // Bootloader state.
 #define AUTH_WORD_ADDR          (APPLICATION_END_ADDR)
