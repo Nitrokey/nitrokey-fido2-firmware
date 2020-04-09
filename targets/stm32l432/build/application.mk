@@ -2,7 +2,7 @@ include build/common.mk
 
 # ST related
 SRC = src/main.c src/init.c src/redirect.c src/flash.c src/rng.c src/led.c src/device.c
-SRC += src/fifo.c src/crypto.c src/attestation.c src/nfc.c src/ams.c src/sense.c
+SRC += src/fifo.c src/attestation.c src/nfc.c src/ams.c src/sense.c
 SRC += src/startup_stm32l432xx.s src/system_stm32l4xx.c
 SRC += $(DRIVER_LIBS) $(USB_LIB)
 SRC += src/gpio.c
@@ -11,7 +11,7 @@ SRC += src/user_feedback.c
 # FIDO2 lib
 SRC += ../../fido2/apdu.c ../../fido2/util.c ../../fido2/u2f.c ../../fido2/test_power.c
 SRC += ../../fido2/stubs.c ../../fido2/log.c  ../../fido2/ctaphid.c  ../../fido2/ctap.c
-SRC += ../../fido2/ctap_parse.c ../../fido2/main.c
+SRC += ../../fido2/ctap_parse.c ../../fido2/crypto.c
 SRC += ../../fido2/version.c
 SRC += ../../fido2/data_migration.c
 SRC += ../../fido2/extensions/extensions.c ../../fido2/extensions/solo.c
@@ -24,7 +24,9 @@ SRC += ../../crypto/cifra/src/sha512.c ../../crypto/cifra/src/blockwise.c
 OBJ1=$(SRC:.c=.o)
 OBJ=$(OBJ1:.s=.o)
 
-INC = -Isrc/ -Isrc/cmsis/ -Ilib/ -Ilib/usbd/ -I../../fido2/ -I../../fido2/extensions
+INC = -Isrc/ -Isrc/cmsis/ -Ilib/ -Ilib/usbd/
+
+INC+= -I../../fido2/ -I../../fido2/extensions
 INC += -I../../tinycbor/src -I../../crypto/sha256 -I../../crypto/micro-ecc
 INC += -I../../crypto/tiny-AES-c
 INC += -I../../crypto/cifra/src -I../../crypto/cifra/src/ext
@@ -68,10 +70,6 @@ all: $(TARGET).elf
 	@echo "*** $<"
 	@$(CC) $^ $(HW)  -O3 $(ECC_CFLAGS) -o $@
 
-%.o: %.s
-	@echo "*** $<"
-	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
-
 %.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
 	@$(CC) $^ $(HW) $(LDFLAGS) -o $@
@@ -91,4 +89,5 @@ cbor:
 	cd ../../tinycbor/ && make clean
 	cd ../../tinycbor/ && make CC="$(CC)" AR=$(AR) \
 LDFLAGS="$(LDFLAGS_LIB)" \
-CFLAGS="$(CFLAGS) -Os"
+CFLAGS="$(CFLAGS) -Os  -DCBOR_PARSER_MAX_RECURSIONS=3"
+

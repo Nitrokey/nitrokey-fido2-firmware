@@ -25,7 +25,6 @@
 
 #include APP_CONFIG
 
-
 typedef enum
 {
     IDLE = 0,
@@ -276,7 +275,7 @@ static void ctaphid_write(CTAPHID_WRITE_BUFFER * wb, void * _data, int len)
         if (wb->offset > 0)
         {
             memset(wb->buf + wb->offset, 0, HID_MESSAGE_SIZE - wb->offset);
-            ctaphid_write_block(wb->buf);
+            usbhid_send(wb->buf);
         }
         return;
     }
@@ -305,7 +304,7 @@ static void ctaphid_write(CTAPHID_WRITE_BUFFER * wb, void * _data, int len)
         wb->bytes_written += 1;
         if (wb->offset == HID_MESSAGE_SIZE)
         {
-            ctaphid_write_block(wb->buf);
+            usbhid_send(wb->buf);
             wb->offset = 0;
         }
     }
@@ -543,6 +542,9 @@ extern void _check_ret(CborError ret, int line, const char * filename);
 
 uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE_BUFFER * wb);
 
+
+extern void solo_lock_if_not_already();
+
 uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
 {
     uint8_t cmd = 0;
@@ -636,6 +638,9 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             status = ctap_request(ctap_buffer, len, &ctap_resp);
 
             wb.bcnt = (ctap_resp.length+1);
+            wb.cid = cid;
+            wb.cmd = cmd;
+
 
 
             timestamp();
@@ -666,6 +671,9 @@ uint8_t ctaphid_handle_packet(uint8_t * pkt_raw)
             u2f_request((struct u2f_request_apdu*)ctap_buffer, &ctap_resp);
 
             wb.bcnt = (ctap_resp.length);
+            wb.cid = cid;
+            wb.cmd = cmd;
+
 
             ctaphid_write(&wb, ctap_resp.data, ctap_resp.length);
             ctaphid_write(&wb, NULL, 0);
@@ -731,6 +739,11 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
             }
             break;
 #endif
+#if defined(SOLO)
+        case CTAPHID_REBOOT:
+            device_reboot();
+            return 1;
+#endif
 
 #if !defined(IS_BOOTLOADER)
         case CTAPHID_GETRNG:
@@ -774,34 +787,51 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
             return 1;
         break;
 
+        // Remove on next release
+#if !defined(IS_BOOTLOADER) && defined(SOLO)
+        case 0x99:
+            solo_lock_if_not_already();
+            wb->bcnt = 0;
+            ctaphid_write(wb, NULL, 0);
+            return 1;
+        break;
+#endif
+
 #if !defined(IS_BOOTLOADER) && (defined(SOLO_EXPERIMENTAL))
         case CTAPHID_LOADKEY:
             /**
              * Load external key.  Useful for enabling backups.
-             * bytes:            4                   96
-             * payload: | counter_increase (BE) | master_key |
+             * bytes:                   4                     4                      96
+             * payload:  version [maj rev patch RFU]| counter_replacement (BE) | master_key |
              *
              * Counter should be increased by a large amount, e.g. (0x10000000)
              * to outdo any previously lost/broken keys.
             */
             printf1(TAG_HID,"CTAPHID_LOADKEY\n");
-            if (len != 100)
+            if (len != 104)
             {
                 printf2(TAG_ERR,"Error, invalid length.\n");
                 ctaphid_send_error(wb->cid, CTAP1_ERR_INVALID_LENGTH);
                 return 1;
             }
+            param = ctap_buffer[0] << 16;
+            param |= ctap_buffer[1] << 8;
+            param |= ctap_buffer[2] << 0;
+            if (param != 0){
+                ctaphid_send_error(wb->cid, CTAP2_ERR_UNSUPPORTED_OPTION);
+                return 1;
+            }
 
             // Ask for THREE button presses
             if (ctap_user_presence_test(8000) > 0)
-                if (ctap_user_presence_test(8000) > 0)
-                    if (ctap_user_presence_test(8000) > 0)
+                if (ctap_user_presence_test(2000) > 0)
+                    if (ctap_user_presence_test(2000) > 0)
                     {
-                        ctap_load_external_keys(ctap_buffer + 4);
-                        param = ctap_buffer[3];
-                        param |= ctap_buffer[2] << 8;
-                        param |= ctap_buffer[1] << 16;
-                        param |= ctap_buffer[0] << 24;
+                        ctap_load_external_keys(ctap_buffer + 8);
+                        param = ctap_buffer[7];
+                        param |= ctap_buffer[6] << 8;
+                        param |= ctap_buffer[5] << 16;
+                        param |= ctap_buffer[4] << 24;
                         ctap_atomic_count(param);
 
                         wb->bcnt = 0;

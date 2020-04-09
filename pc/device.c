@@ -11,7 +11,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-#include <time.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
@@ -25,8 +24,7 @@
 
 #define RK_NUM  50
 
-bool use_udp = true;
-static bool _up_disabled = false;
+static bool use_udp = true;
 
 struct ResidentKeyStore {
     CTAP_residentKey rks[RK_NUM];
@@ -34,21 +32,6 @@ struct ResidentKeyStore {
 
 void authenticator_initialize();
 
-uint32_t __device_status = 0;
-void device_set_status(uint32_t status)
-{
-    if (status != CTAPHID_STATUS_IDLE && __device_status != status)
-    {
-        ctaphid_update_status(status);
-    }
-    __device_status = status;
-}
-
-void device_reboot()
-{
-    printf1(TAG_RED, "REBOOT command recieved!\r\n");
-    exit(100);
-}
 
 int udp_server()
 {
@@ -192,7 +175,6 @@ int usbhid_recv(uint8_t * msg)
     return l;
 }
 
-// Send 64 byte USB HID message
 void usbhid_send(uint8_t * msg)
 {
     if (use_udp)
@@ -208,6 +190,8 @@ void usbhid_send(uint8_t * msg)
         }
     }
 }
+
+
 
 void usbhid_close()
 {
@@ -272,14 +256,6 @@ void device_init(int argc, char *argv[])
 }
 
 
-void main_loop_delay()
-{
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 1000*1000*100;
-    nanosleep(&ts,NULL);
-}
-
 void delay(uint32_t ms)
 {
     struct timespec ts;
@@ -289,47 +265,9 @@ void delay(uint32_t ms)
 }
 
 
-void heartbeat()
-{
-
-}
-
-void ctaphid_write_block(uint8_t * data)
-{
-    /*printf("<< "); dump_hex(data, 64);*/
-    usbhid_send(data);
-}
-
-
-int ctap_user_presence_test(uint32_t d)
-{
-    if (_up_disabled)
-    {
-        return 2;
-    }
-    return 1;
-}
-
-int ctap_user_verification(uint8_t arg)
-{
-    return 1;
-}
-
-
-uint32_t ctap_atomic_count(uint32_t amount)
-{
-    static uint32_t counter1 = 25;
-    counter1 += (amount + 1);
-    return counter1;
-}
-
-int ctap_get_status_data(uint8_t * dst){
-    printf2(TAG_ERR,"ctap_get_status_data not imple\n");
-    return 0;
-}
-
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
+    int ret;
     FILE * urand = fopen("/dev/urandom","r");
     if (urand == NULL)
     {
@@ -348,10 +286,9 @@ int ctap_generate_rng(uint8_t * dst, size_t num)
 
 
 const char * state_file = "authenticator_state.bin";
-const char * backup_file = "authenticator_state2.bin";
 const char * rk_file = "resident_keys.bin";
 
-void authenticator_read_state(AuthenticatorState * state)
+int authenticator_read_state(AuthenticatorState * state)
 {
     FILE * f;
     int ret;
@@ -370,104 +307,35 @@ void authenticator_read_state(AuthenticatorState * state)
         perror("fwrite");
         exit(1);
     }
+    if (state->is_initialized == INITIALIZED_MARKER)
+        return 1;
+    else
+        return 0;
 
 }
 
-void authenticator_read_backup_state(AuthenticatorState * state )
+
+void authenticator_write_state(AuthenticatorState * state)
 {
     FILE * f;
     int ret;
 
-    f = fopen(backup_file, "rb");
+    f = fopen(state_file, "wb+");
     if (f== NULL)
     {
         perror("fopen");
         exit(1);
     }
-
-    ret = fread(state, 1, sizeof(AuthenticatorState), f);
+    ret = fwrite(state, 1, sizeof(AuthenticatorState), f);
     fclose(f);
-    if(ret != sizeof(AuthenticatorState))
-    {
-        perror("fwrite");
-        exit(1);
-    }
-}
-
-void authenticator_write_state(AuthenticatorState * state, int backup)
-{
-    FILE * f;
-    int ret;
-
-    if (! backup)
-    {
-        f = fopen(state_file, "wb+");
-        if (f== NULL)
-        {
-            perror("fopen");
-            exit(1);
-        }
-        ret = fwrite(state, 1, sizeof(AuthenticatorState), f);
-        fclose(f);
-        if (ret != sizeof(AuthenticatorState))
-        {
-            perror("fwrite");
-            exit(1);
-        }
-    }
-    else
-    {
-
-        f = fopen(backup_file, "wb+");
-        if (f== NULL)
-        {
-            perror("fopen");
-            exit(1);
-        }
-        ret = fwrite(state, 1, sizeof(AuthenticatorState), f);
-        fclose(f);
-        if (ret != sizeof(AuthenticatorState))
-        {
-            perror("fwrite");
-            exit(1);
-        }
-    }
-}
-
-// Return 1 yes backup is init'd, else 0
-int authenticator_is_backup_initialized()
-{
-    uint8_t header[16];
-    AuthenticatorState * state = (AuthenticatorState*) header;
-    FILE * f;
-    int ret;
-
-    printf("state file exists\n");
-    f = fopen(backup_file, "rb");
-    if (f== NULL)
-    {
-        printf("Warning, backup file doesn't exist\n");
-        return 0;
-    }
-
-    ret = fread(header, 1, sizeof(header), f);
-    fclose(f);
-    if(ret != sizeof(header))
+    if (ret != sizeof(AuthenticatorState))
     {
         perror("fwrite");
         exit(1);
     }
 
-    return state->is_initialized == INITIALIZED_MARKER;
-
 }
 
-// Return 1 yes backup is init'd, else 0
-/*int authenticator_is_initialized()*/
-/*{*/
-
-
-/*}*/
 
 static void sync_rk()
 {
@@ -547,44 +415,18 @@ void authenticator_initialize()
             exit(1);
         }
 
-        f = fopen(backup_file, "wb+");
-        if (f== NULL)
-        {
-            perror("fopen");
-            exit(1);
-        }
-        mem = malloc(sizeof(AuthenticatorState));
-        memset(mem,0xff,sizeof(AuthenticatorState));
-        ret = fwrite(mem, 1, sizeof(AuthenticatorState), f);
-        free(mem);
-        fclose(f);
-        if (ret != sizeof(AuthenticatorState))
-        {
-            perror("fwrite");
-            exit(1);
-        }
-
         // resident_keys
         memset(&RK_STORE,0xff,sizeof(RK_STORE));
         sync_rk();
 
-
-
     }
 }
-
-void device_manage()
-{
-
-}
-
 
 
 void ctap_reset_rk()
 {
     memset(&RK_STORE,0xff,sizeof(RK_STORE));
     sync_rk();
-
 }
 
 uint32_t ctap_rk_size()
@@ -607,6 +449,12 @@ void ctap_store_rk(int index, CTAP_residentKey * rk)
 
 }
 
+void ctap_delete_rk(int index)
+{
+    CTAP_residentKey rk;
+    memset(&rk, 0xff, sizeof(CTAP_residentKey));
+    memmove(RK_STORE.rks + index, &rk, sizeof(CTAP_residentKey));
+}
 
 void ctap_load_rk(int index, CTAP_residentKey * rk)
 {
@@ -626,29 +474,9 @@ void ctap_overwrite_rk(int index, CTAP_residentKey * rk)
     }
 }
 
-void device_wink()
-{
-    printf("*WINK*\n");
-}
 
-int device_is_nfc()
-{
-    return 0;
-}
 
-void device_disable_up(bool disable)
-{
-    _up_disabled = disable;
-}
 
-void device_set_clock_rate(DEVICE_CLOCK_RATE param)
-{
 
-}
 
-void request_from_nfc(bool request_active) {
-}
 
-void boot_solo_bootloader(){
-    printf1(TAG_ERR,"Bootloader executed\r\n");
-}

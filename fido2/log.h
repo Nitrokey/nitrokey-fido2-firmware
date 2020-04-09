@@ -7,7 +7,10 @@
 #ifndef _LOG_H
 #define _LOG_H
 
+#ifdef APP_CONFIG
 #include APP_CONFIG
+#endif
+
 #include <stdint.h>
 
 #ifndef DEBUG_LEVEL
@@ -45,13 +48,14 @@ typedef enum
     TAG_NFC      = (1 << 19),
     TAG_NFC_APDU = (1 << 20),
     TAG_CCID     = (1 << 21),
-    TAG_BUTTON   = (1 << 22),
+    TAG_CM       = (1 << 22),
+    TAG_BUTTON   = (1 << 26),
 
     TAG_NO_TAG   = (1UL << 30),
     TAG_FILENO   = (1UL << 31)
 } LOG_TAG;
 
-#if DEBUG_LEVEL > 0
+#if defined(DEBUG_LEVEL) && DEBUG_LEVEL > 0
 
 void set_logging_mask(uint32_t mask);
 #define printf1(tag,fmt, ...) LOG(tag & ~(TAG_FILENO), NULL, 0, fmt, ##__VA_ARGS__)

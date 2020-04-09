@@ -212,6 +212,20 @@ int solo_is_locked(){
     return tag == ATTESTATION_CONFIGURED_TAG && (device_settings & SOLO_FLAG_LOCKED) != 0;
 }
 
+// Locks solo flash from debugging.  Locks on next reboot.
+// This should be removed in next Solo release.
+void solo_lock_if_not_already() {
+    uint8_t buf[2048];
+
+    memmove(buf, (uint8_t*)ATTESTATION_PAGE_ADDR, 2048);
+
+    ((flash_attestation_page *)buf)->device_settings |= SOLO_FLAG_LOCKED;
+
+    flash_erase_page(ATTESTATION_PAGE);
+
+    flash_write(ATTESTATION_PAGE_ADDR, buf, 2048);
+}
+
 /** device_migrate
  * Depending on version of device, migrates:
  * * Moves attestation certificate to data segment.
@@ -299,7 +313,7 @@ static void device_migrate(){
   }
 }
 
-void device_init(int argc, char *argv[])
+void device_init()
 {
 
     hw_init(LOW_FREQUENCY);
@@ -482,20 +496,8 @@ void heartbeat(void)
 
 }
 
-void authenticator_read_state(AuthenticatorState * a)
-{
-    uint32_t * ptr = (uint32_t *)flash_addr(STATE1_PAGE);
-    memmove(a,ptr,sizeof(AuthenticatorState));
-}
 
-void authenticator_read_backup_state(AuthenticatorState * a)
-{
-    uint32_t * ptr = (uint32_t *)flash_addr(STATE2_PAGE);
-    memmove(a,ptr,sizeof(AuthenticatorState));
-}
-
-// Return 1 yes backup is init'd, else 0
-int authenticator_is_backup_initialized(void)
+static int authenticator_is_backup_initialized(void)
 {
     uint8_t header[16];
     uint32_t * ptr = (uint32_t *)flash_addr(STATE2_PAGE);
@@ -504,20 +506,35 @@ int authenticator_is_backup_initialized(void)
     return state->is_initialized == INITIALIZED_MARKER;
 }
 
-void authenticator_write_state(AuthenticatorState * a, int backup)
+int authenticator_read_state(AuthenticatorState * a)
 {
-    if (! backup)
-    {
-        flash_erase_page(STATE1_PAGE);
+    uint32_t * ptr = (uint32_t *) flash_addr(STATE1_PAGE);
+    memmove(a, ptr, sizeof(AuthenticatorState));
 
-        flash_write(flash_addr(STATE1_PAGE), (uint8_t*)a, sizeof(AuthenticatorState));
-    }
-    else
-    {
-        flash_erase_page(STATE2_PAGE);
+    if (a->is_initialized != INITIALIZED_MARKER){
 
-        flash_write(flash_addr(STATE2_PAGE), (uint8_t*)a, sizeof(AuthenticatorState));
+        if (authenticator_is_backup_initialized()){
+            printf1(TAG_ERR,"Warning: memory corruption detected.  restoring from backup..\n");
+            ptr = (uint32_t *) flash_addr(STATE2_PAGE);
+            memmove(a, ptr, sizeof(AuthenticatorState));
+            authenticator_write_state(a);
+            return 1;
+        }
+
+        return 0;
     }
+
+    return 1;
+}
+
+
+void authenticator_write_state(AuthenticatorState * a)
+{
+    flash_erase_page(STATE1_PAGE);
+    flash_write(flash_addr(STATE1_PAGE), (uint8_t*)a, sizeof(AuthenticatorState));
+
+    flash_erase_page(STATE2_PAGE);
+    flash_write(flash_addr(STATE2_PAGE), (uint8_t*)a, sizeof(AuthenticatorState));
 }
 
 #if !defined(IS_BOOTLOADER)
@@ -574,7 +591,11 @@ uint32_t ctap_atomic_count(uint32_t amount)
         return lastc;
     }
 
-    lastc += amount;
+    if (amount > 256){
+        lastc = amount;
+    } else {
+        lastc += amount;
+    }
 
     if (lastc/256 > erases)
     {
@@ -826,11 +847,6 @@ int ctap_generate_rng(uint8_t * dst, size_t num)
 }
 
 
-int ctap_user_verification(uint8_t arg)
-{
-    return 1;
-}
-
 void ctap_reset_rk(void)
 {
     int i;
@@ -848,33 +864,28 @@ uint32_t ctap_rk_size(void)
 
 void ctap_store_rk(int index,CTAP_residentKey * rk)
 {
-    int page_offset = (sizeof(CTAP_residentKey) * index) / PAGE_SIZE;
-    uint32_t addr = flash_addr(page_offset + RK_START_PAGE) + ((sizeof(CTAP_residentKey)*index) % PAGE_SIZE);
+    ctap_overwrite_rk(index, rk);
+}
 
-    printf1(TAG_GREEN, "storing RK %d @ %04x\r\n", index,addr);
-
-    if (page_offset < RK_NUM_PAGES)
-    {
-        flash_write(addr, (uint8_t*)rk, sizeof(CTAP_residentKey));
-        //dump_hex1(TAG_GREEN,rk,sizeof(CTAP_residentKey));
-    }
-    else
-    {
-        printf2(TAG_ERR,"Out of bounds reading index %d for rk\n", index);
-    }
+void ctap_delete_rk(int index)
+{
+    CTAP_residentKey rk;
+    memset(&rk, 0xff, sizeof(CTAP_residentKey));
+    ctap_overwrite_rk(index, &rk);
 }
 
 void ctap_load_rk(int index,CTAP_residentKey * rk)
 {
-    int page_offset = (sizeof(CTAP_residentKey) * index) / PAGE_SIZE;
-    uint32_t addr = flash_addr(page_offset + RK_START_PAGE) + ((sizeof(CTAP_residentKey)*index) % PAGE_SIZE);
+    int byte_offset_into_page = (sizeof(CTAP_residentKey) * (index % (PAGE_SIZE/sizeof(CTAP_residentKey))));
+    int page_offset = (index)/(PAGE_SIZE/sizeof(CTAP_residentKey));
+
+    uint32_t addr = flash_addr(page_offset + RK_START_PAGE) + byte_offset_into_page;
 
     printf1(TAG_GREEN, "reading RK %d @ %04x\r\n", index, addr);
     if (page_offset < RK_NUM_PAGES)
     {
         uint32_t * ptr = (uint32_t *)addr;
         memmove((uint8_t*)rk,ptr,sizeof(CTAP_residentKey));
-        //dump_hex1(TAG_GREEN,rk,sizeof(CTAP_residentKey));
     }
     else
     {
@@ -885,22 +896,28 @@ void ctap_load_rk(int index,CTAP_residentKey * rk)
 void ctap_overwrite_rk(int index,CTAP_residentKey * rk)
 {
     uint8_t tmppage[PAGE_SIZE];
-    int page_offset = (sizeof(CTAP_residentKey) * index) / PAGE_SIZE;
-    int page = page_offset + RK_START_PAGE;
 
-    printf1(TAG_GREEN, "overwriting RK %d\r\n", index);
+    int byte_offset_into_page = (sizeof(CTAP_residentKey) * (index % (PAGE_SIZE/sizeof(CTAP_residentKey))));
+    int page_offset = (index)/(PAGE_SIZE/sizeof(CTAP_residentKey));
+
+    printf1(TAG_GREEN, "overwriting RK %d @ page %d @ addr 0x%08x-0x%08x\r\n", 
+        index, RK_START_PAGE + page_offset, 
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page, 
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page + sizeof(CTAP_residentKey) 
+        );
     if (page_offset < RK_NUM_PAGES)
     {
-        memmove(tmppage, (uint8_t*)flash_addr(page), PAGE_SIZE);
+        memmove(tmppage, (uint8_t*)flash_addr(RK_START_PAGE + page_offset), PAGE_SIZE);
 
-        memmove(tmppage + (sizeof(CTAP_residentKey) * index) % PAGE_SIZE, rk, sizeof(CTAP_residentKey));
-        flash_erase_page(page);
-        flash_write(flash_addr(page), tmppage, PAGE_SIZE);
+        memmove(tmppage + byte_offset_into_page, rk, sizeof(CTAP_residentKey));
+        flash_erase_page(RK_START_PAGE + page_offset);
+        flash_write(flash_addr(RK_START_PAGE + page_offset), tmppage, PAGE_SIZE);
     }
     else
     {
         printf2(TAG_ERR,"Out of bounds reading index %d for rk\n", index);
     }
+    printf1(TAG_GREEN, "4\r\n");
 }
 
 void boot_st_bootloader(void)
@@ -935,6 +952,17 @@ void boot_solo_bootloader(void)
 
 }
 
+void device_read_aaguid(uint8_t * dst){
+    uint8_t * aaguid = (uint8_t *)"\x88\x76\x63\x1b\xd4\xa0\x42\x7f\x57\x73\x0e\xc7\x1c\x9e\x02\x79";
+    memmove(dst, aaguid, 16);
+    if (device_is_nfc()){
+        dst[0] = 0x89;
+    }
+    else if (tsc_sensor_exists()){
+        dst[0] = 0x98;
+    }
+    dump_hex1(TAG_GREEN,dst, 16);
+}
 
 
 void _Error_Handler(char *file, int line)
