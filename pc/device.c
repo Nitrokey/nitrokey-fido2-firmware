@@ -476,6 +476,10 @@ void ctap_overwrite_rk(int index, CTAP_residentKey * rk)
 
 
 
+int ctap_get_status_data(uint8_t * ctap_buffer) {
+  memset(ctap_buffer, 42, 10);
+  return 0;
+}
 
 
 
