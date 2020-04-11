@@ -245,7 +245,7 @@ static void device_migrate(){
     uint32_t configure_tag = (uint32_t)(device_settings >> 32);
 
   if (configure_tag != ATTESTATION_CONFIGURED_TAG
-      || attestation_solo_cert_der_size != attestation_cert_der_get_size())
+      || attestation_solo_cert_der_size != device_attestation_cert_der_get_size())
   {
         printf1(TAG_RED,"Migrating certificate and lock information to data segment.\r\n");
 
