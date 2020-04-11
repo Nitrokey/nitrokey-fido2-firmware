@@ -181,7 +181,7 @@ typedef struct {
     CTAP_userEntity user;
 
     // Maximum amount of "extra" space in resident key.
-    uint8_t rpId[48];
+    uint8_t rpId[14];
     uint8_t rpIdSize;
 } __attribute__((packed)) CTAP_residentKey;
 
