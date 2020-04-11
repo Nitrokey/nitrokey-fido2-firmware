@@ -138,3 +138,8 @@ travis:
 	$(MAKE) test VENV=". ../../venv/bin/activate;"
 	$(MAKE) test-docker
 	$(MAKE) black
+
+.PHONY: simulation
+simulation: main
+	-rm -v authenticator_state*.bin resident_keys.bin
+	while true; do ./main; sleep 0.1; done;
