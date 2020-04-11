@@ -119,6 +119,7 @@ clean:
 	for f in crypto/tiny-AES-c/Makefile tinycbor/Makefile ; do \
 	    if [ -f "$$f" ]; then \
 	    	(cd `dirname $$f` ; git checkout -- .) ;\
+	    	(cd `dirname $$f` ; make clean) ;\
 	    fi ;\
 	done
 	cd fido2 && $(MAKE) clean
