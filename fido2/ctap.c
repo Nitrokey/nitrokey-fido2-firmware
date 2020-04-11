@@ -461,6 +461,7 @@ static int ctap_make_extensions(CTAP_extensions * ext, uint8_t * ext_encoder_buf
         // Generate credRandom
         crypto_sha256_hmac_init(CRYPTO_TRANSPORT_KEY2, 0, credRandom);
         crypto_sha256_update((uint8_t*)&ext->hmac_secret.credential->id, sizeof(CredentialId));
+        crypto_sha256_update(&getAssertionState.user_verified, 1);
         crypto_sha256_hmac_final(CRYPTO_TRANSPORT_KEY2, 0, credRandom);
 
         // Decrypt saltEnc
@@ -1586,18 +1587,15 @@ static int scan_for_next_rk(int index, uint8_t * initialRpIdHash){
 
     if (initialRpIdHash != NULL) {
         memmove(lastRpIdHash, initialRpIdHash, 32);
-        index = 0;
+        index = -1;
     }
     else
     {
         ctap_load_rk(index, &rk);
         memmove(lastRpIdHash, rk.id.rpIdHash, 32);
-        index++;
     }
 
-    ctap_load_rk(index, &rk);
-
-    while ( memcmp( rk.id.rpIdHash, lastRpIdHash, 32 ) != 0 )
+    do
     {
         index++;
         if ((unsigned int)index >= ctap_rk_size()) 
@@ -1606,6 +1604,7 @@ static int scan_for_next_rk(int index, uint8_t * initialRpIdHash){
         }
         ctap_load_rk(index, &rk);
     }
+    while ( memcmp( rk.id.rpIdHash, lastRpIdHash, 32 ) != 0 );
 
     return index;
 }
