@@ -74,6 +74,7 @@ all: $(TARGET).elf
 
 %.hex: %.elf
 	$(CP) -O ihex $^ $(TARGET).hex
+	@echo "Bootloader built flags: $(CFLAGS)"
 
 clean:
 	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ)

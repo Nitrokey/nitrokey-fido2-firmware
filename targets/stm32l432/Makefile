@@ -111,11 +111,11 @@ all-locked:
 
 debugboot-app:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex DEBUG=2 PREFIX=$(PREFIX) \
-	LDSCRIPT=linker/stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER'
+	LDSCRIPT=linker/stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER -DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 debugboot-boot:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) DEBUG=1 \
-	LDSCRIPT=linker/bootloader_stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER'
+	LDSCRIPT=linker/bootloader_stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER $(TEST_MODE_DEFINE)'
 
 boot-sig-checking:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) DEBUG=0
@@ -132,7 +132,7 @@ build-release: cbor clean2 boot-sig-checking clean all
 build-hacker: cbor clean2 boot-no-sig clean all-hacker
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 
-build-debugboot: clean2 debugboot-boot clean debugboot-app
+build-debugboot: | clean2 debugboot-boot clean debugboot-app
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 
 clean:
@@ -143,10 +143,11 @@ clean2:
 	$(MAKE) -f $(APPMAKE) clean
 	$(MAKE) -f $(BOOTMAKE) clean
 
+FW=all.hex
 flash: solo.hex bootloader.hex all.hex
 #	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
-	STM32_Programmer_CLI -c port=SWD -halt  -d all.hex -rst
+	STM32_Programmer_CLI -c port=SWD -halt  -d $(FW) -rst
 
 flash_dfu: solo.hex bootloader.hex
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex

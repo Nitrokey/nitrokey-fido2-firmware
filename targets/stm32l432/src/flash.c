@@ -45,7 +45,7 @@ void flash_option_bytes_init(int boot_from_dfu)
           #warning "ROP==1 enabled"
           val = 0xfffff8b9; // ROP==1
 #else
-          #warning "ROP==2 enabled"
+          #error "ROP==2 enabled"
           val = 0xfffff8cc; // ROP==2
 #endif
         }
