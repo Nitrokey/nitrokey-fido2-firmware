@@ -57,6 +57,8 @@ bootloader-nonverifying:
 
 bootloader-verifying:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0 2>&1 | tee build-bootloader.log
+	test -f bootloader.hex || false
+
 
 full-clean: clean2
 
