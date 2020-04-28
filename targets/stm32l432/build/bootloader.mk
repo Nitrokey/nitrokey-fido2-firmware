@@ -1,5 +1,18 @@
 include build/common.mk
 
+# Small
+# ST related
+SRCS = bootloader/main_small.c
+SRCS += src/init.c src/redirect.c src/device-small.c
+SRCS += src/startup_stm32l432xx.s src/system_stm32l4xx.c
+SRCS += $(DRIVER_LIBS)
+#$(USB_LIB)
+
+
+OBJ1S=$(SRCS:.c=.o)
+OBJS=$(OBJ1S:.s=.o)
+
+
 # ST related
 SRC = bootloader/main.c bootloader/bootloader.c
 SRC += bootloader/pubkey_bootloader.c bootloader/version_check.c
@@ -53,7 +66,7 @@ LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref  -Wl,-B
 
 all: $(TARGET).elf
 	$(SZ) $^
-
+	$(MAKE) bootloader_small.hex
 
 %.o: %.c
 	@echo "*** $<"
@@ -66,6 +79,10 @@ all: $(TARGET).elf
 %.o: %.s
 	@echo "*** $<"
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+
+bootloader_small.elf: $(OBJS)
+	$(CC) $^ $(HW) $(LDFLAGS) -o $@
+	$(SZ) $@
 
 %.elf: $(OBJ)
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@
