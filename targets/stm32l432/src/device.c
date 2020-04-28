@@ -952,15 +952,10 @@ void boot_solo_bootloader(void)
 
 }
 
+const uint8_t global_aaguid[16];
+
 void device_read_aaguid(uint8_t * dst){
-    uint8_t * aaguid = (uint8_t *)"\x88\x76\x63\x1b\xd4\xa0\x42\x7f\x57\x73\x0e\xc7\x1c\x9e\x02\x79";
-    memmove(dst, aaguid, 16);
-    if (device_is_nfc()){
-        dst[0] = 0x89;
-    }
-    else if (tsc_sensor_exists()){
-        dst[0] = 0x98;
-    }
+    memmove(dst, global_aaguid, 16);
     dump_hex1(TAG_GREEN,dst, 16);
 }
 
