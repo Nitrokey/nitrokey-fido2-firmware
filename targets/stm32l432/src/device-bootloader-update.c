@@ -6,7 +6,8 @@
 #include "crypto.h"
 #include "device.h"
 #include "device-bootloader-update.h"
-
+#include <stdint.h>
+#include "led.h"
 
 #if !defined(IS_BOOTLOADER) && defined(APP_UPDATE_BOOTLOADER)
 #include "boot_payload.h"

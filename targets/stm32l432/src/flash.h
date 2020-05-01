@@ -7,6 +7,9 @@
 #ifndef _FLASH_H_
 #define _FLASH_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
 void flash_erase_page(uint8_t page);
 void flash_write_dword(uint32_t addr, uint64_t data);
 void flash_write(uint32_t addr, uint8_t * data, size_t sz);
