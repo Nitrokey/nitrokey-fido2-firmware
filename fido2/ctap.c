@@ -26,6 +26,7 @@
 
 #include "device.h"
 #include "data_migration.h"
+#include "device-bootloader-update.h"
 
 uint8_t PIN_TOKEN[PIN_TOKEN_SIZE];
 uint8_t KEY_AGREEMENT_PUB[64];

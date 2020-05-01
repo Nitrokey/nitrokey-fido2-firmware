@@ -26,7 +26,7 @@ merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
 #For bootloader update support add this to below targets:
-#EXTRA_DEFINES="-DAPP_UPDATE_BOOTLOADER" BOOT_UPDATE=1
+EXTRA_DEFINES="-DAPP_UPDATE_BOOTLOADER BOOT_UPDATE=1"
 ifeq ($(RELEASE),0)
 TEST_MODE_DEFINE="-DNK_TEST_MODE=1"
 merge_hex=$(merge_hex_dev)
@@ -37,10 +37,10 @@ endif
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE) $(EXTRA_DEFINES)' BOOT_UPDATE=1
 
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	set -xeo pipefail && $(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE) $(EXTRA_DEFINES)' BOOT_UPDATE=1 2>&1 | tee build.log
 
 .PHONY: show-warnings
 show-warnings:
@@ -51,7 +51,7 @@ show-warnings:
 	@echo
 
 firmware-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE) $(EXTRA_DEFINES)' BOOT_UPDATE=1
 
 bootloader-nonverifying:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE)' DEBUG=0
