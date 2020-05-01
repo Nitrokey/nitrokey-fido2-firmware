@@ -46,21 +46,24 @@ void update_bootloader(void){
     uint8_t hash[32];
     bootloader_calculate_hash(hash);
 #endif
+    timestamp();
     bool success = memcmp((uint8_t*) BOOTLOADER_START_ADDR, boot_payload, boot_payload_length) == 0;
+    printf1(TAG_TIME,"bootloader memcmp calc time: %d ms\n",timestamp());
     if (success) {
-        printf1(TAG_ERR, "Bootloader already up-to-date. Skipping.\n");
+        printf1(TAG_GREEN, "Bootloader already up-to-date. Skipping.\n");
         return;
     }
     led_rgb(0xFF0000);
     timestamp();
-    erase_bootloader();  //about 250 ms
+    erase_bootloader();  //about 220 ms
     printf1(TAG_TIME,"boot erase: %d ms\n",timestamp());
     printf1(TAG_ERR, "Write: %p %d\n", boot_payload, boot_payload_length);
-    flash_write(BOOTLOADER_START_ADDR,boot_payload, boot_payload_length); //about 250 ms
+    flash_write(BOOTLOADER_START_ADDR,boot_payload, boot_payload_length); //about 225 ms
     printf1(TAG_TIME,"boot write: %d ms\n",timestamp());
     led_rgb(0x00FF00);
 
     success = memcmp((uint8_t*) BOOTLOADER_START_ADDR, boot_payload, boot_payload_length) == 0;
+    printf1(TAG_TIME,"boot update finished, compare: %d ms\n",timestamp()); // about 30 ms
 #if DEBUG_LEVEL >= 2
     bootloader_calculate_hash(hash);
 #endif
