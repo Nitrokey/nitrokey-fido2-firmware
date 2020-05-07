@@ -1059,6 +1059,9 @@ static uint8_t parse_cred_mgmt_subcommandparams(CborValue * val, CTAP_credMgmt *
                 ret = parse_credential_descriptor(&map, &CM->subCommandParams.credentialDescriptor);
                 check_ret(ret);;
                 break;
+            default:
+              printf2(TAG_ERR, "Error, unidentified key: 0x%x\n", key);
+              return CTAP2_ERR_INVALID_OPTION;
         }
         ret = cbor_value_advance(&map);
         check_ret(ret);
