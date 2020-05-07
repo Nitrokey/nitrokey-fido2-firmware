@@ -253,7 +253,7 @@ uint8_t ctap_get_info(CborEncoder * encoder)
         ret = cbor_encode_uint(&map, 0x08); // maxCredentialIdLength 
         check_ret(ret);
         {
-            ret = cbor_encode_uint(&map, 128);
+            ret = cbor_encode_uint(&map, MAX_CREDENTIAL_ID_LENGTH);
             check_ret(ret);
         }
 
@@ -637,7 +637,7 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
     if (credInfo != NULL)
     {
         // add attestedCredentialData
-        authData->head.flags |= (1 << 6);//include attestation data
+        authData->head.flags |= (1 << 6);//include attestation data  // FIXME use struct/bit field
 
         cbor_encoder_init(&cose_key, cose_key_buf, *len - sizeof(CTAP_authData), 0);
 
@@ -664,7 +664,7 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
             memmove(&rk.user, &credInfo->user, sizeof(CTAP_userEntity));
 
             // Copy rpId to RK, but it could be cropped.
-            int rp_id_size = rp->size < sizeof(rk.rpId) ? rp->size : sizeof(rk.rpId);
+            size_t rp_id_size = rp->size < sizeof(rk.rpId) ? rp->size : sizeof(rk.rpId); // FIXME use MIN
             memmove(rk.rpId, rp->id, rp_id_size);
             rk.rpIdSize = rp_id_size;
 
@@ -962,7 +962,7 @@ uint8_t ctap_make_credential(CborEncoder * encoder, uint8_t * request, int lengt
         check_retr(ret);
         if (ext_encoder_buf_size)
         {
-            ((CTAP_authData *)auth_data_buf)->head.flags |= (1 << 7);
+            ((CTAP_authData *)auth_data_buf)->head.flags |= (1 << 7); // FIXME use struct/bit field
             auth_data_sz += ext_encoder_buf_size;
         }
     }
@@ -1428,7 +1428,7 @@ uint8_t ctap_cred_rk(CborEncoder * encoder, int rk_ind, int rk_count)
     ctap_load_rk(rk_ind, &rk);
 
     uint32_t cred_protect = read_metadata_from_masked_credential(&rk.id);
-    if ( cred_protect == 0 || cred_protect > 3 ) 
+    if ( cred_protect == 0 || cred_protect > 3 ) // FIXME name magic values
     {
         // Take default value of userVerificationOptional
         cred_protect = EXT_CRED_PROTECT_OPTIONAL;
@@ -1839,7 +1839,7 @@ uint8_t ctap_get_assertion(CborEncoder * encoder, uint8_t * request, int length)
         device_disable_up(false);
         check_retr(ret);
 
-        getAssertionState.buf.authData.flags &= ~(1 << 2);
+        getAssertionState.buf.authData.flags &= ~(1 << 2);  // FIXME use struct/bit field
         getAssertionState.buf.authData.flags |= (getAssertionState.user_verified << 2);
 
         {
@@ -1849,7 +1849,7 @@ uint8_t ctap_get_assertion(CborEncoder * encoder, uint8_t * request, int length)
             check_retr(ret);
             if (ext_encoder_buf_size)
             {
-                getAssertionState.buf.authData.flags |= (1 << 7);
+                getAssertionState.buf.authData.flags |= (1 << 7);  // FIXME use struct/bit field
                 auth_data_buf_sz += ext_encoder_buf_size;
             }
         }

@@ -666,8 +666,10 @@ uint8_t ctap_parse_extensions(CborValue * val, CTAP_extensions * ext)
         if (ret == CborErrorOutOfMemory)
         {
             printf2(TAG_ERR,"Error, rp map key is too large. Ignoring.\n");
-            check_ret( cbor_value_advance(&map) );
-            check_ret( cbor_value_advance(&map) );
+            ret = cbor_value_advance(&map);
+            check_ret(ret);
+            ret = cbor_value_advance(&map);
+            check_ret(ret);
             continue;
         }
         check_ret(ret);
@@ -1057,6 +1059,9 @@ static uint8_t parse_cred_mgmt_subcommandparams(CborValue * val, CTAP_credMgmt *
                 ret = parse_credential_descriptor(&map, &CM->subCommandParams.credentialDescriptor);
                 check_ret(ret);;
                 break;
+            default:
+              printf2(TAG_ERR, "Error, unidentified key: 0x%x\n", key);
+              return CTAP2_ERR_INVALID_OPTION;
         }
         ret = cbor_value_advance(&map);
         check_ret(ret);
@@ -1064,7 +1069,7 @@ static uint8_t parse_cred_mgmt_subcommandparams(CborValue * val, CTAP_credMgmt *
 
     const uint8_t * end_byte = cbor_value_get_next_byte(&map);
 
-    uint32_t length = (uint32_t)end_byte - (uint32_t)start_byte;
+    uint32_t length = end_byte - start_byte;
     if (length > sizeof(CM->hashed.subCommandParamsCborCopy))
     {
         return CTAP2_ERR_LIMIT_EXCEEDED;
