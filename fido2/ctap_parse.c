@@ -1069,7 +1069,7 @@ static uint8_t parse_cred_mgmt_subcommandparams(CborValue * val, CTAP_credMgmt *
 
     const uint8_t * end_byte = cbor_value_get_next_byte(&map);
 
-    uint32_t length = (uint32_t)end_byte - (uint32_t)start_byte;
+    uint32_t length = end_byte - start_byte;
     if (length > sizeof(CM->hashed.subCommandParamsCborCopy))
     {
         return CTAP2_ERR_LIMIT_EXCEEDED;
