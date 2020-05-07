@@ -666,8 +666,10 @@ uint8_t ctap_parse_extensions(CborValue * val, CTAP_extensions * ext)
         if (ret == CborErrorOutOfMemory)
         {
             printf2(TAG_ERR,"Error, rp map key is too large. Ignoring.\n");
-            check_ret( cbor_value_advance(&map) );
-            check_ret( cbor_value_advance(&map) );
+            ret = cbor_value_advance(&map);
+            check_ret(ret);
+            ret = cbor_value_advance(&map);
+            check_ret(ret);
             continue;
         }
         check_ret(ret);
