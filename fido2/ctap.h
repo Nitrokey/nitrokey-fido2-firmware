@@ -137,6 +137,7 @@
 #define CREDENTIAL_NOT_SUPPORTED    0
 
 #define ALLOW_LIST_MAX_SIZE         20
+#define MAX_CREDENTIAL_ID_LENGTH    128
 
 #define NEW_PIN_ENC_MAX_SIZE        256     // includes NULL terminator
 #define NEW_PIN_ENC_MIN_SIZE        64
