@@ -1,0 +1,39 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C = DE, O = Nitrokey GmbH, OU = Root CA, CN = nitrokey.com
+        Validity
+            Not Before: May  8 09:35:35 2020 GMT
+            Not After : Apr 26 09:35:35 2070 GMT
+        Subject: C = DE, O = Nitrokey GmbH, OU = Authenticator Attestation, CN = nitrokey.com
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+                pub:
+                    04:b6:a8:02:1d:09:dd:48:8f:31:db:e3:7e:26:d6:
+                    cd:a5:44:11:c3:34:27:93:20:6e:51:0a:0c:7f:2c:
+                    c8:87:b9:a7:3c:4a:b4:64:2a:b7:8c:a1:d8:c3:80:
+                    9f:71:2c:c2:9a:73:5d:ef:2d:a4:66:25:a0:3a:cf:
+                    49:6b:d2:02:87
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                2E:5B:45:7E:56:10:B4:E5:DD:B4:A9:28:0B:D1:1F:E8:FE:E5:C6:46
+            X509v3 Authority Key Identifier: 
+                DirName:/C=DE/O=Nitrokey GmbH/OU=Root CA/CN=nitrokey.com
+                serial:16:62:04:96:E9:D9:F4:FF:2D:A4:49:F1:7C:25:F6:A8:57:EB:66:E8
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment
+            1.3.6.1.4.1.45724.1.1.4: 
+                ........L>...Ja...
+    Signature Algorithm: ecdsa-with-SHA256
+         30:45:02:20:24:38:71:59:c0:8f:e7:9d:ef:c3:c8:dc:72:6a:
+         82:c2:62:4b:af:82:6f:b2:74:0b:1c:5f:1f:01:0c:be:4e:54:
+         02:21:00:9a:9b:6d:61:4b:84:6f:8d:f7:d6:9a:97:96:65:e2:
+         8c:4f:58:0c:51:01:16:c6:de:ab:56:83:04:5f:d0:bb:1a

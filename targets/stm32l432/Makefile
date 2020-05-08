@@ -13,13 +13,13 @@ BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
 merge_hex=solo mergehex
 
-KEY_PATH ?= "../../keys/dummy-key.hex"
+KEY_PATH ?= "../../keys/attestation/device_key-dummy.hex"
 KEY=$(shell cat $(KEY_PATH))
-ATTEST_PATH ?= "../../keys/production_device_cert.der"
+ATTEST_PATH ?= "../../keys/attestation/device_cert.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
-ATTEST_PATH_DEV ?= "../../keys/nk-dev-device_cert.der"
-KEY_PATH_DEV ?= "../../keys/nk-dev-device_key.hex"
+ATTEST_PATH_DEV ?= "../../keys/attestation/dev/device_cert.der"
+KEY_PATH_DEV ?= "../../keys/attestation/dev/device_key.hex"
 KEY_DEV=$(shell cat $(KEY_PATH_DEV))
 merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
 

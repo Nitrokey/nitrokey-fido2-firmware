@@ -265,19 +265,14 @@ static void device_migrate(){
             32);
 
         flash_erase_page(ATTESTATION_PAGE);
-        flash_write(
-            (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_key,
-            tmp_attestation_key,
-            32
-        );
 
         // Check if this is Solo Hacker attestation (not confidential)
         // then write solo or hacker attestation cert to flash page.
         extern uint8_t solo_hacker_attestation_key[32];
+        extern uint8_t solo_hacker_attestation_key_old[32];
 
-        if (memcmp(solo_hacker_attestation_key,
-                   tmp_attestation_key,
-                   32) == 0)
+        if (memcmp(solo_hacker_attestation_key,tmp_attestation_key,32) == 0
+            || memcmp(solo_hacker_attestation_key_old, tmp_attestation_key,32) == 0)
         {
             printf1(TAG_GREEN,"Updating solo hacker cert\r\n");
             flash_write_dword(
@@ -288,6 +283,12 @@ static void device_migrate(){
                 (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert,
                 attestation_hacker_cert_der,
                 attestation_hacker_cert_der_size
+            );
+            // for development use the currently shipped key and certificate
+            flash_write(
+                (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_key,
+                solo_hacker_attestation_key,
+                32
             );
         }
         else
@@ -301,6 +302,11 @@ static void device_migrate(){
                 (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_cert,
                 attestation_solo_cert_der,
                 attestation_solo_cert_der_size
+            );
+            flash_write(
+                (uint32_t)((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->attestation_key,
+                tmp_attestation_key,
+                32
             );
         }
 
@@ -952,10 +958,11 @@ void boot_solo_bootloader(void)
 
 }
 
-const uint8_t global_aaguid[16];
+extern const uint8_t global_aaguid[16];
 
 void device_read_aaguid(uint8_t * dst){
     memmove(dst, global_aaguid, 16);
+    printf2(TAG_GREEN, "Sending AAGUID: ");
     dump_hex1(TAG_GREEN,dst, 16);
 }
 
