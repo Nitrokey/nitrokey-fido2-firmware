@@ -4,23 +4,24 @@
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
-#include <sys/time.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
-#include <signal.h>
-#include <fcntl.h>
 
-#include "device.h"
 #include "cbor.h"
-#include "util.h"
-#include "log.h"
 #include "ctaphid.h"
+#include "device.h"
+#include "log.h"
+#include "util.h"
 
 #define RK_NUM  50
 
@@ -267,7 +268,6 @@ void delay(uint32_t ms)
 
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
-    int ret;
     FILE * urand = fopen("/dev/urandom","r");
     if (urand == NULL)
     {

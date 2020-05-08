@@ -132,6 +132,7 @@ __attribute__((weak)) int ctap_generate_rng(uint8_t * dst, size_t num)
     for (i = 0; i < num; i++){
         dst[i] = (uint8_t)rand();
     }
+    return 1;
 }
 
 __attribute__((weak)) int device_is_nfc()

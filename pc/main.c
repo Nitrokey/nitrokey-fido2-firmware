@@ -29,7 +29,6 @@ int usbhid_recv(uint8_t * msg);
 int main(int argc, char *argv[])
 {
     uint8_t hidmsg[64];
-    uint32_t t1 = 0;
 
     set_logging_mask(
 //        -1 |
