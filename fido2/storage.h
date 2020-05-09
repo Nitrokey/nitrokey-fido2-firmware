@@ -12,7 +12,7 @@
 #define KEY_SPACE_BYTES     128
 #define MAX_KEYS            (1)
 #define PIN_SALT_LEN        (32)
-#define STATE_VERSION        (1)
+#define STATE_VERSION        (2)
 
 
 #define BACKUP_MARKER       0x5A

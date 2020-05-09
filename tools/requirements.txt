@@ -1,5 +1,4 @@
 ecdsa
-fido2
 intelhex
 pyserial
 solo-python

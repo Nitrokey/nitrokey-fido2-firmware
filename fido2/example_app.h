@@ -13,14 +13,13 @@
 
 #define USING_PC
 
-#define DEBUG_LEVEL 1
-
 #define ENABLE_U2F
 #define ENABLE_U2F_EXTENSIONS
 //#define BRIDGE_TO_WALLET
 
 void printing_init();
 
+extern bool use_udp;
 
 //                              0xRRGGBB
 #define LED_INIT_VALUE			0x000800

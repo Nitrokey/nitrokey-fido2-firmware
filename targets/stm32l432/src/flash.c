@@ -34,7 +34,9 @@ void flash_option_bytes_init(int boot_from_dfu)
     uint32_t val = 0xfffff8aa; // ROP==0
 
     if (boot_from_dfu){
+#ifdef SOLO_HACKER
         val &= ~(1<<27); // nBOOT0 = 0  (boot from system rom)
+#endif
     }
     else {
         if (solo_is_locked())

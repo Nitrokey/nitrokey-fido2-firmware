@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "cbor.h"
 #include "device.h"
@@ -17,20 +18,22 @@
 #include "util.h"
 #include "log.h"
 #include "ctap.h"
-#include APP_CONFIG
+#include "app.h"
 
-#if !defined(TEST)
+
+void device_init(int argc, char *argv[]);
+int usbhid_recv(uint8_t * msg);
+
 
 
 int main(int argc, char *argv[])
 {
     uint8_t hidmsg[64];
-    uint32_t t1 = 0;
 
     set_logging_mask(
 //        -1 |
 		/*0*/
-		//TAG_GEN|
+		// TAG_GEN|
 		// TAG_MC |
 		// TAG_GA |
 		TAG_WALLET |
@@ -38,13 +41,14 @@ int main(int argc, char *argv[])
 		TAG_BUTTON |
 		//TAG_NFC_APDU |
 		TAG_NFC |
-		//TAG_CP |
+		// TAG_CP |
 		// TAG_CTAP|
-		//TAG_HID|
+		// TAG_HID|
 		TAG_U2F|
-		//TAG_PARSE |
+		// TAG_PARSE |
 		//TAG_TIME|
 		// TAG_DUMP|
+		// TAG_DUMP2|
 		TAG_GREEN|
 		TAG_RED|
         TAG_EXT|
@@ -59,13 +63,6 @@ int main(int argc, char *argv[])
 
     while(1)
     {
-        if (millis() - t1 > HEARTBEAT_PERIOD)
-        {
-            heartbeat();
-            t1 = millis();
-        }
-
-        device_manage();
 
         if (usbhid_recv(hidmsg) > 0)
         {
@@ -75,14 +72,16 @@ int main(int argc, char *argv[])
         else
         {
         }
+
         ctaphid_check_timeouts();
 
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 1000*1000*10;
+        nanosleep(&ts,NULL);
     }
 
     // Should never get here
-    usbhid_close();
     printf1(TAG_GREEN, "done\n");
     return 0;
 }
-
-#endif

@@ -13,13 +13,13 @@ BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
 merge_hex=solo mergehex
 
-KEY_PATH ?= "../../keys/dummy-key.hex"
+KEY_PATH ?= "../../keys/attestation/device_key-dummy.hex"
 KEY=$(shell cat $(KEY_PATH))
-ATTEST_PATH ?= "../../keys/production_device_cert.der"
+ATTEST_PATH ?= "../../keys/attestation/device_cert.der"
 merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
-ATTEST_PATH_DEV ?= "../../keys/nk-dev-device_cert.der"
-KEY_PATH_DEV ?= "../../keys/nk-dev-device_key.hex"
+ATTEST_PATH_DEV ?= "../../keys/attestation/dev/device_cert.der"
+KEY_PATH_DEV ?= "../../keys/attestation/dev/device_key.hex"
 KEY_DEV=$(shell cat $(KEY_PATH_DEV))
 merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
 
@@ -39,6 +39,7 @@ firmware:
 
 firmware-debug-1:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	test -f solo.hex || false
 
 .PHONY: show-warnings
 show-warnings:
@@ -56,6 +57,8 @@ bootloader-nonverifying:
 
 bootloader-verifying:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0 2>&1 | tee build-bootloader.log
+	test -f bootloader.hex || false
+
 
 full-clean: clean2
 
@@ -110,11 +113,11 @@ all-locked:
 
 debugboot-app:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex DEBUG=2 PREFIX=$(PREFIX) \
-	LDSCRIPT=linker/stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER'
+	LDSCRIPT=linker/stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER -DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
 
 debugboot-boot:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) DEBUG=1 \
-	LDSCRIPT=linker/bootloader_stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER'
+	LDSCRIPT=linker/bootloader_stm32l4xx_extra.ld EXTRA_DEFINES='-DAPPLICATION_START_PAGE=16 -DSOLO_HACKER $(TEST_MODE_DEFINE)'
 
 boot-sig-checking:
 	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) DEBUG=0
@@ -131,7 +134,7 @@ build-release: cbor clean2 boot-sig-checking clean all
 build-hacker: cbor clean2 boot-no-sig clean all-hacker
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 
-build-debugboot: clean2 debugboot-boot clean debugboot-app
+build-debugboot: | clean2 debugboot-boot clean debugboot-app
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 
 clean:
@@ -142,10 +145,11 @@ clean2:
 	$(MAKE) -f $(APPMAKE) clean
 	$(MAKE) -f $(BOOTMAKE) clean
 
+FW=all.hex
 flash: solo.hex bootloader.hex all.hex
 #	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
-	STM32_Programmer_CLI -c port=SWD -halt  -d all.hex -rst
+	STM32_Programmer_CLI -c port=SWD -halt  -d $(FW) -rst
 
 flash_dfu: solo.hex bootloader.hex
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
