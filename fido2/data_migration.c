@@ -62,15 +62,17 @@ void save_migrated_state(AuthenticatorState *state_tmp_ptr) {
 void do_migration_if_required(AuthenticatorState* state_current){
     // Currently handles only state structures with the same size, or bigger
     // FIXME rework to raw buffers with fixed size to allow state structure size decrease
-    if(!state_current->is_initialized)
-        return;
+    if(!state_current->is_initialized || state_current->data_version == STATE_VERSION){
+      printf1(TAG_GREEN, "State data migration not needed\n");
+      return;
+    }
 
     AuthenticatorState state_tmp;
     AuthenticatorState state_previous;
     authenticator_read_state(&state_previous);
     authenticator_read_state(&state_tmp);
     if(state_current->data_version == 0xFF){
-        printf2(TAG_ERR, "Running migration\n");
+        printf1(TAG_ERR, "Running migration 0xFF->0x01\n");
         bool success = migrate_from_FF_to_01((AuthenticatorState_0xFF *) &state_previous, &state_tmp);
         if (!success){
             printf2(TAG_ERR, "Failed migration from 0xFF to 1\n");
@@ -80,6 +82,14 @@ void do_migration_if_required(AuthenticatorState* state_current){
         dump_hex1(TAG_ERR, (void*)&state_tmp, sizeof(state_tmp));
         dump_hex1(TAG_ERR, (void*)&state_previous, sizeof(state_previous));
         save_migrated_state(&state_tmp);
+    } else if (state_current->data_version == 0x01) {
+      printf1(TAG_ERR, "Running migration 0x01->0x02\n");
+      // RK struct format changed, clear current data
+      ctap_reset_rk();
+      state_current->data_version = 0x02;
+      save_migrated_state(state_current);
+    } else {
+      printf1(TAG_RED, "Data migration 0x%x->0x%x is not handled\n", state_current->data_version, STATE_VERSION);
     }
 
     assert(state_current->data_version == STATE_VERSION);

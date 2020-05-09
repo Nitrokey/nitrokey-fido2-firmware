@@ -315,7 +315,7 @@ static void device_migrate(){
             (uint32_t) & ((flash_attestation_page *)ATTESTATION_PAGE_ADDR)->device_settings,
             (uint64_t)device_settings);
     } else {
-      printf1(TAG_GREEN,"Migration not required\r\n");
+      printf1(TAG_GREEN,"Certificate migration not required\r\n");
   }
 }
 
