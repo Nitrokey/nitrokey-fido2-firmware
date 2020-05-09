@@ -118,8 +118,9 @@
 #define RP_NAME_LIMIT               32  // application limit, name parameter isn't needed.
 #define USER_ID_MAX_SIZE            64
 #define USER_NAME_LIMIT             65  // Must be minimum of 64 bytes but can be more.
-#define DISPLAY_NAME_LIMIT          65  // Must be minimum of 64 bytes but can be more.
-#define ICON_LIMIT                  65 // Must be minimum of 128 bytes but can be more.
+#define DISPLAY_NAME_LIMIT          32  // Must be minimum of 64 bytes but can be more.
+#define ICON_LIMIT                  128 // Must be minimum of 128 bytes but can be more.
+#define RPID_LIMIT                  48
 #define CTAP_MAX_MESSAGE_SIZE       1200
 
 #define CREDENTIAL_RK_FLASH_PAD     2   // size of RK should be 8-byte aligned to store in flash easily.
@@ -182,7 +183,7 @@ typedef struct {
     CTAP_userEntity user;
 
     // Maximum amount of "extra" space in resident key.
-    uint8_t rpId[14+64];
+    uint8_t rpId[RPID_LIMIT];
     uint8_t rpIdSize;
 } __attribute__((packed)) CTAP_residentKey;
 
