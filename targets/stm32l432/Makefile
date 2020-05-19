@@ -1,6 +1,7 @@
 DEBUG ?= 0
 HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
+SOLO=nitrokey
 
 # RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
 # selects the production attestation certificate
@@ -11,17 +12,17 @@ include build/common.mk
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
 BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
-merge_hex=solo mergehex
+merge_hex=$(SOLO) mergehex
 
 KEY_PATH ?= "../../keys/attestation/device_key-dummy.hex"
 KEY=$(shell cat $(KEY_PATH))
 ATTEST_PATH ?= "../../keys/attestation/device_cert.der"
-merge_hex_release=solo mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
+merge_hex_release=$(SOLO) mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
 
 ATTEST_PATH_DEV ?= "../../keys/attestation/dev/device_cert.der"
 KEY_PATH_DEV ?= "../../keys/attestation/dev/device_key.hex"
 KEY_DEV=$(shell cat $(KEY_PATH_DEV))
-merge_hex_dev=solo mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
+merge_hex_dev=$(SOLO) mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
@@ -71,7 +72,7 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
-	solo sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
+	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
 	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
 
@@ -89,8 +90,8 @@ release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warni
 
 .PHONY: test-signed-flash
 test-signed-flash: | flash
-	-solo program aux enter-bootloader
-	solo program bootloader $(signame)
+	-$(SOLO) program aux enter-bootloader
+	$(SOLO) program bootloader $(signame)
 
 .PHONY: debug-release-build
 debug-release-build: | full-clean cbor bootloader-nonverifying clean firmware
@@ -165,13 +166,13 @@ flashboot: bootloader.hex
 
 flash-firmware:
 	$(SZ) -A solo.elf
-	-solo program aux enter-bootloader
-	solo program bootloader $(signamedev).json
+	-$(SOLO) program aux enter-bootloader
+	$(SOLO) program bootloader $(signamedev).json
 
 flash-firmware-final:
 	arm-none-eabi-size -A solo.elf
-	-solo program aux enter-bootloader
-	solo program bootloader $(signamedev)
+	-$(SOLO) program aux enter-bootloader
+	$(SOLO) program bootloader $(signamedev)
 
 # tell ST DFU to enter application
 detach:
