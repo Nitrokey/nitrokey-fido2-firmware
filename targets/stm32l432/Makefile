@@ -67,6 +67,7 @@ full-clean: clean2
 ver=$(VERSION_FULL)
 signamedev=release/fido2-firmware-dev-$(ver)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
+	mkdir -p release/
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
@@ -78,6 +79,7 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
+	mkdir -p release/
 	-rm release/*
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex
