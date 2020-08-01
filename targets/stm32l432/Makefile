@@ -1,7 +1,13 @@
 DEBUG ?= 0
 HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
-SOLO=nitrokey
+SOLO=nitropy fido2 util
+
+
+# development - debug enabled, debug console, debug bootloader keys and certificates, no flash protection
+# test - development minus debug console
+# release - production keys and certificate, flash and debug access protection, no debug console
+
 
 # RELEASE == 1 selects production public key for the bootloader, and R == 0 development one
 # selects the production attestation certificate
@@ -79,6 +85,10 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 .PHONY: release-buildv
 signame1=release/fido2-firmware-$(ver)
 signame=$(signame1).json
+ifeq ($(RELEASE),0)
+signame1=release/fido2-firmware-$(ver)-test
+endif
+
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
 	mkdir -p release/
 	-rm release/*
