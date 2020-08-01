@@ -13,10 +13,10 @@
 #define CTAP1_ERR_CHANNEL_BUSY              0x06
 #define CTAP1_ERR_LOCK_REQUIRED             0x0A
 #define CTAP1_ERR_INVALID_CHANNEL           0x0B
-#define CTAP2_ERR_CBOR_PARSING              0x10
+#define CTAP2_ERR_CBOR_PARSING              0x12
 #define CTAP2_ERR_CBOR_UNEXPECTED_TYPE      0x11
 #define CTAP2_ERR_INVALID_CBOR              0x12
-#define CTAP2_ERR_INVALID_CBOR_TYPE         0x13
+#define CTAP2_ERR_INVALID_CBOR_TYPE         0x12
 #define CTAP2_ERR_MISSING_PARAMETER         0x14
 #define CTAP2_ERR_LIMIT_EXCEEDED            0x15
 #define CTAP2_ERR_UNSUPPORTED_EXTENSION     0x16
