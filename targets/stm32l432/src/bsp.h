@@ -44,7 +44,7 @@ extern volatile uint8_t LED_STATE;
 
 #include "led.h"
 
-#define LED_ON()                 { led_rgb(0xFFFFFF); }
+#define LED_ON()                 { led_rgb(led_default_color); }
 #define LED_OFF()                {  led_rgb(0); }
 #define BUTTON_RESET_ON()        { LL_GPIO_ResetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }
 #define BUTTON_RESET_OFF()       { LL_GPIO_SetOutputPin(SOLO_BUTTON_R_PORT, SOLO_BUTTON_R_PIN); }

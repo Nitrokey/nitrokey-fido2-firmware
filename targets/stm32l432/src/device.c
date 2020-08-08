@@ -216,13 +216,9 @@ int solo_is_locked(){
 // This should be removed in next Solo release.
 void solo_lock_if_not_already() {
     uint8_t buf[2048];
-
     memmove(buf, (uint8_t*)ATTESTATION_PAGE_ADDR, 2048);
-
     ((flash_attestation_page *)buf)->device_settings |= SOLO_FLAG_LOCKED;
-
     flash_erase_page(ATTESTATION_PAGE);
-
     flash_write(ATTESTATION_PAGE_ADDR, buf, 2048);
 }
 
@@ -739,7 +735,29 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 
 #include "user_feedback.h"
 
+int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_function)());
+
 int ctap_user_presence_test(uint32_t up_delay){
+  return ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback);
+}
+
+int ctap_user_presence_test_reset(uint32_t up_delay){
+  led_set_default_color(LED_COLOR_DATA_DELETION);
+  const int res = ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback_extended_wipe);
+  led_reset_default_color();
+  return res;
+}
+
+int ctap_user_presence_test_config(uint32_t up_delay){
+  led_set_default_color(LED_COLOR_SYSTEM);
+  const int res = ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback_extended_wipe);
+  led_reset_default_color();
+  return res;
+}
+
+// +++charged
+
+int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_function)()){
     int ret;
 
     if (device_is_nfc() == NFC_IS_ACTIVE) return 1;
@@ -764,7 +782,7 @@ int ctap_user_presence_test(uint32_t up_delay){
 
     printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
     while (up_delay--){
-        if (u2f_get_user_feedback() == 0) {
+        if (feedback_function() == 0) {
             printf1(TAG_BUTTON, "User's feedback received\n");
             return 1;
         }
@@ -906,10 +924,10 @@ void ctap_overwrite_rk(int index,CTAP_residentKey * rk)
     int byte_offset_into_page = (sizeof(CTAP_residentKey) * (index % (PAGE_SIZE/sizeof(CTAP_residentKey))));
     int page_offset = (index)/(PAGE_SIZE/sizeof(CTAP_residentKey));
 
-    printf1(TAG_GREEN, "overwriting RK %d @ page %d @ addr 0x%08x-0x%08x\r\n", 
-        index, RK_START_PAGE + page_offset, 
-        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page, 
-        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page + sizeof(CTAP_residentKey) 
+    printf1(TAG_GREEN, "overwriting RK %d @ page %d @ addr 0x%08x-0x%08x\r\n",
+        index, RK_START_PAGE + page_offset,
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page,
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page + sizeof(CTAP_residentKey)
         );
     if (page_offset < RK_NUM_PAGES)
     {

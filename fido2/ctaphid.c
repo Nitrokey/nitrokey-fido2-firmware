@@ -725,7 +725,7 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 #if defined(APP_EXECS_BOOTLOADER) && !defined(IS_BOOTLOADER)
         case CTAPHID_ENTERBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT - user presence test\n");
-            if (ctap_user_presence_test(5000)){
+            if (ctap_user_presence_test_config(5000)){
                 boot_solo_bootloader();
                 wb->bcnt = 0;
                 ctaphid_write(wb, NULL, 0);

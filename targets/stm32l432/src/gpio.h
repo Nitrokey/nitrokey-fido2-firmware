@@ -87,5 +87,11 @@ typedef enum {
 BUTTON_STATE_T button_get_press_state (void);
 uint8_t button_get_press (void);
 
+bool is_in_first_10_seconds(void);
+bool button_ready_to_work(void);
+
+void led_reset_default_color(void);
+void led_set_default_color(uint32_t color);
+
 
 #endif /* GPIO_H_ */

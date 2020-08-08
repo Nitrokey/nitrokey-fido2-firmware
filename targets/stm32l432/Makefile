@@ -163,7 +163,7 @@ FW=all.hex
 flash: solo.hex bootloader.hex all.hex
 #	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	STM32_Programmer_CLI -c port=SWD -halt -e all --readunprotect
-	STM32_Programmer_CLI -c port=SWD -halt  -d $(FW) -rst
+	STM32_Programmer_CLI -c port=SWD freq=500 -halt  -d $(FW) -rst
 
 flash_dfu: solo.hex bootloader.hex
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
