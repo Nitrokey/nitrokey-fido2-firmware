@@ -48,12 +48,22 @@ static data uint32_t  led_blink_tim = 0;                    // Timer for TaskLed
 static data uint16_t  led_blink_period_t;                // Period time register
 static data uint16_t  led_blink_ON_t;                // ON time register
 static data uint8_t   led_blink_num;                    // Blink number counter, also an indicator if blinking is on
+static data uint32_t led_default_color = LED_COLOR_REGULAR;
 
 static data uint32_t  button_manager_start_t = 0;
+static data bool  first_10_seconds = true;
+
+bool is_in_first_10_seconds(void){
+  return first_10_seconds;
+}
 
 void button_manager (void) {                          // Requires at least a 750ms long button press to register a valid user button press
 
-	if (button_state == BST_INITIALIZING){
+  if (first_10_seconds && millis() > 10 * 1000) {
+    first_10_seconds = false;
+  }
+
+  if (button_state == BST_INITIALIZING){
 		if (button_manager_start_t == 0){
 			button_manager_start_t = get_ms();
       BUTTON_RESET_OFF();
@@ -115,6 +125,10 @@ BUTTON_STATE_T button_get_press_state (void) {
 	return button_state;
 }
 
+bool button_ready_to_work(void){
+  return button_get_press_state() > BST_META_READY_TO_USE;
+}
+
 uint8_t button_get_press_extended (void) {
 	return ((button_state == BST_PRESSED_REGISTERED_EXT)? 1 : 0);
 }
@@ -132,6 +146,14 @@ uint8_t button_press_is_consumed(void){
 }
 
 volatile uint8_t LED_STATE = 0;
+
+void led_set_default_color(uint32_t color){
+  led_default_color = color;
+}
+
+void led_reset_default_color(void) {
+  led_default_color = LED_COLOR_REGULAR;
+}
 
 void led_on_color(uint32_t color) {
     led_rgb(color);
@@ -166,7 +188,7 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 	led_blink_period_t 	= period_t;
 	led_blink_ON_t = LED_BLINK_T_ON;
 
-	if ( (button_get_press_state() > BST_META_READY_TO_USE && (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) )
+	if ( (button_ready_to_work() && (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) )
 			|| led_blink_num == 1)
         led_on();
 	if (!sanity_check_passed)
@@ -187,6 +209,10 @@ void led_blink_manager (void) {
 
     if (button_get_press_state() == BST_PRESSED_CONSUMED) {
         led_on_color(LED_COLOR_TOUCH_CONSUMED);
+        return;
+    }
+    if (button_get_press_state() == BST_PRESSED_REGISTERED) {
+        led_on_color(LED_COLOR_CHARGED);
         return;
     }
 

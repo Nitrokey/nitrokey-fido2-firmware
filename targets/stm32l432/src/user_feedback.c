@@ -35,7 +35,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
     }
 
     if (blink == true && led_is_blinking() == false)
-        led_blink(10, LED_BLINK_PERIOD);
+        led_blink(50, LED_BLINK_PERIOD);
     else if (blink == false)
         stop_blinking();
 
@@ -88,5 +88,5 @@ int8_t u2f_get_user_feedback(){
 }
 
 int8_t u2f_get_user_feedback_extended_wipe(){
-    return _u2f_get_user_feedback(BST_PRESSED_REGISTERED_EXT, false);
+    return _u2f_get_user_feedback(BST_PRESSED_REGISTERED_EXT, true);
 }

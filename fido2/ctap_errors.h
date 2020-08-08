@@ -5,6 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 #define CTAP1_ERR_SUCCESS                   0x00
+#define CTAP2_OK                            0x00
 #define CTAP1_ERR_INVALID_COMMAND           0x01
 #define CTAP1_ERR_INVALID_PARAMETER         0x02
 #define CTAP1_ERR_INVALID_LENGTH            0x03

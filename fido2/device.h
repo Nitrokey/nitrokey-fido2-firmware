@@ -86,6 +86,7 @@ int device_is_button_pressed();
  * *Optional*, the default implementation will return 1, unless a FIDO2 operation calls for no UP, where this will then return 2.
 */
 int ctap_user_presence_test(uint32_t delay);
+int ctap_user_presence_test_reset(uint32_t delay);
 
 /** Disable the next user presence test.  This is called by FIDO2 layer when a transaction
  *  requests UP to be disabled.  The next call to ctap_user_presence_test should return 2,

@@ -52,7 +52,7 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
 #ifdef APP_EXECS_BOOTLOADER
         case WalletBootloader:
             printf1(TAG_WALLET,"WalletBootloader\n");
-            if (ctap_user_presence_test(5000)){
+            if (ctap_user_presence_test_config(5000)){
                 printf1(TAG_WALLET,"WalletBootloader confirmed\n");
                 boot_solo_bootloader();
             } else {

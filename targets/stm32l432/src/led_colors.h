@@ -9,6 +9,8 @@
 #define LED_COLOR_TOUCH_CONSUMED    (0x00FF00)
 // regular color for all other operations
 #define LED_COLOR_REGULAR           (0xFFFFFF)
+// touch charged
+#define LED_COLOR_CHARGED           (0x0000FF)
 // initial blink just before being ready
 #define LED_COLOR_INIT              (LED_COLOR_REGULAR)
 
