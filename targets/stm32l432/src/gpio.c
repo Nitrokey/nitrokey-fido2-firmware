@@ -57,7 +57,8 @@ bool is_in_first_10_seconds(void){
   return first_10_seconds;
 }
 
-void button_manager(void) { // Requires at least a 750ms long button press to
+void button_manager(void) {
+    // Requires at least a 750ms long button press to
     // register a valid user button press
 
     if (first_10_seconds && millis() > 10 * 1000) {
@@ -81,15 +82,15 @@ void button_manager(void) { // Requires at least a 750ms long button press to
 
     if (IS_BUTTON_PRESSED_RAW()) {           // Button's physical state: pressed
         switch (button_state) {                // Handle press phase
-            case BST_UNPRESSED: {                  // It happened at this moment
+            case BST_UNPRESSED:                  // It happened at this moment
                 button_state = BST_PRESSED_RECENTLY; // Update button state
                 button_press_t = get_ms();           // Start measure press time
-            }
                 break;
-            case BST_PRESSED_RECENTLY: { // Button is already pressed, press time
+            case BST_PRESSED_RECENTLY: {
+                // Button is already pressed, press time
                 // measurement is ongoing
-                if (get_ms() - button_press_t >=
-                    BUTTON_MIN_PRESS_T_MS) { // Press time reached the critical value to
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) {
+                    // Press time reached the critical value to
                     // register a valid user touch
                     button_state = BST_PRESSED_REGISTERED; // Update button state
                 }
