@@ -243,10 +243,13 @@ void led_blink_manager (void) {
 		return;
 
     if (button_get_press_state() == BST_PRESSED_CONSUMED) {
+        stop_blinking();
         led_on_color(LED_COLOR_TOUCH_CONSUMED);
         return;
     }
     if (button_get_press_state() == BST_PRESSED_REGISTERED) {
+        // TODO limit to state, where no request is coming
+        stop_blinking();
         led_on_color(LED_COLOR_CHARGED);
         return;
     }
