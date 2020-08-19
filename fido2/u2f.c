@@ -313,7 +313,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
         return U2F_SW_INSUFFICIENT_MEMORY;
     }
 
-	if ( ! ctap_user_presence_test(750))
+	if ( ! ctap_user_presence_test(20*750))
 	{
 		return U2F_SW_CONDITIONS_NOT_SATISFIED;
 	}
