@@ -79,7 +79,9 @@ typedef enum {
 	BST_PRESSED_REGISTERED,		// touch registered, normal press period
 	BST_PRESSED_REGISTERED_TRANSITIONAL,		// touch registered, normal press, but timeouted
 	BST_PRESSED_REGISTERED_EXT, // touch registered, extended press period
-	BST_PRESSED_CONSUMED,		// touch registered and consumed, but button still not released
+	BST_PRESSED_REGISTERED_EXT_INVALID, // touch registered, extended press period, invalidated
+	BST_PRESSED_CONSUMED,		// touch registered and consumed, button still not released, does not accept requests
+        BST_PRESSED_CONSUMED_ACTIVE,		// BST_PRESSED_CONSUMED, but accepts requests
 
 	BST_MAX_NUM
 } BUTTON_STATE_T;
@@ -92,6 +94,6 @@ bool button_ready_to_work(void);
 
 void led_reset_default_color(void);
 void led_set_default_color(uint32_t color);
-
+char * button_state_to_string(BUTTON_STATE_T state);
 
 #endif /* GPIO_H_ */

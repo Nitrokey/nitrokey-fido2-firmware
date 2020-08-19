@@ -110,12 +110,37 @@ void button_manager (void) {                          // Requires at least a 750
 
 #ifdef LOG_STATE_CHANGE
 	if (button_state != button_state_old){
-        printf1(TAG_BUTTON, "State changed: %02d => %02d\n", button_state_old, button_state);
+//        printf1(TAG_BUTTON, "State changed: %02d => %02d\n", button_state_old, button_state);
+        printf1(TAG_BUTTON, "State changed: %s (%02d) => %s (%02d)\n", button_state_to_string(button_state_old), button_state_old,
+                                                          button_state_to_string(button_state), button_state);
 	    button_state_old = button_state;
     }
 #endif
 
 }
+
+#ifdef LOG_STATE_CHANGE
+#define m(x)  { case x: return #x; }
+char * button_state_to_string(BUTTON_STATE_T state){
+  switch (state) {
+    m(BST_INITIALIZING)
+    m(BST_INITIALIZING_READY_TO_CLEAR)
+    m(BST_META_READY_TO_USE)
+    m(BST_UNPRESSED)
+    m(BST_PRESSED_RECENTLY)
+    m(BST_PRESSED_REGISTERED)
+    m(BST_PRESSED_REGISTERED_TRANSITIONAL)
+    m(BST_PRESSED_REGISTERED_EXT)
+    m(BST_PRESSED_REGISTERED_EXT_INVALID)
+    m(BST_PRESSED_CONSUMED)
+    m(BST_PRESSED_CONSUMED_ACTIVE)
+    m(BST_MAX_NUM)
+    default:
+        return "unknown button state";
+  }
+}
+#undef m
+#endif
 
 uint8_t button_get_press (void) {
 	return ((button_state == BST_PRESSED_REGISTERED)? 1 : 0);
