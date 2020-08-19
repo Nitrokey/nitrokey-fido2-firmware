@@ -106,6 +106,11 @@ void button_manager (void) {                          // Requires at least a 750
 					button_state = BST_PRESSED_REGISTERED_EXT;
 				}
 		    	break;
+		    case BST_PRESSED_REGISTERED_EXT:
+		    	if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT+2000) {
+                            button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
+                        }
+		    	break;
 		    default:
 		    	break;
 		}
