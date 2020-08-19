@@ -57,76 +57,81 @@ bool is_in_first_10_seconds(void){
   return first_10_seconds;
 }
 
-void button_manager (void) {                          // Requires at least a 750ms long button press to register a valid user button press
+void button_manager(void) { // Requires at least a 750ms long button press to
+    // register a valid user button press
 
-  if (first_10_seconds && millis() > 10 * 1000) {
-    first_10_seconds = false;
-  }
+    if (first_10_seconds && millis() > 10 * 1000) {
+        first_10_seconds = false;
+    }
 
-  if (button_state == BST_INITIALIZING){
-		if (button_manager_start_t == 0){
-			button_manager_start_t = get_ms();
-      BUTTON_RESET_OFF();
-			return;
-		}
-		if (get_ms() - button_manager_start_t <= U2F_MS_INIT_BUTTON_PERIOD){
-			return;
-		}
-		button_state = BST_INITIALIZING_READY_TO_CLEAR;
-	}
-	if (button_state == BST_INITIALIZING_READY_TO_CLEAR){
-		return;
-	}
+    if (button_state == BST_INITIALIZING) {
+        if (button_manager_start_t == 0) {
+            button_manager_start_t = get_ms();
+            BUTTON_RESET_OFF();
+            return;
+        }
+        if (get_ms() - button_manager_start_t <= U2F_MS_INIT_BUTTON_PERIOD) {
+            return;
+        }
+        button_state = BST_INITIALIZING_READY_TO_CLEAR;
+    }
+    if (button_state == BST_INITIALIZING_READY_TO_CLEAR) {
+        return;
+    }
 
-	if (IS_BUTTON_PRESSED_RAW()) {                        // Button's physical state: pressed
-		switch (button_state) {                        // Handle press phase
-		    case BST_UNPRESSED: {                     // It happened at this moment
-				button_state  = BST_PRESSED_RECENTLY;  // Update button state
-				button_press_t = get_ms();              // Start measure press time
-		    }break;
-		    case BST_PRESSED_RECENTLY: {              // Button is already pressed, press time measurement is ongoing
-				if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) { // Press time reached the critical value to register a valid user touch
-				    button_state = BST_PRESSED_REGISTERED; // Update button state
-				}
-		    }break;
-		    case BST_PRESSED_CONSUMED:
-                        break;
-                    case BST_PRESSED_CONSUMED_ACTIVE:
-                        if (get_ms() - button_press_t >= 2000) {
-                          button_state = BST_PRESSED_CONSUMED;
-                        }
-                        break;
-		    case BST_PRESSED_REGISTERED:
-				if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
-					button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
-				}
-				break;
-		    case BST_PRESSED_REGISTERED_TRANSITIONAL:
-		    	if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
-					button_state = BST_PRESSED_REGISTERED_EXT;
-				}
-		    	break;
-		    case BST_PRESSED_REGISTERED_EXT:
-		    	if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT+2000) {
-                            button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
-                        }
-		    	break;
-		    default:
-		    	break;
-		}
-	} else {                                          // Button is unprssed
-		button_state = BST_UNPRESSED;                  // Update button state
-	}
+    if (IS_BUTTON_PRESSED_RAW()) {           // Button's physical state: pressed
+        switch (button_state) {                // Handle press phase
+            case BST_UNPRESSED: {                  // It happened at this moment
+                button_state = BST_PRESSED_RECENTLY; // Update button state
+                button_press_t = get_ms();           // Start measure press time
+            }
+                break;
+            case BST_PRESSED_RECENTLY: { // Button is already pressed, press time
+                // measurement is ongoing
+                if (get_ms() - button_press_t >=
+                    BUTTON_MIN_PRESS_T_MS) { // Press time reached the critical value to
+                    // register a valid user touch
+                    button_state = BST_PRESSED_REGISTERED; // Update button state
+                }
+            }
+                break;
+            case BST_PRESSED_CONSUMED:
+                break;
+            case BST_PRESSED_CONSUMED_ACTIVE:
+                if (get_ms() - button_press_t >= 2000) {
+                    button_state = BST_PRESSED_CONSUMED;
+                }
+                break;
+            case BST_PRESSED_REGISTERED:
+                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
+                    button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
+                }
+                break;
+            case BST_PRESSED_REGISTERED_TRANSITIONAL:
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
+                    button_state = BST_PRESSED_REGISTERED_EXT;
+                }
+                break;
+            case BST_PRESSED_REGISTERED_EXT:
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + 2000) {
+                    button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
+                }
+                break;
+            default:
+                break;
+        }
+    } else {                        // Button is unprssed
+        button_state = BST_UNPRESSED; // Update button state
+    }
 
 #ifdef LOG_STATE_CHANGE
-	if (button_state != button_state_old){
-//        printf1(TAG_BUTTON, "State changed: %02d => %02d\n", button_state_old, button_state);
-        printf1(TAG_BUTTON, "State changed: %s (%02d) => %s (%02d)\n", button_state_to_string(button_state_old), button_state_old,
-                                                          button_state_to_string(button_state), button_state);
-	    button_state_old = button_state;
+    if (button_state != button_state_old) {
+        printf1(TAG_BUTTON, "State changed: %s (%02d) => %s (%02d)\n",
+                button_state_to_string(button_state_old), button_state_old,
+                button_state_to_string(button_state), button_state);
+        button_state_old = button_state;
     }
 #endif
-
 }
 
 #ifdef LOG_STATE_CHANGE
