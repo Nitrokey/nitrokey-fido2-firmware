@@ -315,6 +315,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
 	if ( ! ctap_user_presence_test(20*750))
 	{
+                printf2(TAG_U2F,"No user feedback got\r\n");
 		return U2F_SW_CONDITIONS_NOT_SATISFIED;
 	}
 
