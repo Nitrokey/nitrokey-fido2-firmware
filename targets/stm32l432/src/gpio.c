@@ -86,20 +86,18 @@ void button_manager(void) {
                 button_state = BST_PRESSED_RECENTLY; // Update button state
                 button_press_t = get_ms();           // Start measure press time
                 break;
-            case BST_PRESSED_RECENTLY: {
-                // Button is already pressed, press time
-                // measurement is ongoing
+            case BST_PRESSED_RECENTLY:
+                // Button is already pressed, press time measurement is ongoing
                 if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) {
                     // Press time reached the critical value to
                     // register a valid user touch
                     button_state = BST_PRESSED_REGISTERED; // Update button state
                 }
-            }
                 break;
             case BST_PRESSED_CONSUMED:
                 break;
             case BST_PRESSED_CONSUMED_ACTIVE:
-                if (get_ms() - button_press_t >= 2000) {
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS + BUTTON_VALID_CONSUMED_T_MS) {
                     button_state = BST_PRESSED_CONSUMED;
                 }
                 break;
@@ -114,7 +112,7 @@ void button_manager(void) {
                 }
                 break;
             case BST_PRESSED_REGISTERED_EXT:
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + 2000) {
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + BUTTON_VALID_PRESS_T_MS_EXT) {
                     button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
                 }
                 break;

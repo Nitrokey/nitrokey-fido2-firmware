@@ -31,7 +31,9 @@
 #include <stdbool.h>
 
 #define BUTTON_MIN_PRESS_T_MS    1000
+#define BUTTON_VALID_CONSUMED_T_MS    (2*1000)
 #define BUTTON_MIN_PRESS_T_MS_EXT    (10*1000)
+#define BUTTON_VALID_PRESS_T_MS_EXT    (2*1000)
 #define BUTTON_MAX_PRESS_T_MS    (3*1000)
 
 // set time after the power on, during which a single U2F or configuration
