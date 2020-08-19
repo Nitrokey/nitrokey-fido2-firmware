@@ -90,7 +90,12 @@ void button_manager (void) {                          // Requires at least a 750
 				}
 		    }break;
 		    case BST_PRESSED_CONSUMED:
-		    	break;
+                        break;
+                    case BST_PRESSED_CONSUMED_ACTIVE:
+                        if (get_ms() - button_press_t >= 2000) {
+                          button_state = BST_PRESSED_CONSUMED;
+                        }
+                        break;
 		    case BST_PRESSED_REGISTERED:
 				if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
 					button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
@@ -143,7 +148,7 @@ char * button_state_to_string(BUTTON_STATE_T state){
 #endif
 
 uint8_t button_get_press (void) {
-	return ((button_state == BST_PRESSED_REGISTERED)? 1 : 0);
+	return ((button_state == BST_PRESSED_REGISTERED || button_state == BST_PRESSED_CONSUMED_ACTIVE)? 1 : 0);
 }
 
 BUTTON_STATE_T button_get_press_state (void) {
