@@ -203,3 +203,7 @@ test:
 	$(MAKE) build-hacker
 	$(MAKE) build-debugboot
 	$(MAKE) clean2
+
+.PHONY: run-debug
+run-debug:
+	openocd -f interface/stlink-v2.cfg  -f target/stm32l4x.cfg
