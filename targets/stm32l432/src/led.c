@@ -49,6 +49,7 @@ void led_rgb(uint32_t hex)
     TIM2->CCR4 = 1000 - (g * 100)/(256);
 }
 
+#ifdef NEW_COLOR_SYNTAX
 typedef struct color {
   union {
       struct {
@@ -64,6 +65,7 @@ typedef struct color {
 void test(){
     led_rgb( (color){1,1,1}.raw );
 }
+#endif
 
 void led_test_colors()
 {

@@ -430,9 +430,9 @@ void main_loop_delay(void)
 
 }
 
+#ifdef LED_WINK_VALUE
 static int wink_time = 0;
 static uint32_t winkt1 = 0;
-#ifdef LED_WINK_VALUE
 static uint32_t winkt2 = 0;
 #endif
 
@@ -442,10 +442,9 @@ void device_wink(void)
     led_blink(10, LED_BLINK_PERIOD);
 }
 
-
 void heartbeat(void)
 {
-    return;
+#ifdef HEARBEAT
 
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
@@ -496,8 +495,8 @@ void heartbeat(void)
     {
     }
 
+#endif
 }
-
 
 static int authenticator_is_backup_initialized(void)
 {
