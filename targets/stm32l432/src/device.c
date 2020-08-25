@@ -780,6 +780,7 @@ int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_functio
 #endif
 
     printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
+    device_set_status(CTAPHID_STATUS_UPNEEDED);
     while (up_delay--){
         if (feedback_function() == 0) {
             printf1(TAG_BUTTON, "User's feedback received\n");
