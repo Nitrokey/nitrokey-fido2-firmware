@@ -330,6 +330,7 @@ int bootloader_bridge(int klen, uint8_t * keyh)
  */
 void bootloader_heartbeat()
 {
+#if 0
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;
@@ -351,6 +352,7 @@ void bootloader_heartbeat()
     }
 
     led_rgb(((val * g)<<8) | ((val*r) << 16) | (val*b));
+#endif
 }
 
 uint32_t ctap_atomic_count(uint32_t amount)
