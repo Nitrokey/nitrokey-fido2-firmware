@@ -795,6 +795,7 @@ int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_functio
         delay(1);
     }
     printf1(TAG_BUTTON, "User's feedback NOT received\n");
+    stop_blinking();
     return 0;
 }
 
