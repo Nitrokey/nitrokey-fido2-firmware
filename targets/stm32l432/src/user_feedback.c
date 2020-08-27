@@ -41,8 +41,9 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         return 1;
     }
 
-    if (blink == true && led_is_blinking() == false)
+    if (blink == true && led_is_blinking() == false){
         led_blink(50, LED_BLINK_PERIOD);
+    }
     else if (blink == false)
         stop_blinking();
 
