@@ -272,8 +272,17 @@ void led_blink_manager (void) {
     if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
         return;
 
-	if (led_blink_num) {                                     // LED blinking is on
-		if (IS_LED_ON()) {                                 // ON state
+
+    if (led_blink_num) {                                     // LED blinking is on
+        if (button_press_in_progress()) {
+            led_blink_period_t = LED_BLINK_PERIOD / 2;
+            led_blink_ON_t = LED_BLINK_T_ON / 2;
+        } else {
+            led_blink_period_t = LED_BLINK_PERIOD;
+            led_blink_ON_t = LED_BLINK_T_ON;
+        }
+
+        if (IS_LED_ON()) {                                 // ON state
 			if (get_ms() - led_blink_tim >= led_blink_ON_t) { // ON time expired
                 led_off();                                 // LED physical state -> OFF
 				if (led_blink_num) {                         // It isnt the last blink round: initialize OFF state:
