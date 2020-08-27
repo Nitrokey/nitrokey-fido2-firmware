@@ -77,6 +77,8 @@ void button_manager(void) {
         button_state = BST_INITIALIZING_READY_TO_CLEAR;
     }
     if (button_state == BST_INITIALIZING_READY_TO_CLEAR) {
+        button_state = BST_META_READY_TO_USE;
+        clear_button_press();
         return;
     }
 

@@ -350,8 +350,6 @@ void device_init()
 #else
     flash_option_bytes_init(0);
 #endif
-
-    clear_button_press();
 }
 
 int device_is_nfc(void)
@@ -660,7 +658,6 @@ void device_manage(void)
 #ifndef IS_BOOTLOADER
 	if(device_is_nfc())
     nfc_loop();
-    clear_button_press();
 #endif
     run_drivers();
 }
