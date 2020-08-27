@@ -27,6 +27,13 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         return 0;
     }
 
+    // Auto touch for BST_PRESSED_CONSUMED_ACTIVE state.
+    // For the short activation period BUTTON_VALID_CONSUMED_T_MS after a touch is consumed, only simple actions
+    if (button_get_press() && target_button_state == BST_PRESSED_REGISTERED) {
+        printf1(TAG_BUTTON, "Touch active\n");
+        return 0;
+    }
+
     // Reject all requests, if device is not ready yet for touch button feedback,
     // or if the touch is already consumed
     if (button_press_is_consumed() || button_get_press_state() < BST_META_READY_TO_USE) {
@@ -62,7 +69,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
         printf1(TAG_BUTTON, "Touch registered\n");
         // Button has been pushed in time
         user_presence = 1;
-        button_press_set_consumed();
+        button_press_set_consumed(target_button_state);
         stop_blinking();
 #ifdef SHOW_TOUCH_REGISTERED
         //show short confirming animation

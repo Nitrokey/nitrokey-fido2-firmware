@@ -41,6 +41,7 @@
 
 
 uint32_t        button_press_t;                   // Timer for TaskButton() timings
+uint32_t        button_press_consumed_t;                   // Timer for TaskButton() timings
 BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 BUTTON_STATE_T  button_state_old = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 
@@ -87,6 +88,7 @@ void button_manager(void) {
             case BST_UNPRESSED:                  // It happened at this moment
                 button_state = BST_PRESSED_RECENTLY; // Update button state
                 button_press_t = get_ms();           // Start measure press time
+                button_press_consumed_t = 0;
                 break;
             case BST_PRESSED_RECENTLY:
                 // Button is already pressed, press time measurement is ongoing
@@ -94,13 +96,6 @@ void button_manager(void) {
                     // Press time reached the critical value to
                     // register a valid user touch
                     button_state = BST_PRESSED_REGISTERED; // Update button state
-                }
-                break;
-            case BST_PRESSED_CONSUMED:
-                break;
-            case BST_PRESSED_CONSUMED_ACTIVE:
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS + BUTTON_VALID_CONSUMED_T_MS) {
-                    button_state = BST_PRESSED_CONSUMED;
                 }
                 break;
             case BST_PRESSED_REGISTERED:
@@ -114,9 +109,19 @@ void button_manager(void) {
                 }
                 break;
             case BST_PRESSED_REGISTERED_EXT:
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + BUTTON_VALID_PRESS_T_MS_EXT) {
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + BUTTON_MAX_PRESS_T_MS+ BUTTON_VALID_PRESS_T_MS_EXT) {
                     button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
                 }
+                break;
+            case BST_PRESSED_CONSUMED_ACTIVE:
+                if (button_press_consumed_t == 0) {
+                    button_press_consumed_t = get_ms();
+                }
+                if (get_ms() - button_press_consumed_t >= BUTTON_VALID_CONSUMED_T_MS) {
+                    button_state = BST_PRESSED_CONSUMED;
+                }
+                break;
+            case BST_PRESSED_CONSUMED:
                 break;
             default:
                 break;
@@ -175,11 +180,17 @@ uint8_t button_get_press_extended (void) {
 }
 
 uint8_t button_press_in_progress(void){
-	return ( (button_state > BST_UNPRESSED)? 1 : 0);
+	return ( (button_state > BST_UNPRESSED &&
+             button_state != BST_PRESSED_CONSUMED &&
+             button_state != BST_PRESSED_REGISTERED_EXT_INVALID)? 1 : 0);
 }
 
-void button_press_set_consumed(void){
-	button_state = BST_PRESSED_CONSUMED_ACTIVE;
+void button_press_set_consumed(const BUTTON_STATE_T target_button_state){
+    if (target_button_state == BST_PRESSED_REGISTERED) {
+        button_state = BST_PRESSED_CONSUMED_ACTIVE;
+    } else {
+        button_state = BST_PRESSED_CONSUMED;
+    }
 }
 
 uint8_t button_press_is_consumed(void){
