@@ -251,25 +251,26 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 }
 
 void led_blink_manager (void) {
-    if (button_get_press_state() == BST_INITIALIZING_READY_TO_CLEAR) {
-        led_on_color(LED_COLOR_INIT);
-        return;
+    switch (button_get_press_state()) {
+        case BST_INITIALIZING_READY_TO_CLEAR:
+            led_on_color(LED_COLOR_INIT);
+            return;
+        case BST_PRESSED_CONSUMED:
+            led_blink_num = 0;
+            led_on_color(LED_COLOR_TOUCH_CONSUMED);
+            return;
+//        case BST_PRESSED_REGISTERED:
+//        case BST_PRESSED_CONSUMED_ACTIVE:
+//            // TODO limit to state, where no request is coming
+//            led_blink_num = 0;
+//            led_on_color(LED_COLOR_CHARGED);
+//            return;
+        default:
+            break;
     }
 
-	if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
-		return;
-
-    if (button_get_press_state() == BST_PRESSED_CONSUMED) {
-        stop_blinking();
-        led_on_color(LED_COLOR_TOUCH_CONSUMED);
+    if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
         return;
-    }
-    if (button_get_press_state() == BST_PRESSED_REGISTERED) {
-        // TODO limit to state, where no request is coming
-        stop_blinking();
-        led_on_color(LED_COLOR_CHARGED);
-        return;
-    }
 
 	if (led_blink_num) {                                     // LED blinking is on
 		if (IS_LED_ON()) {                                 // ON state
