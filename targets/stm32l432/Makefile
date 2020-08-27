@@ -207,3 +207,7 @@ test:
 .PHONY: run-debug
 run-debug:
 	openocd -f interface/stlink-v2.cfg  -f target/stm32l4x.cfg
+
+.PHONY: run-reset
+run-reset:
+	STM32_Programmer_CLI -c port=SWD -rst

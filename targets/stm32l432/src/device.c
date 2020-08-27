@@ -115,11 +115,13 @@ void TIM6_DAC_IRQHandler(void)
     // timer is only 16 bits, so roll it over here
     TIM6->SR = 0;
     __90_ms += 1;
-    if ((millis() - __last_update) > 90)
-    {
-        if (__device_status != CTAPHID_STATUS_IDLE)
-        {
+
+    if ((millis() - __last_update) > 90 ){
+        if (__device_status != CTAPHID_STATUS_IDLE){
             ctaphid_update_status(__device_status);
+            __disable_irq();
+            __last_update = millis();
+            __enable_irq();
         }
     }
 
@@ -400,13 +402,22 @@ int usbhid_recv(uint8_t * msg)
     return 0;
 }
 
+#include "stm32l4xx_ll_pwr.h"
 void usbhid_send(uint8_t * msg)
 {
-
+    uint32_t guard_counter = 0; // since this might be called during TIM6 IRQ call, we can't rely on time
     printf1(TAG_DUMP2,"<< ");
     dump_hex1(TAG_DUMP2, msg, HID_PACKET_SIZE);
-    while (PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f) == USB_EP_TX_VALID)
-        ;
+    uint8_t flag = PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f);
+    while (flag == USB_EP_TX_VALID){
+        if(guard_counter++ >= 1000*100*2){
+            // TODO replace with watchdog / issue reboot
+            printf2(TAG_ERR, "Failed to send USBHID message. Status: 0x%X. Discarding.\r\n", flag);
+//            USBD_LL_FlushEP(&Solo_USBD_Device, HID_EPIN_ADDR);
+            return;
+        }
+        flag = PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f);
+    }
     USBD_LL_Transmit(&Solo_USBD_Device, HID_EPIN_ADDR, msg, HID_PACKET_SIZE);
 
 

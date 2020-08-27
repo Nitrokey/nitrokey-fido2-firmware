@@ -199,6 +199,20 @@ uint8_t button_press_is_consumed(void){
 
 volatile uint8_t LED_STATE = 0;
 
+void led_set_proper_color_for_expected_state(BUTTON_STATE_T b){
+    switch (b) {
+        case BST_PRESSED_REGISTERED:
+            led_set_default_color(LED_COLOR_REGULAR);
+            break;
+        case BST_PRESSED_REGISTERED_EXT:
+            led_set_default_color(LED_COLOR_SYSTEM);
+            break;
+        default:
+            led_set_default_color(LED_COLOR_REGULAR);
+            break;
+    }
+}
+
 void led_set_default_color(uint32_t color){
   led_default_color = color;
 }

@@ -97,6 +97,7 @@ bool button_ready_to_work(void);
 void led_reset_default_color(void);
 void led_set_default_color(uint32_t color);
 char * button_state_to_string(BUTTON_STATE_T state);
+void led_set_proper_color_for_expected_state(BUTTON_STATE_T b);
 void button_press_set_consumed(BUTTON_STATE_T target_button_state);
 
 #endif /* GPIO_H_ */
