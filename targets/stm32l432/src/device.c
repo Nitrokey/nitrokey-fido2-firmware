@@ -753,6 +753,24 @@ int ctap_user_presence_test_config(uint32_t up_delay){
 
 // +++charged
 
+typedef struct NK_timer_t {
+    uint32_t wait_until_t;
+} NK_timer_t;
+NK_timer_t timer_wait_for(const uint32_t delay){
+    NK_timer_t t;
+    t.wait_until_t = millis() + delay;
+    // timer overflow check, e.g. bool overflow = t.wait_until_t < millis()
+    // not needed since clock will overflow as well, and will work with this method
+    return t;
+}
+
+bool timer_is_elapsed(const NK_timer_t t){
+    return millis() >= t.wait_until_t;
+}
+bool timer_is_active(const NK_timer_t t){
+    return millis() < t.wait_until_t;
+}
+
 int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_function)()){
     int ret;
 
@@ -778,7 +796,8 @@ int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_functio
 
     printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
     device_set_status(CTAPHID_STATUS_UPNEEDED);
-    while (up_delay--){
+    NK_timer_t t = timer_wait_for(up_delay);
+    while (timer_is_active(t)){
         if (feedback_function() == 0) {
             printf1(TAG_BUTTON, "User's feedback received\n");
             return 1;
