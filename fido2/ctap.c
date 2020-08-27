@@ -570,16 +570,18 @@ static unsigned int get_credential_id_size(int type)
 
 static int ctap2_user_presence_test(const uint8_t ctap_command)
 {
+    uint32_t up_delay = CTAP2_UP_RESET_DELAY_MS;
     int (*feedback_function)(uint32_t) = ctap_user_presence_test;
     if (ctap_command == CTAP_RESET) {
       if (is_in_first_10_seconds() != 1) {
         return CTAP2_ERR_NOT_ALLOWED;
       }
+      up_delay = CTAP2_UP_RESET_DELAY_MS;
       feedback_function = ctap_user_presence_test_reset;
     }
 
     device_set_status(CTAPHID_STATUS_UPNEEDED);
-    int ret = feedback_function(CTAP2_UP_DELAY_MS);
+    int ret = feedback_function(up_delay);
     if ( ret > 1 )
     {
         return CTAP2_ERR_PROCESSING;
