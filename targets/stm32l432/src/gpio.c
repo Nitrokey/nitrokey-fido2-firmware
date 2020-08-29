@@ -41,7 +41,7 @@
 
 
 uint32_t        button_press_t;                   // Timer for TaskButton() timings
-uint32_t        button_press_consumed_t;                   // Timer for TaskButton() timings
+uint32_t        button_press_consumed_t = 0;                   // Timer for TaskButton() timings
 BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 BUTTON_STATE_T  button_state_old = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 
@@ -122,6 +122,9 @@ void button_manager(void) {
                 }
                 break;
             case BST_PRESSED_CONSUMED:
+                if (button_press_consumed_t != 0) {
+                    button_press_consumed_t = 0;
+                }
                 break;
             default:
                 break;
