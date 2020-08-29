@@ -61,8 +61,9 @@ build-release-locked: cbor clean2 boot-sig-checking clean all-locked
 build-release: cbor clean2 boot-sig-checking clean all
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 
-build-hacker: cbor clean2 boot-no-sig clean all-hacker
+build-hacker: | cbor clean2 boot-no-sig clean all-hacker
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
+	ls -lh all.hex
 
 build-debugboot: clean2 debugboot-boot clean debugboot-app
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
