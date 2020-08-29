@@ -35,7 +35,7 @@
 #define BUTTON_MAX_PRESS_T_MS    (3*1000)
 
 #define BUTTON_MIN_PRESS_T_MS_EXT    (5*1000)
-#define BUTTON_VALID_PRESS_T_MS_EXT    (2*1000)
+#define BUTTON_MAX_PRESS_T_MS_EXT    (8*1000)
 
 // set time after the power on, during which a single U2F or configuration
 // request would be accepted

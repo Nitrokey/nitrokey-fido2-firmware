@@ -109,7 +109,7 @@ void button_manager(void) {
                 }
                 break;
             case BST_PRESSED_REGISTERED_EXT:
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT + BUTTON_MAX_PRESS_T_MS+ BUTTON_VALID_PRESS_T_MS_EXT) {
+                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS_EXT) {
                     button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
                 }
                 break;
