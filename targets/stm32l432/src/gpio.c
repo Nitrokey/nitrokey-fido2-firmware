@@ -273,11 +273,11 @@ void led_blink_manager (void) {
             led_on_color(LED_COLOR_TOUCH_CONSUMED);
             return;
 //        case BST_PRESSED_REGISTERED:
-//        case BST_PRESSED_CONSUMED_ACTIVE:
+        case BST_PRESSED_CONSUMED_ACTIVE:
 //            // TODO limit to state, where no request is coming
-//            led_blink_num = 0;
-//            led_on_color(LED_COLOR_CHARGED);
-//            return;
+            stop_blinking();
+            led_on_color(LED_COLOR_CHARGED);
+            return;
         default:
             break;
     }
