@@ -140,10 +140,10 @@ void button_manager(void) {
 #endif
 }
 
+char * button_state_to_string(BUTTON_STATE_T state){
 #ifdef LOG_STATE_CHANGE
 #define m(x)  { case x: return #x; }
-char * button_state_to_string(BUTTON_STATE_T state){
-  switch (state) {
+    switch (state) {
     m(BST_INITIALIZING)
     m(BST_INITIALIZING_READY_TO_CLEAR)
     m(BST_META_READY_TO_USE)
@@ -159,9 +159,10 @@ char * button_state_to_string(BUTTON_STATE_T state){
     default:
         return "unknown button state";
   }
-}
 #undef m
 #endif
+    return "";
+}
 
 uint8_t button_get_press (void) {
 	return ((button_state == BST_PRESSED_REGISTERED || button_state == BST_PRESSED_CONSUMED_ACTIVE)? 1 : 0);
@@ -189,6 +190,7 @@ void button_press_set_consumed(const BUTTON_STATE_T target_button_state){
     if (target_button_state == BST_PRESSED_REGISTERED) {
         button_state = BST_PRESSED_CONSUMED_ACTIVE;
     } else {
+        printf1(TAG_BUTTON, "Expected button state %s, setting to CONSUMED\r\n", button_state_to_string(target_button_state));
         button_state = BST_PRESSED_CONSUMED;
     }
 }
