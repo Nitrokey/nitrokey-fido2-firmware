@@ -31,7 +31,7 @@ static void flash_unlock(void)
 // Locks flash and turns off DFU
 void flash_option_bytes_init(int boot_from_dfu)
 {
-    uint32_t val = 0xfffff8aa;
+    uint32_t val = 0xfffff8aa;  // ROP==0
 
     if (boot_from_dfu){
         val &= ~(1<<27); // nBOOT0 = 0  (boot from system rom)
@@ -39,7 +39,7 @@ void flash_option_bytes_init(int boot_from_dfu)
     else {
         if (solo_is_locked())
         {
-            val = 0xfffff8cc;
+//            val = 0xfffff8cc;   // ROP==2
         }
     }
 
