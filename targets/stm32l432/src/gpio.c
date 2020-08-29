@@ -237,12 +237,11 @@ void led_off (void) {
 }
 
 void stop_blinking(void){
-    led_blink_num = 0;
-    led_off();
+    led_blink_num = 1;
 }
 
 bool led_is_blinking(void){
-	return led_blink_num != 0;
+	return led_blink_num > 1;
 }
 
 void led_change_ON_time(uint16_t ON_time){
@@ -250,7 +249,7 @@ void led_change_ON_time(uint16_t ON_time){
 }
 
 void led_blink (uint8_t blink_num, uint16_t period_t) {
-	led_blink_num     	= blink_num;
+	led_blink_num     	+= blink_num;
 	led_blink_period_t 	= period_t;
 	led_blink_ON_t = LED_BLINK_T_ON;
 
@@ -270,7 +269,7 @@ void led_blink_manager (void) {
             led_on_color(LED_COLOR_INIT);
             return;
         case BST_PRESSED_CONSUMED:
-            led_blink_num = 0;
+            stop_blinking();
             led_on_color(LED_COLOR_TOUCH_CONSUMED);
             return;
 //        case BST_PRESSED_REGISTERED:
@@ -296,7 +295,7 @@ void led_blink_manager (void) {
             led_blink_ON_t = LED_BLINK_T_ON;
         }
 
-        if (IS_LED_ON()) {                                 // ON state
+        if (IS_LED_ON() || led_blink_num == 1) {                                 // ON state
 			if (get_ms() - led_blink_tim >= led_blink_ON_t) { // ON time expired
                 led_off();                                 // LED physical state -> OFF
 				if (led_blink_num) {                         // It isnt the last blink round: initialize OFF state:
