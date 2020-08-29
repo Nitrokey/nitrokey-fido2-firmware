@@ -153,7 +153,7 @@
 #define CTAP2_UP_DELAY_MS           29000
 #define CTAP2_UP_RESET_DELAY_MS     15000
 #define CTAP2_UP_CONFIG_DELAY_MS    15000
-#define U2F_UP_DELAY_MS             (CTAP2_UP_DELAY_MS)
+#define U2F_UP_DELAY_MS             (500)
 
 typedef struct
 {
