@@ -408,15 +408,12 @@ void usbhid_send(uint8_t * msg)
     uint32_t guard_counter = 0; // since this might be called during TIM6 IRQ call, we can't rely on time
     printf1(TAG_DUMP2,"<< ");
     dump_hex1(TAG_DUMP2, msg, HID_PACKET_SIZE);
-    uint8_t flag = PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f);
-    while (flag == USB_EP_TX_VALID){
+    while (PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f) == USB_EP_TX_VALID){
         if(guard_counter++ >= 1000*100*2){
             // TODO replace with watchdog / issue reboot
-            printf2(TAG_ERR, "Failed to send USBHID message. Status: 0x%X. Discarding.\r\n", flag);
-//            USBD_LL_FlushEP(&Solo_USBD_Device, HID_EPIN_ADDR);
+            printf2(TAG_ERR, "Failed to send USBHID message. Discarding.\r\n");
             return;
         }
-        flag = PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f);
     }
     USBD_LL_Transmit(&Solo_USBD_Device, HID_EPIN_ADDR, msg, HID_PACKET_SIZE);
 
