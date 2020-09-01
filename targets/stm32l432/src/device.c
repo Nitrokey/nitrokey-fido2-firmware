@@ -800,16 +800,19 @@ int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_functio
     return 1;
 #endif
 
+    set_button_awaiting_up(true);
     printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
     NK_timer_t t = timer_wait_for(up_delay);
     while (timer_is_active(t)){
         if (feedback_function() == 0) {
             printf1(TAG_BUTTON, "User's feedback received\n");
+            set_button_awaiting_up(false);
             return 1;
         }
         ret = handle_packets();
         if (ret) {
             stop_blinking();
+            set_button_awaiting_up(false);
             return ret;
         }
         run_drivers();
@@ -817,6 +820,7 @@ int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_functio
     }
     printf1(TAG_BUTTON, "User's feedback NOT received\n");
     stop_blinking();
+    set_button_awaiting_up(false);
     return 0;
 }
 

@@ -268,6 +268,15 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
     printf1(TAG_BUTTON, "Blinking set to %d %d\n", blink_num, period_t);
 }
 
+static bool button_awaiting_up = false;
+void set_button_awaiting_up(const bool awaits){
+    button_awaiting_up = awaits;
+}
+
+bool button_awaiting_UP(void){
+    return button_awaiting_up;
+}
+
 void led_blink_manager (void) {
     switch (button_get_press_state()) {
         case BST_INITIALIZING:
@@ -278,7 +287,10 @@ void led_blink_manager (void) {
             stop_blinking();
             led_on_color(LED_COLOR_TOUCH_CONSUMED);
             return;
-//        case BST_PRESSED_REGISTERED:
+        case BST_PRESSED_REGISTERED:
+            if (button_awaiting_UP()) {
+                break;
+            } __attribute__ ((fallthrough));
         case BST_PRESSED_CONSUMED_ACTIVE:
 //            // TODO limit to state, where no request is coming
             stop_blinking();
