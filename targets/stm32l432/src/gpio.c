@@ -193,9 +193,9 @@ void button_press_set_consumed(const BUTTON_STATE_T target_button_state){
     if (target_button_state == BST_PRESSED_REGISTERED) {
         button_state = BST_PRESSED_CONSUMED_ACTIVE;
     } else {
-        printf1(TAG_BUTTON, "Expected button state %s, setting to CONSUMED\r\n", button_state_to_string(target_button_state));
         button_state = BST_PRESSED_CONSUMED;
     }
+    printf1(TAG_BUTTON, "Expected button state %s, setting to %s\r\n", button_state_to_string(target_button_state), button_state_to_string(button_state));
 }
 
 uint8_t button_press_is_consumed(void){
