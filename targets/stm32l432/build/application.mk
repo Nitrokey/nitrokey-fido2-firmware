@@ -72,7 +72,7 @@ all: $(TARGET).elf
 
 %.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
-	@$(CC) $^ $(HW) $(LDFLAGS) -o $@
+	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	@echo "Built version: $(VERSION_FLAGS)"
 
 %.hex: %.elf
