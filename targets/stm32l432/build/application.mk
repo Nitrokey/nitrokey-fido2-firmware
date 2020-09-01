@@ -64,7 +64,7 @@ all: $(TARGET).elf
 
 %.o: %.c
 	@echo "*** $<"
-	@$(CC) $^ $(HW)  -Og -g3 $(CFLAGS) -o $@
+	@$(CC) $^ $(HW)  -Os -g3 $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
 	@echo "*** $<"
@@ -89,5 +89,5 @@ cbor:
 	cd ../../tinycbor/ && make clean
 	cd ../../tinycbor/ && make CC="$(CC)" AR=$(AR) \
 LDFLAGS="$(LDFLAGS_LIB)" \
-CFLAGS="$(CFLAGS) -Og -g3  -DCBOR_PARSER_MAX_RECURSIONS=3"
+CFLAGS="$(CFLAGS) -Os -g3  -DCBOR_PARSER_MAX_RECURSIONS=3"
 

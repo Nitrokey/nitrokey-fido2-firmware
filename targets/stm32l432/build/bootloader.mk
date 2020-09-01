@@ -69,7 +69,7 @@ all: $(TARGET).elf
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 %.elf: $(OBJ)
-	$(CC) $^ $(HW) $(LDFLAGS) -o $@
+	$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	$(SZ) $@
 
 %.hex: %.elf
