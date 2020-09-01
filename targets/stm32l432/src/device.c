@@ -450,7 +450,7 @@ void device_wink(void)
 
 void heartbeat(void)
 {
-#ifdef HEARBEAT
+#ifdef HEARTBEAT
 
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
@@ -758,8 +758,6 @@ int ctap_user_presence_test_config(uint32_t up_delay){
   led_reset_default_color();
   return res;
 }
-
-// +++charged
 
 typedef struct NK_timer_t {
     uint32_t wait_until_t;
