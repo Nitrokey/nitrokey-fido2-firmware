@@ -39,6 +39,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
     // or if the touch is already consumed
     if (button_press_is_consumed() || button_get_press_state() < BST_META_READY_TO_USE) {
         printf1(TAG_BUTTON, "Touch consumed or button not ready\n");
+        u2f_delay(20);
         return 1;
     }
 
