@@ -40,7 +40,7 @@
 #define LOG_STATE_CHANGE
 
 
-uint32_t        button_press_t;                   // Timer for TaskButton() timings
+uint32_t        button_press_t = 0;                   // Timer for TaskButton() timings
 uint32_t        button_press_consumed_t = 0;                   // Timer for TaskButton() timings
 BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 BUTTON_STATE_T  button_state_old = BST_INITIALIZING;    // Holds the actual registered logical state of the button
@@ -84,32 +84,45 @@ void button_manager(void) {
     }
 
     if (IS_BUTTON_PRESSED_RAW()) {           // Button's physical state: pressed
+        __disable_irq();
+        uint32_t button_total_press_t = get_ms() - button_press_t;
+        if (button_press_t == 0) {
+            button_total_press_t = 0;
+        }
+        __enable_irq();
+
+        if (button_press_t != 0 && ( button_total_press_t > 1000 * 50 || button_press_t > 1000*1000)) {
+            printf1(TAG_ERR, "Invalid value for button time: bt:%p btt:%p t:%d \r\n\r\n", button_press_t, button_total_press_t, get_ms());
+        }
+
         switch (button_state) {                // Handle press phase
             case BST_UNPRESSED:                  // It happened at this moment
                 button_state = BST_PRESSED_RECENTLY; // Update button state
+                __disable_irq();
                 button_press_t = get_ms();           // Start measure press time
                 button_press_consumed_t = 0;
+                __enable_irq();
                 break;
             case BST_PRESSED_RECENTLY:
                 // Button is already pressed, press time measurement is ongoing
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) {
+                if (button_total_press_t >= BUTTON_MIN_PRESS_T_MS) {
                     // Press time reached the critical value to
                     // register a valid user touch
                     button_state = BST_PRESSED_REGISTERED; // Update button state
                 }
                 break;
             case BST_PRESSED_REGISTERED:
-                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
+                if (button_total_press_t >= BUTTON_MAX_PRESS_T_MS) {
                     button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
                 }
                 break;
             case BST_PRESSED_REGISTERED_TRANSITIONAL:
-                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
+                if (button_total_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
                     button_state = BST_PRESSED_REGISTERED_EXT;
                 }
                 break;
             case BST_PRESSED_REGISTERED_EXT:
-                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS_EXT) {
+                if (button_total_press_t>= BUTTON_MAX_PRESS_T_MS_EXT) {
                     button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
                 }
                 break;
@@ -131,6 +144,9 @@ void button_manager(void) {
         }
     } else {                        // Button is unprssed
         button_state = BST_UNPRESSED; // Update button state
+        if (button_press_t != 0) {
+            button_press_t = 0;
+        }
     }
 
 #ifdef LOG_STATE_CHANGE
