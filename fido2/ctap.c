@@ -574,7 +574,7 @@ static int ctap2_user_presence_test(const uint8_t ctap_command)
     int (*feedback_function)(uint32_t) = ctap_user_presence_test;
     if (ctap_command == CTAP_RESET) {
       if (is_in_first_10_seconds() != 1) {
-//        return CTAP2_ERR_NOT_ALLOWED;
+        return CTAP2_ERR_NOT_ALLOWED;
       }
       up_delay = CTAP2_UP_RESET_DELAY_MS;
       feedback_function = ctap_user_presence_test_reset;
