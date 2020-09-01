@@ -57,7 +57,7 @@ all: $(TARGET).elf
 
 
 %.o: %.c
-	@echo "*** $<"
+	@echo "*** bootloader: $<"
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
@@ -65,7 +65,7 @@ all: $(TARGET).elf
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 %.o: %.s
-	@echo "*** $<"
+	@echo "*** bootloader: $<"
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
 %.elf: $(OBJ)
