@@ -250,7 +250,7 @@ uint8_t ctap_get_info(CborEncoder * encoder)
             check_ret(ret);
         }
 
-        ret = cbor_encode_uint(&map, 0x08); // maxCredentialIdLength 
+        ret = cbor_encode_uint(&map, 0x08); // maxCredentialIdLength
         check_ret(ret);
         {
             ret = cbor_encode_uint(&map, MAX_CREDENTIAL_ID_LENGTH);
@@ -566,17 +566,30 @@ static unsigned int get_credential_id_size(int type)
     return sizeof(CredentialId);
 }
 
-static int ctap2_user_presence_test()
+#include "gpio.h"
+
+static int ctap2_user_presence_test(const uint8_t ctap_command)
 {
+    uint32_t up_delay = CTAP2_UP_RESET_DELAY_MS;
+    int (*feedback_function)(uint32_t) = ctap_user_presence_test;
+    if (ctap_command == CTAP_RESET) {
+      if (is_in_first_10_seconds() != 1) {
+        return CTAP2_ERR_NOT_ALLOWED;
+      }
+      up_delay = CTAP2_UP_RESET_DELAY_MS;
+      feedback_function = ctap_user_presence_test_reset;
+    }
+
     device_set_status(CTAPHID_STATUS_UPNEEDED);
-    int ret = ctap_user_presence_test(CTAP2_UP_DELAY_MS);
+    int ret = feedback_function(up_delay);
+    device_set_status(CTAPHID_STATUS_IDLE);
     if ( ret > 1 )
     {
         return CTAP2_ERR_PROCESSING;
     }
     else if ( ret > 0 )
     {
-        return CTAP1_ERR_SUCCESS;
+        return CTAP2_OK;
     }
     else if (ret < 0)
     {
@@ -617,7 +630,7 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
 
     int but;
 
-    but = ctap2_user_presence_test();
+    but = ctap2_user_presence_test(CTAP_MAKE_CREDENTIAL);
     if (CTAP2_ERR_PROCESSING == but)
     {
         authData->head.flags = (0 << 0);        // User presence disabled
@@ -627,8 +640,8 @@ static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * au
         check_retr(but);
         authData->head.flags = (1 << 0);        // User presence
     }
-    
-    
+
+
     device_set_status(CTAPHID_STATUS_PROCESSING);
 
     authData->head.flags |= (ctap_is_pin_set() << 2);
@@ -783,7 +796,7 @@ uint8_t ctap_add_attest_statement(CborEncoder * map, uint8_t * sigder, int len)
         return CTAP2_ERR_PROCESSING;
     }
     device_attestation_read_cert_der(cert);
-    
+
     CborEncoder stmtmap;
     CborEncoder x5carr;
 
@@ -880,7 +893,7 @@ uint8_t ctap_make_credential(CborEncoder * encoder, uint8_t * request, int lengt
     }
     if (MC.pinAuthEmpty)
     {
-        ret = ctap2_user_presence_test();
+        ret = ctap2_user_presence_test(CTAP_MAKE_CREDENTIAL);
         check_retr(ret);
         return ctap_is_pin_set() == 1 ? CTAP2_ERR_PIN_AUTH_INVALID : CTAP2_ERR_PIN_NOT_SET;
     }
@@ -925,7 +938,7 @@ uint8_t ctap_make_credential(CborEncoder * encoder, uint8_t * request, int lengt
         {
             if ( check_credential_metadata(&excl_cred->credential.id, MC.pinAuthPresent, 1) == 0)
             {
-                ret = ctap2_user_presence_test();
+                ret = ctap2_user_presence_test(CTAP_MAKE_CREDENTIAL);
                 check_retr(ret);
                 printf1(TAG_MC, "Cred %d failed!\r\n",i);
                 return CTAP2_ERR_CREDENTIAL_EXCLUDED;
@@ -1136,14 +1149,14 @@ int ctap_filter_invalid_credentials(CTAP_getAssertion * GA)
         else
         {
 
-            int protection_status = 
+            int protection_status =
                 check_credential_metadata(&GA->creds[i].credential.id, getAssertionState.user_verified, 1);
 
             if (protection_status != 0) {
                 printf1(TAG_GREEN,"skipping protected wrapped credential.\r\n");
                 GA->creds[i].credential.id.count = 0;      // invalidate
             }
-            else 
+            else
             {
                 // add user info if it exists
                 add_existing_user_info(&GA->creds[i]);
@@ -1170,7 +1183,7 @@ int ctap_filter_invalid_credentials(CTAP_getAssertion * GA)
 
             printf1(TAG_GREEN, "rpIdHash%d: ", i);  dump_hex1(TAG_GREEN, rk.id.rpIdHash, 32);
 
-            int protection_status = 
+            int protection_status =
                 check_credential_metadata(&rk.id, getAssertionState.user_verified, 0);
 
             if (protection_status != 0) {
@@ -1200,8 +1213,8 @@ int ctap_filter_invalid_credentials(CTAP_getAssertion * GA)
 }
 
 
-static int8_t save_credential_list( uint8_t * clientDataHash, 
-                                    CTAP_credentialDescriptor * creds, 
+static int8_t save_credential_list( uint8_t * clientDataHash,
+                                    CTAP_credentialDescriptor * creds,
                                     uint32_t count,
                                     CTAP_extensions * extensions)
 {
@@ -1341,9 +1354,9 @@ uint8_t ctap_get_next_assertion(CborEncoder * encoder)
         }
     }
 
-    ret = ctap_end_get_assertion(&map, cred, 
-                                (uint8_t *)&getAssertionState.buf.authData, 
-                                sizeof(CTAP_authDataHeader) + ext_encoder_buf_size, 
+    ret = ctap_end_get_assertion(&map, cred,
+                                (uint8_t *)&getAssertionState.buf.authData,
+                                sizeof(CTAP_authDataHeader) + ext_encoder_buf_size,
                                 getAssertionState.clientDataHash);
 
     check_retr(ret);
@@ -1479,8 +1492,8 @@ uint8_t ctap_cred_rk(CborEncoder * encoder, int rk_ind, int rk_count)
 
 uint8_t ctap_cred_mgmt_pinauth(CTAP_credMgmt *CM)
 {
-    if (CM->cmd != CM_cmdMetadata && 
-        CM->cmd != CM_cmdRPBegin && 
+    if (CM->cmd != CM_cmdMetadata &&
+        CM->cmd != CM_cmdRPBegin &&
         CM->cmd != CM_cmdRKBegin &&
         CM->cmd != CM_cmdRKDelete)
     {
@@ -1548,7 +1561,7 @@ static int scan_for_next_rp(int index){
         occurs_previously = 0;
 
         index++;
-        if ((unsigned int)index >= ctap_rk_size()) 
+        if ((unsigned int)index >= ctap_rk_size())
         {
             return -1;
         }
@@ -1598,7 +1611,7 @@ static int scan_for_next_rk(int index, uint8_t * initialRpIdHash){
     do
     {
         index++;
-        if ((unsigned int)index >= ctap_rk_size()) 
+        if ((unsigned int)index >= ctap_rk_size())
         {
             return -1;
         }
@@ -1752,7 +1765,7 @@ uint8_t ctap_get_assertion(CborEncoder * encoder, uint8_t * request, int length)
 
     if (GA.pinAuthEmpty)
     {
-        ret = ctap2_user_presence_test();
+        ret = ctap2_user_presence_test(CTAP_GET_ASSERTION);
         check_retr(ret);
         return ctap_is_pin_set() == 1 ? CTAP2_ERR_PIN_AUTH_INVALID : CTAP2_ERR_PIN_NOT_SET;
     }
@@ -1870,8 +1883,8 @@ uint8_t ctap_get_assertion(CborEncoder * encoder, uint8_t * request, int length)
     ret = cbor_encoder_close_container(encoder, &map);
     check_ret(ret);
 
-    ret = save_credential_list( GA.clientDataHash, 
-                                GA.creds + 1 /* skip first credential*/, 
+    ret = save_credential_list( GA.clientDataHash,
+                                GA.creds + 1 /* skip first credential*/,
                                 validCredCount - 1,
                                 &GA.extensions);
     check_retr(ret);
@@ -2285,8 +2298,8 @@ uint8_t ctap_request(uint8_t * pkt_raw, int length, CTAP_RESPONSE * resp)
             break;
         case CTAP_RESET:
             printf1(TAG_CTAP,"CTAP_RESET\n");
-            status = ctap2_user_presence_test();
-            if (status == CTAP1_ERR_SUCCESS)
+            status = ctap2_user_presence_test(CTAP_RESET);
+            if (status == CTAP2_OK)
             {
                 ctap_reset();
             }
@@ -2365,7 +2378,7 @@ static void ctap_state_init()
 
 /** Overwrite master secret from external source.
  * @param keybytes an array of KEY_SPACE_BYTES length.
- * 
+ *
  * This function should only be called from a privilege mode.
 */
 void ctap_load_external_keys(uint8_t * keybytes){

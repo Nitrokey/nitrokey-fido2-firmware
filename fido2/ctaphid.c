@@ -384,10 +384,8 @@ static int ctaphid_buffer_packet(uint8_t * pkt_raw, uint8_t * cmd, uint32_t * ci
 {
     CTAPHID_PACKET * pkt = (CTAPHID_PACKET *)(pkt_raw);
 
-    printf1(TAG_HID, "Recv packet\n");
-    printf1(TAG_HID, "  CID: %08x \n", pkt->cid);
-    printf1(TAG_HID, "  cmd: %02x\n", pkt->pkt.init.cmd);
-    if (!is_cont_pkt(pkt)) {printf1(TAG_HID, "  length: %d\n", ctaphid_packet_len(pkt));}
+    printf1(TAG_HID, "Recv packet: CID: %08x cmd: %02x (%02x)\r\n",pkt->cid, pkt->pkt.init.cmd, pkt->pkt.init.cmd & ~TYPE_INIT);
+    if (!is_cont_pkt(pkt)) {printf1(TAG_HID, "  length: %d\r\n", ctaphid_packet_len(pkt));}
 
     int ret;
     uint32_t oldcid;
@@ -725,7 +723,7 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 #if defined(APP_EXECS_BOOTLOADER) && !defined(IS_BOOTLOADER)
         case CTAPHID_ENTERBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT - user presence test\n");
-            if (ctap_user_presence_test(5000)){
+            if (ctap_user_presence_test_config(CTAP2_UP_CONFIG_DELAY_MS)){
                 boot_solo_bootloader();
                 wb->bcnt = 0;
                 ctaphid_write(wb, NULL, 0);
@@ -737,8 +735,21 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 #endif
 #if defined(SOLO)
         case CTAPHID_REBOOT:
+#if defined(IS_BOOTLOADER)
             device_reboot();
             return 1;
+#else
+            if (ctap_user_presence_test_config(CTAP2_UP_CONFIG_DELAY_MS)){
+                delay(50);
+                device_reboot();
+                return 1;
+            } else {
+                printf1(TAG_HID,"CTAPHID_REBOOT denied\n");
+                wb->bcnt = 0;
+                ctaphid_write(wb, NULL, 0);
+                return 1;
+            }
+#endif
 #endif
 
 #if !defined(IS_BOOTLOADER)

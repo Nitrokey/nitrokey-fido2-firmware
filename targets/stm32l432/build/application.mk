@@ -50,7 +50,7 @@ DEBUG ?= 0
 DEFINES = -DDEBUG_LEVEL=$(DEBUG) -D$(CHIP) -DAES256=1  -DUSE_FULL_LL_DRIVER -DAPP_CONFIG=\"app.h\" $(EXTRA_DEFINES)
 
 CFLAGS=$(INC) -c $(DEFINES)   -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -fdata-sections -ffunction-sections \
-	-fomit-frame-pointer $(HW) -g $(VERSION_FLAGS)
+	-fomit-frame-pointer $(HW) $(VERSION_FLAGS) -Os -g3
 LDFLAGS_LIB=$(HW) $(SEARCH) -specs=nano.specs  -specs=nosys.specs  -Wl,--gc-sections -lnosys
 LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref -Wl,-Bstatic -ltinycbor
 
@@ -64,7 +64,7 @@ all: $(TARGET).elf
 
 %.o: %.c
 	@echo "*** $<"
-	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@$(CC) $^ $(HW)  $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
 	@echo "*** $<"
@@ -72,14 +72,14 @@ all: $(TARGET).elf
 
 %.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
-	@$(CC) $^ $(HW) $(LDFLAGS) -o $@
-	@echo "Built version: $(VERSION_FLAGS)"
+	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
+	@echo "*** Built version: $(VERSION_FLAGS)"
+	@echo "*** Built flags: $(DEFINES)"
+	@echo "*** Built CFLAGS: $(CFLAGS)"
 
 %.hex: %.elf
 	$(SZ) $^
 	$(CP) -O ihex $^ $(TARGET).hex
-	@echo "*** Built version: $(VERSION_FLAGS)"
-	@echo "*** Built flags: $(DEFINES)"
 
 clean:
 	@rm -f *.o src/*.o *.elf  bootloader/*.o $(OBJ)
@@ -89,5 +89,5 @@ cbor:
 	cd ../../tinycbor/ && make clean
 	cd ../../tinycbor/ && make CC="$(CC)" AR=$(AR) \
 LDFLAGS="$(LDFLAGS_LIB)" \
-CFLAGS="$(CFLAGS) -Os  -DCBOR_PARSER_MAX_RECURSIONS=3"
+CFLAGS="$(CFLAGS) -Os -g3  -DCBOR_PARSER_MAX_RECURSIONS=3"
 

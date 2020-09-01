@@ -115,11 +115,13 @@ void TIM6_DAC_IRQHandler(void)
     // timer is only 16 bits, so roll it over here
     TIM6->SR = 0;
     __90_ms += 1;
-    if ((millis() - __last_update) > 90)
-    {
-        if (__device_status != CTAPHID_STATUS_IDLE)
-        {
+
+    if ((millis() - __last_update) > 90 ){
+        if (__device_status != CTAPHID_STATUS_IDLE){
             ctaphid_update_status(__device_status);
+            __disable_irq();
+            __last_update = millis();
+            __enable_irq();
         }
     }
 
@@ -216,13 +218,9 @@ int solo_is_locked(){
 // This should be removed in next Solo release.
 void solo_lock_if_not_already() {
     uint8_t buf[2048];
-
     memmove(buf, (uint8_t*)ATTESTATION_PAGE_ADDR, 2048);
-
     ((flash_attestation_page *)buf)->device_settings |= SOLO_FLAG_LOCKED;
-
     flash_erase_page(ATTESTATION_PAGE);
-
     flash_write(ATTESTATION_PAGE_ADDR, buf, 2048);
 }
 
@@ -354,8 +352,6 @@ void device_init()
 #else
     flash_option_bytes_init(0);
 #endif
-
-    clear_button_press();
 }
 
 int device_is_nfc(void)
@@ -406,13 +402,19 @@ int usbhid_recv(uint8_t * msg)
     return 0;
 }
 
+#include "stm32l4xx_ll_pwr.h"
 void usbhid_send(uint8_t * msg)
 {
-
+    uint32_t guard_counter = 0; // since this might be called during TIM6 IRQ call, we can't rely on time
     printf1(TAG_DUMP2,"<< ");
     dump_hex1(TAG_DUMP2, msg, HID_PACKET_SIZE);
-    while (PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f) == USB_EP_TX_VALID)
-        ;
+    while (PCD_GET_EP_TX_STATUS(USB, HID_EPIN_ADDR & 0x0f) == USB_EP_TX_VALID){
+        if(guard_counter++ >= 1000*100*2){
+            // TODO replace with watchdog / issue reboot
+            printf2(TAG_ERR, "Failed to send USBHID message. Discarding.\r\n");
+            return;
+        }
+    }
     USBD_LL_Transmit(&Solo_USBD_Device, HID_EPIN_ADDR, msg, HID_PACKET_SIZE);
 
 
@@ -434,9 +436,9 @@ void main_loop_delay(void)
 
 }
 
+#ifdef LED_WINK_VALUE
 static int wink_time = 0;
 static uint32_t winkt1 = 0;
-#ifdef LED_WINK_VALUE
 static uint32_t winkt2 = 0;
 #endif
 
@@ -446,10 +448,9 @@ void device_wink(void)
     led_blink(10, LED_BLINK_PERIOD);
 }
 
-
 void heartbeat(void)
 {
-    return;
+#ifdef HEARTBEAT
 
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
@@ -500,8 +501,8 @@ void heartbeat(void)
     {
     }
 
+#endif
 }
-
 
 static int authenticator_is_backup_initialized(void)
 {
@@ -665,7 +666,6 @@ void device_manage(void)
 #ifndef IS_BOOTLOADER
 	if(device_is_nfc())
     nfc_loop();
-    clear_button_press();
 #endif
     run_drivers();
 }
@@ -739,7 +739,45 @@ int ctap_get_status_data(uint8_t * ctap_buffer){
 
 #include "user_feedback.h"
 
+int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_function)());
+
 int ctap_user_presence_test(uint32_t up_delay){
+  return ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback);
+}
+
+int ctap_user_presence_test_reset(uint32_t up_delay){
+  led_set_default_color(LED_COLOR_DATA_DELETION);
+  const int res = ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback_extended_wipe);
+  led_reset_default_color();
+  return res;
+}
+
+int ctap_user_presence_test_config(uint32_t up_delay){
+  led_set_default_color(LED_COLOR_SYSTEM);
+  const int res = ctap_user_presence_test_feedback(up_delay, u2f_get_user_feedback_extended_wipe);
+  led_reset_default_color();
+  return res;
+}
+
+typedef struct NK_timer_t {
+    uint32_t wait_until_t;
+} NK_timer_t;
+NK_timer_t timer_wait_for(const uint32_t delay){
+    NK_timer_t t;
+    t.wait_until_t = millis() + delay;
+    // timer overflow check, e.g. bool overflow = t.wait_until_t < millis()
+    // not needed since clock will overflow as well, and will work with this method
+    return t;
+}
+
+bool timer_is_elapsed(const NK_timer_t t){
+    return millis() >= t.wait_until_t;
+}
+bool timer_is_active(const NK_timer_t t){
+    return millis() < t.wait_until_t;
+}
+
+int ctap_user_presence_test_feedback(uint32_t up_delay, int8_t(*feedback_function)()){
     int ret;
 
     if (device_is_nfc() == NFC_IS_ACTIVE) return 1;
@@ -762,21 +800,27 @@ int ctap_user_presence_test(uint32_t up_delay){
     return 1;
 #endif
 
+    set_button_awaiting_up(true);
     printf1(TAG_BUTTON, "Waiting for user's feedback for %d ms\n", up_delay);
-    while (up_delay--){
-        if (u2f_get_user_feedback() == 0) {
+    NK_timer_t t = timer_wait_for(up_delay);
+    while (timer_is_active(t)){
+        if (feedback_function() == 0) {
             printf1(TAG_BUTTON, "User's feedback received\n");
+            set_button_awaiting_up(false);
             return 1;
         }
         ret = handle_packets();
         if (ret) {
             stop_blinking();
+            set_button_awaiting_up(false);
             return ret;
         }
         run_drivers();
         delay(1);
     }
     printf1(TAG_BUTTON, "User's feedback NOT received\n");
+    stop_blinking();
+    set_button_awaiting_up(false);
     return 0;
 }
 
@@ -906,10 +950,10 @@ void ctap_overwrite_rk(int index,CTAP_residentKey * rk)
     int byte_offset_into_page = (sizeof(CTAP_residentKey) * (index % (PAGE_SIZE/sizeof(CTAP_residentKey))));
     int page_offset = (index)/(PAGE_SIZE/sizeof(CTAP_residentKey));
 
-    printf1(TAG_GREEN, "overwriting RK %d @ page %d @ addr 0x%08x-0x%08x\r\n", 
-        index, RK_START_PAGE + page_offset, 
-        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page, 
-        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page + sizeof(CTAP_residentKey) 
+    printf1(TAG_GREEN, "overwriting RK %d @ page %d @ addr 0x%08x-0x%08x\r\n",
+        index, RK_START_PAGE + page_offset,
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page,
+        flash_addr(RK_START_PAGE + page_offset) + byte_offset_into_page + sizeof(CTAP_residentKey)
         );
     if (page_offset < RK_NUM_PAGES)
     {

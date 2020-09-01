@@ -31,8 +31,11 @@
 #include <stdbool.h>
 
 #define BUTTON_MIN_PRESS_T_MS    1000
-#define BUTTON_MIN_PRESS_T_MS_EXT    (10*1000)
+#define BUTTON_VALID_CONSUMED_T_MS    (10*1000)
 #define BUTTON_MAX_PRESS_T_MS    (3*1000)
+
+#define BUTTON_MIN_PRESS_T_MS_EXT    (5*1000)
+#define BUTTON_MAX_PRESS_T_MS_EXT    (8*1000)
 
 // set time after the power on, during which a single U2F or configuration
 // request would be accepted
@@ -45,14 +48,13 @@
 
 
 #define U2F_MS_CLEAR_BUTTON_PERIOD			(20*1000)
-#define U2F_MS_INIT_BUTTON_PERIOD			(2*1000)
+#define U2F_MS_INIT_BUTTON_PERIOD			(500)
 
 void button_manager (void);
 uint8_t button_get_press (void);
 uint8_t button_get_press_extended (void);
 
 uint8_t button_press_in_progress(void);
-void button_press_set_consumed(void);
 uint8_t button_press_is_consumed(void);
 void _clear_button_press(bool forced);
 void clear_button_press();
@@ -79,7 +81,9 @@ typedef enum {
 	BST_PRESSED_REGISTERED,		// touch registered, normal press period
 	BST_PRESSED_REGISTERED_TRANSITIONAL,		// touch registered, normal press, but timeouted
 	BST_PRESSED_REGISTERED_EXT, // touch registered, extended press period
-	BST_PRESSED_CONSUMED,		// touch registered and consumed, but button still not released
+	BST_PRESSED_REGISTERED_EXT_INVALID, // touch registered, extended press period, invalidated
+    BST_PRESSED_CONSUMED_ACTIVE,		// BST_PRESSED_CONSUMED, but accepts requests
+	BST_PRESSED_CONSUMED,		// touch registered and consumed, button still not released, does not accept requests
 
 	BST_MAX_NUM
 } BUTTON_STATE_T;
@@ -87,5 +91,14 @@ typedef enum {
 BUTTON_STATE_T button_get_press_state (void);
 uint8_t button_get_press (void);
 
+bool is_in_first_10_seconds(void);
+bool button_ready_to_work(void);
+void set_button_awaiting_up(const bool awaits);
+
+void led_reset_default_color(void);
+void led_set_default_color(uint32_t color);
+char * button_state_to_string(BUTTON_STATE_T state);
+void led_set_proper_color_for_expected_state(BUTTON_STATE_T b);
+void button_press_set_consumed(BUTTON_STATE_T target_button_state);
 
 #endif /* GPIO_H_ */

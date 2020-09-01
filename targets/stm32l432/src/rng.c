@@ -27,6 +27,7 @@ void rng_get_bytes(uint8_t * dst, size_t sz)
 
         if (RNG->SR & 0x66)
         {
+            // FIXME [ERR] src/rng.c:30: Error RNG: 40
             printf2(TAG_ERR,"Error RNG: %02lx\r\n", RNG->SR);
             exit(1);
         }

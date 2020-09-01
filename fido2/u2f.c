@@ -262,7 +262,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 
 	if(up)
 	{
-		if (ctap_user_presence_test(750) == 0)
+		if (ctap_user_presence_test(U2F_UP_DELAY_MS) == 0)
 		{
 			return U2F_SW_CONDITIONS_NOT_SATISFIED;
 		}
@@ -313,8 +313,9 @@ static int16_t u2f_register(struct u2f_register_request * req)
         return U2F_SW_INSUFFICIENT_MEMORY;
     }
 
-	if ( ! ctap_user_presence_test(750))
+	if ( ! ctap_user_presence_test(U2F_UP_DELAY_MS))
 	{
+                printf2(TAG_U2F,"No user feedback got\r\n");
 		return U2F_SW_CONDITIONS_NOT_SATISFIED;
 	}
 

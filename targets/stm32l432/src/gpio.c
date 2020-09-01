@@ -41,6 +41,7 @@
 
 
 uint32_t        button_press_t;                   // Timer for TaskButton() timings
+uint32_t        button_press_consumed_t = 0;                   // Timer for TaskButton() timings
 BUTTON_STATE_T  button_state = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 BUTTON_STATE_T  button_state_old = BST_INITIALIZING;    // Holds the actual registered logical state of the button
 
@@ -48,71 +49,134 @@ static data uint32_t  led_blink_tim = 0;                    // Timer for TaskLed
 static data uint16_t  led_blink_period_t;                // Period time register
 static data uint16_t  led_blink_ON_t;                // ON time register
 static data uint8_t   led_blink_num;                    // Blink number counter, also an indicator if blinking is on
+static data uint32_t led_default_color = LED_COLOR_REGULAR;
 
 static data uint32_t  button_manager_start_t = 0;
+static data bool  first_10_seconds = true;
 
-void button_manager (void) {                          // Requires at least a 750ms long button press to register a valid user button press
+bool is_in_first_10_seconds(void){
+  return first_10_seconds;
+}
 
-	if (button_state == BST_INITIALIZING){
-		if (button_manager_start_t == 0){
-			button_manager_start_t = get_ms();
-      BUTTON_RESET_OFF();
-			return;
-		}
-		if (get_ms() - button_manager_start_t <= U2F_MS_INIT_BUTTON_PERIOD){
-			return;
-		}
-		button_state = BST_INITIALIZING_READY_TO_CLEAR;
-	}
-	if (button_state == BST_INITIALIZING_READY_TO_CLEAR){
-		return;
-	}
+void button_manager(void) {
+    // Requires at least a 750ms long button press to
+    // register a valid user button press
 
-	if (IS_BUTTON_PRESSED_RAW()) {                        // Button's physical state: pressed
-		switch (button_state) {                        // Handle press phase
-		    case BST_UNPRESSED: {                     // It happened at this moment
-				button_state  = BST_PRESSED_RECENTLY;  // Update button state
-				button_press_t = get_ms();              // Start measure press time
-		    }break;
-		    case BST_PRESSED_RECENTLY: {              // Button is already pressed, press time measurement is ongoing
-				if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) { // Press time reached the critical value to register a valid user touch
-				    button_state = BST_PRESSED_REGISTERED; // Update button state
-				}
-		    }break;
-		    case BST_PRESSED_CONSUMED:
-		    	break;
-		    case BST_PRESSED_REGISTERED:
-				if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
-					button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
-				}
-				break;
-		    case BST_PRESSED_REGISTERED_TRANSITIONAL:
-		    	if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
-					button_state = BST_PRESSED_REGISTERED_EXT;
-				}
-		    	break;
-		    default:
-		    	break;
-		}
-	} else {                                          // Button is unprssed
-		button_state = BST_UNPRESSED;                  // Update button state
-	}
+    if (first_10_seconds && millis() > 10 * 1000) {
+        first_10_seconds = false;
+    }
+
+    if (button_state == BST_INITIALIZING) {
+        if (button_manager_start_t == 0) {
+            button_manager_start_t = get_ms();
+            BUTTON_RESET_OFF();
+            return;
+        }
+        if (get_ms() - button_manager_start_t <= U2F_MS_INIT_BUTTON_PERIOD) {
+            return;
+        }
+        button_state = BST_INITIALIZING_READY_TO_CLEAR;
+    }
+    if (button_state == BST_INITIALIZING_READY_TO_CLEAR) {
+        button_state = BST_META_READY_TO_USE;
+        clear_button_press();
+        return;
+    }
+
+    if (IS_BUTTON_PRESSED_RAW()) {           // Button's physical state: pressed
+        switch (button_state) {                // Handle press phase
+            case BST_UNPRESSED:                  // It happened at this moment
+                button_state = BST_PRESSED_RECENTLY; // Update button state
+                button_press_t = get_ms();           // Start measure press time
+                button_press_consumed_t = 0;
+                break;
+            case BST_PRESSED_RECENTLY:
+                // Button is already pressed, press time measurement is ongoing
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS) {
+                    // Press time reached the critical value to
+                    // register a valid user touch
+                    button_state = BST_PRESSED_REGISTERED; // Update button state
+                }
+                break;
+            case BST_PRESSED_REGISTERED:
+                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS) {
+                    button_state = BST_PRESSED_REGISTERED_TRANSITIONAL;
+                }
+                break;
+            case BST_PRESSED_REGISTERED_TRANSITIONAL:
+                if (get_ms() - button_press_t >= BUTTON_MIN_PRESS_T_MS_EXT) {
+                    button_state = BST_PRESSED_REGISTERED_EXT;
+                }
+                break;
+            case BST_PRESSED_REGISTERED_EXT:
+                if (get_ms() - button_press_t >= BUTTON_MAX_PRESS_T_MS_EXT) {
+                    button_state = BST_PRESSED_REGISTERED_EXT_INVALID;
+                }
+                break;
+            case BST_PRESSED_CONSUMED_ACTIVE:
+                if (button_press_consumed_t == 0) {
+                    button_press_consumed_t = get_ms();
+                }
+                if (get_ms() - button_press_consumed_t >= BUTTON_VALID_CONSUMED_T_MS) {
+                    button_state = BST_PRESSED_CONSUMED;
+                }
+                break;
+            case BST_PRESSED_CONSUMED:
+                if (button_press_consumed_t != 0) {
+                    button_press_consumed_t = 0;
+                }
+                break;
+            default:
+                break;
+        }
+    } else {                        // Button is unprssed
+        button_state = BST_UNPRESSED; // Update button state
+    }
 
 #ifdef LOG_STATE_CHANGE
-	if (button_state != button_state_old){
-        printf1(TAG_BUTTON, "State changed: %02d => %02d\n", button_state_old, button_state);
-	    button_state_old = button_state;
+    if (button_state != button_state_old) {
+        printf1(TAG_BUTTON, "State changed: %s (%02d) => %s (%02d)\n",
+                button_state_to_string(button_state_old), button_state_old,
+                button_state_to_string(button_state), button_state);
+        button_state_old = button_state;
     }
 #endif
+}
 
+char * button_state_to_string(BUTTON_STATE_T state){
+#ifdef LOG_STATE_CHANGE
+#define m(x)  { case x: return #x; }
+    switch (state) {
+    m(BST_INITIALIZING)
+    m(BST_INITIALIZING_READY_TO_CLEAR)
+    m(BST_META_READY_TO_USE)
+    m(BST_UNPRESSED)
+    m(BST_PRESSED_RECENTLY)
+    m(BST_PRESSED_REGISTERED)
+    m(BST_PRESSED_REGISTERED_TRANSITIONAL)
+    m(BST_PRESSED_REGISTERED_EXT)
+    m(BST_PRESSED_REGISTERED_EXT_INVALID)
+    m(BST_PRESSED_CONSUMED)
+    m(BST_PRESSED_CONSUMED_ACTIVE)
+    m(BST_MAX_NUM)
+    default:
+        return "unknown button state";
+  }
+#undef m
+#endif
+    return "";
 }
 
 uint8_t button_get_press (void) {
-	return ((button_state == BST_PRESSED_REGISTERED)? 1 : 0);
+	return ((button_state == BST_PRESSED_REGISTERED || button_state == BST_PRESSED_CONSUMED_ACTIVE)? 1 : 0);
 }
 
 BUTTON_STATE_T button_get_press_state (void) {
 	return button_state;
+}
+
+bool button_ready_to_work(void){
+  return button_get_press_state() > BST_META_READY_TO_USE;
 }
 
 uint8_t button_get_press_extended (void) {
@@ -120,11 +184,18 @@ uint8_t button_get_press_extended (void) {
 }
 
 uint8_t button_press_in_progress(void){
-	return ( (button_state > BST_UNPRESSED)? 1 : 0);
+	return ( (button_state > BST_UNPRESSED &&
+             button_state != BST_PRESSED_CONSUMED &&
+             button_state != BST_PRESSED_REGISTERED_EXT_INVALID)? 1 : 0);
 }
 
-void button_press_set_consumed(void){
-	button_state = BST_PRESSED_CONSUMED;
+void button_press_set_consumed(const BUTTON_STATE_T target_button_state){
+    if (target_button_state == BST_PRESSED_REGISTERED) {
+        button_state = BST_PRESSED_CONSUMED_ACTIVE;
+    } else {
+        button_state = BST_PRESSED_CONSUMED;
+    }
+    printf1(TAG_BUTTON, "Expected button state %s, setting to %s\r\n", button_state_to_string(target_button_state), button_state_to_string(button_state));
 }
 
 uint8_t button_press_is_consumed(void){
@@ -132,6 +203,28 @@ uint8_t button_press_is_consumed(void){
 }
 
 volatile uint8_t LED_STATE = 0;
+
+void led_set_proper_color_for_expected_state(BUTTON_STATE_T b){
+    switch (b) {
+        case BST_PRESSED_REGISTERED:
+            led_set_default_color(LED_COLOR_REGULAR);
+            break;
+        case BST_PRESSED_REGISTERED_EXT:
+            led_set_default_color(LED_COLOR_SYSTEM);
+            break;
+        default:
+            led_set_default_color(LED_COLOR_REGULAR);
+            break;
+    }
+}
+
+void led_set_default_color(uint32_t color){
+  led_default_color = color;
+}
+
+void led_reset_default_color(void) {
+  led_default_color = LED_COLOR_REGULAR;
+}
 
 void led_on_color(uint32_t color) {
     led_rgb(color);
@@ -149,12 +242,11 @@ void led_off (void) {
 }
 
 void stop_blinking(void){
-    led_blink_num = 0;
-    led_off();
+    led_blink_num = 1;
 }
 
 bool led_is_blinking(void){
-	return led_blink_num != 0;
+	return led_blink_num > 1;
 }
 
 void led_change_ON_time(uint16_t ON_time){
@@ -162,11 +254,11 @@ void led_change_ON_time(uint16_t ON_time){
 }
 
 void led_blink (uint8_t blink_num, uint16_t period_t) {
-	led_blink_num     	= blink_num;
+	led_blink_num     	+= blink_num;
 	led_blink_period_t 	= period_t;
 	led_blink_ON_t = LED_BLINK_T_ON;
 
-	if ( (button_get_press_state() > BST_META_READY_TO_USE && (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) )
+	if ( (button_ready_to_work() && (get_ms() - led_blink_tim >= LED_BLINK_T_OFF) )
 			|| led_blink_num == 1)
         led_on();
 	if (!sanity_check_passed)
@@ -176,22 +268,58 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
     printf1(TAG_BUTTON, "Blinking set to %d %d\n", blink_num, period_t);
 }
 
+static bool button_awaiting_up = false;
+void set_button_awaiting_up(const bool awaits){
+    button_awaiting_up = awaits;
+}
+
+bool button_awaiting_UP(void){
+    return button_awaiting_up;
+}
+
 void led_blink_manager (void) {
-    if (button_get_press_state() == BST_INITIALIZING_READY_TO_CLEAR) {
-        led_on_color(LED_COLOR_INIT);
-        return;
+    switch (button_get_press_state()) {
+        case BST_INITIALIZING:
+        case BST_INITIALIZING_READY_TO_CLEAR:
+            led_on_color(LED_COLOR_INIT);
+            return;
+        case BST_PRESSED_CONSUMED:
+            stop_blinking();
+            led_on_color(LED_COLOR_TOUCH_CONSUMED);
+            return;
+        case BST_PRESSED_REGISTERED:
+            if (button_awaiting_UP()) {
+                break;
+            } __attribute__ ((fallthrough));
+        case BST_PRESSED_CONSUMED_ACTIVE:
+//            // TODO limit to state, where no request is coming
+            stop_blinking();
+            led_on_color(LED_COLOR_CHARGED);
+            return;
+        case BST_PRESSED_REGISTERED_EXT:
+            if (button_awaiting_UP()) {
+                break;
+            }
+            stop_blinking();
+            led_on_color(LED_COLOR_DATA_DELETION);
+        default:
+            break;
     }
 
-	if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
-		return;
-
-    if (button_get_press_state() == BST_PRESSED_CONSUMED) {
-        led_on_color(LED_COLOR_TOUCH_CONSUMED);
+    if (button_get_press_state() < BST_META_READY_TO_USE && led_blink_num != 1 && sanity_check_passed)
         return;
-    }
 
-	if (led_blink_num) {                                     // LED blinking is on
-		if (IS_LED_ON()) {                                 // ON state
+
+    if (led_blink_num) {                                     // LED blinking is on
+        if (button_press_in_progress()) {
+            led_blink_period_t = LED_BLINK_PERIOD / 2;
+            led_blink_ON_t = LED_BLINK_T_ON / 2;
+        } else {
+            led_blink_period_t = LED_BLINK_PERIOD;
+            led_blink_ON_t = LED_BLINK_T_ON;
+        }
+
+        if (IS_LED_ON() || led_blink_num == 1) {                                 // ON state
 			if (get_ms() - led_blink_tim >= led_blink_ON_t) { // ON time expired
                 led_off();                                 // LED physical state -> OFF
 				if (led_blink_num) {                         // It isnt the last blink round: initialize OFF state:
