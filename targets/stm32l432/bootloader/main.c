@@ -48,7 +48,7 @@ int main()
 {
     uint8_t hidmsg[64];
     uint32_t t1 = 0;
-#if defined(APP_EXECS_BOOTLOADER)
+#if defined(SOLO_HACKER)
     uint32_t stboot_time = 0;
 #endif
     uint32_t boot = 1;
@@ -105,7 +105,6 @@ int main()
 #ifdef APP_EXECS_BOOTLOADER
     if (!is_bootloader_disabled())
     {
-        stboot_time = millis();
         if ( RCC->CSR & (1<<29) )// check if there was independent watchdog reset
         {
             RCC->CSR |= (1<<23); // clear reset flags

@@ -154,6 +154,8 @@ void device_set_clock_rate(DEVICE_CLOCK_RATE param)
             SET_CLOCK_RATE2();
         break;
 #endif
+        default:
+            break;
     }
 }
 
