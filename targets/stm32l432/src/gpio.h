@@ -48,7 +48,7 @@
 
 
 #define U2F_MS_CLEAR_BUTTON_PERIOD			(20*1000)
-#define U2F_MS_INIT_BUTTON_PERIOD			(2*1000)
+#define U2F_MS_INIT_BUTTON_PERIOD			(500)
 
 void button_manager (void);
 uint8_t button_get_press (void);

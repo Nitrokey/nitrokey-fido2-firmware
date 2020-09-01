@@ -270,6 +270,7 @@ void led_blink (uint8_t blink_num, uint16_t period_t) {
 
 void led_blink_manager (void) {
     switch (button_get_press_state()) {
+        case BST_INITIALIZING:
         case BST_INITIALIZING_READY_TO_CLEAR:
             led_on_color(LED_COLOR_INIT);
             return;
