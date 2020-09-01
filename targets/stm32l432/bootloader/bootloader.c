@@ -330,7 +330,7 @@ int bootloader_bridge(int klen, uint8_t * keyh)
  */
 void bootloader_heartbeat()
 {
-#if 0
+#ifdef BOOTLOADER_HEARTBEAT
     static int state = 0;
     static uint32_t val = (LED_MAX_SCALER - LED_MIN_SCALER)/2;
     uint8_t r = (LED_INIT_VALUE >> 16) & 0xff;

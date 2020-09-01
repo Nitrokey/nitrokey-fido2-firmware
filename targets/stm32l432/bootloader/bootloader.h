@@ -37,6 +37,7 @@
 #define LED_MIN_SCALER          1
 // # of ms between each change in LED
 #define HEARTBEAT_PERIOD        5
+#define BOOTLOADER_HEARTBEAT
 // Each LED channel will be multiplied by a integer between LED_MAX_SCALER
 // and LED_MIN_SCALER to cause the slow pulse.  E.g.
 // #define LED_INIT_VALUE			0x301000
