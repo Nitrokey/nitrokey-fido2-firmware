@@ -22,6 +22,7 @@ static int8_t _u2f_get_user_feedback(BUTTON_STATE_T target_button_state, bool bl
     if (!first_request_accepted && (get_ms() < SELF_ACCEPT_MAX_T_MS)
         && (target_button_state == BST_PRESSED_REGISTERED) ){
         first_request_accepted = true;
+        led_rgb(LED_COLOR_TOUCH_CONSUMED);
         stop_blinking();
         printf1(TAG_BUTTON, "first_request_accepted\n");
         return 0;
