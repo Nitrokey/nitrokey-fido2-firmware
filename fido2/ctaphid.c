@@ -735,8 +735,21 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 #endif
 #if defined(SOLO)
         case CTAPHID_REBOOT:
+#if defined(IS_BOOTLOADER)
             device_reboot();
             return 1;
+#else
+            if (ctap_user_presence_test_config(CTAP2_UP_CONFIG_DELAY_MS)){
+                delay(50);
+                device_reboot();
+                return 1;
+            } else {
+                printf1(TAG_HID,"CTAPHID_REBOOT denied\n");
+                wb->bcnt = 0;
+                ctaphid_write(wb, NULL, 0);
+                return 1;
+            }
+#endif
 #endif
 
 #if !defined(IS_BOOTLOADER)
