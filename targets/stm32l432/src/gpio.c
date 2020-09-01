@@ -296,6 +296,12 @@ void led_blink_manager (void) {
             stop_blinking();
             led_on_color(LED_COLOR_CHARGED);
             return;
+        case BST_PRESSED_REGISTERED_EXT:
+            if (button_awaiting_UP()) {
+                break;
+            }
+            stop_blinking();
+            led_on_color(LED_COLOR_DATA_DELETION);
         default:
             break;
     }
