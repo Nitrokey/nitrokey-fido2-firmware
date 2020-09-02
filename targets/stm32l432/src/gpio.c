@@ -83,23 +83,24 @@ void button_manager(void) {
         return;
     }
 
+    const uint32_t current_time = get_ms();
     if (IS_BUTTON_PRESSED_RAW()) {           // Button's physical state: pressed
         __disable_irq();
-        uint32_t button_total_press_t = get_ms() - button_press_t;
-        if (button_press_t == 0) {
+        uint32_t button_total_press_t = current_time - button_press_t;
+        if (button_press_t == 0 && button_total_press_t != 0) {
             button_total_press_t = 0;
         }
         __enable_irq();
 
         if (button_press_t != 0 && ( button_total_press_t > 1000 * 50 || button_press_t > 1000*1000)) {
-            printf1(TAG_ERR, "Invalid value for button time: bt:%p btt:%p t:%d \r\n\r\n", button_press_t, button_total_press_t, get_ms());
+            printf1(TAG_ERR, "Invalid value for button time: bt:%p btt:%p t:%d \r\n\r\n", button_press_t, button_total_press_t, current_time);
         }
 
         switch (button_state) {                // Handle press phase
             case BST_UNPRESSED:                  // It happened at this moment
                 button_state = BST_PRESSED_RECENTLY; // Update button state
                 __disable_irq();
-                button_press_t = get_ms();           // Start measure press time
+                button_press_t = current_time;           // Start measure press time
                 button_press_consumed_t = 0;
                 __enable_irq();
                 break;
@@ -128,7 +129,7 @@ void button_manager(void) {
                 break;
             case BST_PRESSED_CONSUMED_ACTIVE:
                 if (button_press_consumed_t == 0) {
-                    button_press_consumed_t = get_ms();
+                    button_press_consumed_t = current_time;
                 }
                 if (get_ms() - button_press_consumed_t >= BUTTON_VALID_CONSUMED_T_MS) {
                     button_state = BST_PRESSED_CONSUMED;
