@@ -42,7 +42,7 @@ void wait_for_usb_tether(void);
 
 #define IS_BUTTON_PRESSED()     (button_get_press() == 1)
 
-uint32_t __90_ms = 0;
+volatile uint32_t __90_ms = 0;
 uint32_t __last_button_press_time = 0;
 uint32_t __last_button_bounce_time = 0;
 uint32_t __device_status = 0;
@@ -158,7 +158,7 @@ void USB_IRQHandler(void)
 
 uint32_t millis(void)
 {
-    return (((uint32_t)TIM6->CNT) + (__90_ms * 90));
+    return (((volatile uint32_t)TIM6->CNT) + (__90_ms * 90));
 }
 
 void device_set_status(uint32_t status)
