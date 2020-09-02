@@ -18,6 +18,14 @@
 #define htonl(x)    (((x & 0xff) << 24) | ((x & 0xff00) << 8) \
                     | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24) )
 
+
+ReqSrcEnum g_request_source = REQ_SRC_UNKNOWN;
+
+inline ReqSrcEnum get_request_source(void){
+    printf1(TAG_WALLET, "Extension request source: FIDO %d \r\n", g_request_source);
+    return g_request_source;
+}
+
 int is_extension_request(uint8_t * kh, int len)
 {
     wallet_request * req = (wallet_request *) kh;
@@ -78,6 +86,7 @@ int16_t bridge_u2f_to_extensions(uint8_t * _chal, uint8_t * _appid, uint8_t klen
 #ifdef IS_BOOTLOADER
     ret = bootloader_bridge(klen, keyh);
 #else
+    g_request_source = REQ_SRC_U2F;
     ret = bridge_u2f_to_solo(sig, keyh, klen);
     u2f_response_writeback(sig,72);
 #endif
@@ -102,6 +111,7 @@ int16_t extend_fido2(CredentialId * credid, uint8_t * output)
 {
     if (is_extension_request((uint8_t*)credid, sizeof(CredentialId)))
     {
+        g_request_source = REQ_SRC_FIDO2;
         printf1(TAG_EXT,"IS EXT REQ\r\n");
         output[0] = bridge_u2f_to_solo(output+1, (uint8_t*)credid, sizeof(CredentialId));
         return 1;
