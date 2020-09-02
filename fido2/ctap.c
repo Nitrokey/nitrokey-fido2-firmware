@@ -568,7 +568,12 @@ static unsigned int get_credential_id_size(int type)
 
 #include "gpio.h"
 
-static int ctap2_user_presence_test(const uint8_t ctap_command)
+/**
+ * Get UP from the user, CTAP2
+ * @param ctap_command target CTAP2 command to which the UP is needed
+ * @return CTAP2_OK(0) on success
+ */
+int ctap2_user_presence_test(const uint8_t ctap_command)
 {
     uint32_t up_delay = CTAP2_UP_DELAY_MS;
     int (*feedback_function)(uint32_t) = ctap_user_presence_test;

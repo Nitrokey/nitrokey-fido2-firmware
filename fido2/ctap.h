@@ -427,5 +427,6 @@ extern uint8_t KEY_AGREEMENT_PUB[64];
 void lock_device_permanently();
 
 void ctap_load_external_keys(uint8_t * keybytes);
+int ctap2_user_presence_test(const uint8_t ctap_command);
 
 #endif
