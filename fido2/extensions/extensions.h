@@ -26,4 +26,12 @@ int is_extension_request(uint8_t * kh, int len);
 void extension_writeback_init(uint8_t * buffer, uint8_t size);
 void extension_writeback(uint8_t * buf, uint8_t size);
 
+typedef enum {
+    REQ_SRC_UNKNOWN = 0,
+    REQ_SRC_U2F,
+    REQ_SRC_FIDO2,
+} ReqSrcEnum;
+ReqSrcEnum get_request_source(void);
+
+
 #endif /* EXTENSIONS_H_ */
