@@ -56,7 +56,7 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
             if (get_request_source() == REQ_SRC_U2F) {
                 feedback = ctap_user_presence_test_config(CTAP2_UP_CONFIG_DELAY_MS) == 1;
             } else if (get_request_source() == REQ_SRC_FIDO2) {
-                feedback = ctap2_user_presence_test(CTAP_MAKE_CREDENTIAL) == 0;
+                feedback = ctap2_user_presence_test(WalletBootloader) == 0;
             } else { //unknown source
                 feedback = 0;
             }

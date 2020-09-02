@@ -583,6 +583,9 @@ int ctap2_user_presence_test(const uint8_t ctap_command)
       }
       up_delay = CTAP2_UP_RESET_DELAY_MS;
       feedback_function = ctap_user_presence_test_reset;
+    } else if (ctap_command == WalletBootloader){
+        up_delay = CTAP2_UP_CONFIG_DELAY_MS;
+        feedback_function = ctap_user_presence_test_config;
     }
 
     device_set_status(CTAPHID_STATUS_UPNEEDED);
