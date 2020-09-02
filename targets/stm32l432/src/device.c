@@ -163,6 +163,7 @@ uint32_t millis(void)
 
 void device_set_status(uint32_t status)
 {
+    printf1(TAG_CTAP, "Set device %s\r\n", (status==1)?"UPNEEDED":(status==0)?"IDLE":"PROCESSING");
     __disable_irq();
     __last_update = millis();
     __enable_irq();
