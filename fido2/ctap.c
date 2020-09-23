@@ -200,7 +200,7 @@ uint8_t ctap_get_info(CborEncoder * encoder)
                     check_ret(ret);
                 }
 
-                ret = cbor_encode_text_string(&options, "credMgmt", 8);
+                ret = cbor_encode_text_stringz(&options, "credentialMgmtPreview");
                 check_ret(ret);
                 {
                     ret = cbor_encode_boolean(&options, 1);
