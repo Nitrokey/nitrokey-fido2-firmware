@@ -146,10 +146,10 @@ uint8_t ctap_get_info(CborEncoder * encoder)
             ret = cbor_encoder_create_array(&map, &array, 2);
             check_ret(ret);
             {
-                ret = cbor_encode_text_stringz(&array, "hmac-secret");
+                ret = cbor_encode_text_stringz(&array, "credProtect");
                 check_ret(ret);
 
-                ret = cbor_encode_text_stringz(&array, "credProtect");
+                ret = cbor_encode_text_stringz(&array, "hmac-secret");
                 check_ret(ret);
             }
             ret = cbor_encoder_close_container(&map, &array);
@@ -200,7 +200,7 @@ uint8_t ctap_get_info(CborEncoder * encoder)
                     check_ret(ret);
                 }
 
-                ret = cbor_encode_text_string(&options, "credMgmt", 8);
+                ret = cbor_encode_text_stringz(&options, "credentialMgmtPreview");
                 check_ret(ret);
                 {
                     ret = cbor_encode_boolean(&options, 1);
