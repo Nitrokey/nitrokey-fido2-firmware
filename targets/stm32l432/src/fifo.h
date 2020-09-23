@@ -13,6 +13,9 @@
 #define TEST_FIFO 0
 #endif
 
+#include "stm32l4xx.h"
+
+
 #define FIFO_CREATE(NAME,LENGTH,BYTES)\
 int __##NAME##_WRITE_PTR = 0;\
 int __##NAME##_READ_PTR = 0;\
@@ -20,30 +23,36 @@ int __##NAME##_SIZE = 0;\
 static uint8_t __##NAME##_WRITE_BUF[BYTES * LENGTH];\
 \
 int fifo_##NAME##_add(uint8_t * c)\
-{\
+{                                     \
+    __disable_irq(); \
     if (__##NAME##_SIZE < LENGTH)\
     {\
         memmove(__##NAME##_WRITE_BUF + __##NAME##_WRITE_PTR * BYTES, c, BYTES);\
         __##NAME##_WRITE_PTR ++;\
         if (__##NAME##_WRITE_PTR >= LENGTH)\
             __##NAME##_WRITE_PTR = 0;\
-        __##NAME##_SIZE++;\
+        __##NAME##_SIZE++;            \
+        __enable_irq(); \
         return 0;\
-    }\
+    }                                 \
+    __enable_irq();                   \
     return -1;\
 }\
 \
 int fifo_##NAME##_take(uint8_t * c)\
-{\
+{                                     \
+    __disable_irq(); \
     memmove(c, __##NAME##_WRITE_BUF + __##NAME##_READ_PTR * BYTES, BYTES);\
     if ( __##NAME##_SIZE > 0)\
     {\
         __##NAME##_READ_PTR ++;\
         if (__##NAME##_READ_PTR >= LENGTH)\
             __##NAME##_READ_PTR = 0;\
-        __##NAME##_SIZE --;\
+        __##NAME##_SIZE --;           \
+        __enable_irq();               \
         return 0;\
-    }\
+    }                                 \
+    __enable_irq();                   \
     return -1;\
 }\
 \
