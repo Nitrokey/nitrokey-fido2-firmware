@@ -78,6 +78,7 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
+	sha256sum  $(signamedev)-app-to_sign.hex $(signamedev)-all-to_flash.hex *.hex
 	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
 	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
@@ -95,6 +96,7 @@ release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warni
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex
 	cp solo.hex $(signame1)-app-to_sign.hex
+	sha256sum  $(signame1)-app-to_sign.hex $(signame1)-all-to_flash.hex *.hex
 	ls -la release/
 	@echo "done"
 
@@ -198,11 +200,8 @@ cbor:
 	$(MAKE) -f $(APPMAKE) -j8 cbor
 
 test:
-	$(MAKE) build-release-locked
-	$(MAKE) build-release
-	$(MAKE) build-hacker
-	$(MAKE) build-debugboot
-	$(MAKE) clean2
+	$(MAKE) debug-release-buildv
+	$(MAKE) release-buildv RELEASE=1
 
 .PHONY: run-debug
 run-debug:

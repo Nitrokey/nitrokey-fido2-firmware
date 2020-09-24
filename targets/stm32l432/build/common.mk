@@ -18,12 +18,12 @@ USB_LIB := lib/usbd/usbd_cdc.c lib/usbd/usbd_cdc_if.c lib/usbd/usbd_composite.c 
 
 VERSION:=$(shell git describe --abbrev=0 )
 VERSION_FULL_RAW:=$(shell git describe)
-VERSION_FULL:=$(shell python -c 'print("$(VERSION_FULL_RAW)".strip(".nitrokey")) if ".nitrokey" in "$(VERSION_FULL_RAW)" else exit(1)')
+VERSION_FULL:=$(shell python3 -c 'print("$(VERSION_FULL_RAW)".strip(".nitrokey")) if ".nitrokey" in "$(VERSION_FULL_RAW)" else exit(1)')
 VERSION_FULL:=$(if $(VERSION_FULL),$(VERSION_FULL),$(error Invalid version tag - no '.nitrokey' suffix))
 
-VERSION_MAJ:=$(shell python -c 'print("$(VERSION)".split(".")[0])')
-VERSION_MIN:=$(shell python -c 'print("$(VERSION)".split(".")[1])')
-VERSION_PAT:=$(shell python -c 'print("$(VERSION)".split(".")[2])')
+VERSION_MAJ:=$(shell python3 -c 'print("$(VERSION)".split(".")[0])')
+VERSION_MIN:=$(shell python3 -c 'print("$(VERSION)".split(".")[1])')
+VERSION_PAT:=$(shell python3 -c 'print("$(VERSION)".split(".")[2])')
 
 #VERSION_FULL?=$(SOLO_VERSION_FULL)
 #VERSION:=$(SOLO_VERSION)
