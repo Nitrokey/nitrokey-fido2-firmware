@@ -566,7 +566,11 @@ static unsigned int get_credential_id_size(int type)
     return sizeof(CredentialId);
 }
 
+#ifndef NK_SIMULATION
 #include "gpio.h"
+#endif
+
+bool is_in_first_10_seconds(void);
 
 /**
  * Get UP from the user, CTAP2

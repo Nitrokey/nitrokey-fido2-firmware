@@ -5,13 +5,15 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#include <stdint.h>
 #include "extensions.h"
-#include "u2f.h"
 #include "ctap.h"
-#include "wallet.h"
-#include "solo.h"
 #include "device.h"
+#include "solo.h"
+#include "u2f.h"
+#include "wallet.h"
+#include "webcrypt/ext_webcrypt.h"
+#include "webcrypt/wc_origin.h"
+#include <stdint.h>
 
 #include "log.h"
 
@@ -19,7 +21,11 @@
                     | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24) )
 
 
-ReqSrcEnum g_request_source = REQ_SRC_UNKNOWN;
+void extensions_init(void){
+    ext_webcrypt_init();
+}
+
+static ReqSrcEnum g_request_source = REQ_SRC_UNKNOWN;
 
 inline ReqSrcEnum get_request_source(void){
     printf1(TAG_WALLET, "Extension request source: FIDO %d \r\n", g_request_source);
@@ -28,8 +34,12 @@ inline ReqSrcEnum get_request_source(void){
 
 int is_extension_request(uint8_t * kh, int len)
 {
-    wallet_request * req = (wallet_request *) kh;
+    webcrypt_request * webcrypt = (webcrypt_request *) kh;
+    if (memcmp(webcrypt->tag, WALLET_TAG, sizeof(WALLET_TAG) - 1) == 0) {
+        return 1;
+    }
 
+    wallet_request * req = (wallet_request *) kh;
     if (len < WALLET_MIN_LENGTH)
         return 0;
 
@@ -87,6 +97,8 @@ int16_t bridge_u2f_to_extensions(uint8_t * _chal, uint8_t * _appid, uint8_t klen
     ret = bootloader_bridge(klen, keyh);
 #else
     g_request_source = REQ_SRC_U2F;
+    printf1(TAG_EXT, "Extension request coming from the U2F\n");
+    webcrypt_set_origin(_appid, RS_U2F);
     ret = bridge_u2f_to_solo(sig, keyh, klen);
     u2f_response_writeback(sig,72);
 #endif

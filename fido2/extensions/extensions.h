@@ -33,5 +33,6 @@ typedef enum {
 } ReqSrcEnum;
 ReqSrcEnum get_request_source(void);
 
+void extensions_init(void);
 
 #endif /* EXTENSIONS_H_ */

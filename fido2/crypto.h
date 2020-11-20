@@ -50,5 +50,9 @@ void crypto_aes256_encrypt(uint8_t * buf, int lenth);
 void crypto_reset_master_secret();
 void crypto_load_master_secret(uint8_t * key);
 
+void crypto_ecc256_sign_safe(uint8_t * data, int len, uint8_t * sig, size_t sig_buf_len);
+
+const struct uECC_Curve_t * _es256_curve;
+
 
 #endif

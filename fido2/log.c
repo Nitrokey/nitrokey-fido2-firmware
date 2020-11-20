@@ -53,6 +53,7 @@ struct logtag tagtable[] = {
     {TAG_CCID, "CCID"},
     {TAG_CM, "CRED_MGMT"},
     {TAG_BUTTON, "BUTTON"},
+    {TAG_WEBCRYPT,"[1;34mWEBCRYPT[0m"},
 };
 
 
@@ -65,7 +66,7 @@ void LOG(uint32_t tag, const char * filename, int num, const char * fmt, ...)
 {
     unsigned int i;
 
-    if (((tag & 0x7fffffff) & LOGMASK) == 0)
+    if (((tag & 0x7fffffffu) & LOGMASK) == 0)
     {
         return;
     }

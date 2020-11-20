@@ -17,9 +17,23 @@ SRC += ../../fido2/data_migration.c
 SRC += ../../fido2/extensions/extensions.c ../../fido2/extensions/solo.c
 SRC += ../../fido2/extensions/wallet.c
 
+# Webcrypt
+SRC += ../../fido2/extensions/webcrypt/ext_webcrypt.c
+SRC += ../../fido2/extensions/webcrypt/wc_device.c
+SRC += ../../fido2/extensions/webcrypt/wc_origin.c
+SRC += ../../fido2/extensions/webcrypt/wc_buffer.c
+SRC += ../../fido2/extensions/webcrypt/wc_commands.c
+SRC += ../../fido2/extensions/webcrypt/wc_state.c
+SRC += ../../fido2/extensions/webcrypt/wc_cbor.c
+SRC += ../../fido2/extensions/webcrypt/wc_keys.c
+
 # Crypto libs
 SRC += ../../crypto/sha256/sha256.c ../../crypto/micro-ecc/uECC.c ../../crypto/tiny-AES-c/aes.c
 SRC += ../../crypto/cifra/src/sha512.c ../../crypto/cifra/src/blockwise.c
+SRC += ../../crypto/cifra/src/sha256.c
+SRC += ../../crypto/cifra/src/pbkdf2.c
+SRC += ../../crypto/cifra/src/hmac.c
+SRC += ../../crypto/cifra/src/chash.c
 
 OBJ1=$(SRC:.c=.o)
 OBJ=$(OBJ1:.s=.o)

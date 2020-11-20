@@ -30,6 +30,7 @@
 
 #include "log.h"
 #include APP_CONFIG
+#include "webcrypt/ext_webcrypt.h"
 
 
 
@@ -88,14 +89,19 @@ int16_t bridge_u2f_to_solo(uint8_t * output, uint8_t * keyh, int keylen)
         case WalletRegister:
         case WalletPin:
         case WalletReset:
-            return bridge_to_wallet(keyh, keylen);
+          return bridge_to_wallet(keyh, keylen);
 #endif
 
+        case WalletWebcrypt: {
+          ret = bridge_u2f_to_webcrypt(output, keyh, keylen);
+          break;
+        }
+
         default:
-            printf2(TAG_ERR,"Invalid wallet command: %x\n",req->operation);
-            ret = CTAP1_ERR_INVALID_COMMAND;
-            break;
-    }
+          printf2(TAG_ERR, "Invalid wallet command: %x\n", req->operation);
+          ret = CTAP1_ERR_INVALID_COMMAND;
+          break;
+        }
 
 cleanup:
 

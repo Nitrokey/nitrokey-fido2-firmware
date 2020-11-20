@@ -7,6 +7,8 @@
 #ifndef _MEMORY_LAYOUT_H_
 #define _MEMORY_LAYOUT_H_
 
+#include "stdint.h"
+
 #define PAGE_SIZE		2048
 #define PAGES			128
 
@@ -19,7 +21,7 @@
 // State of FIDO2 application
 #define	STATE2_PAGE		      (PAGES - 2)
 #define	STATE1_PAGE		      (PAGES - 1)
-
+#define FLASH_BEGIN             (0x08000000)
 #define	STATE1_PAGE_ADDR		(0x08000000 + ((STATE1_PAGE)*PAGE_SIZE))
 #define	STATE2_PAGE_ADDR		(0x08000000 + ((STATE2_PAGE)*PAGE_SIZE))
 
@@ -62,7 +64,9 @@ struct flash_memory_st{
   uint8_t _reserved_application_end_mark[8];
   uint8_t bootloader_data[2*1024-8];
 
-  uint8_t user_data[38*1024];
+  uint8_t webcrypt_data[PAGE_SIZE];
+
+  uint8_t user_data[36*1024];
 } __attribute__((packed));
 
 typedef struct flash_memory_st flash_memory_st;

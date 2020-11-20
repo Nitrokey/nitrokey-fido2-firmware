@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     uint8_t hidmsg[64];
 
     set_logging_mask(
-//        -1 |
+        -1 |
 		/*0*/
 		// TAG_GEN|
 		// TAG_MC |

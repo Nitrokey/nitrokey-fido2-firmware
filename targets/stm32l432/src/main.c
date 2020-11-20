@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 //		TAG_NFC |
 		TAG_CP |
 		TAG_CTAP|
-		TAG_HID|
+//		TAG_HID|
 		TAG_U2F|
 		//TAG_PARSE |
 		//TAG_TIME|
@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
         TAG_EXT|
         TAG_CCID|
 		TAG_ERR |
-        TAG_BUTTON
+//        TAG_BUTTON |
+        TAG_WEBCRYPT
 	);
 
     device_init(argc, argv);

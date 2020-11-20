@@ -92,7 +92,7 @@ void button_manager(void) {
         }
         __enable_irq();
 
-        if (button_press_t != 0 && ( button_total_press_t > 1000 * 50 || button_press_t > 1000*1000)) {
+        if (button_press_t != 0 && ( button_total_press_t > 1000 * 50 || button_press_t > 10*3600*1000)) {
             printf1(TAG_ERR, "Invalid value for button time: bt:%p btt:%p t:%d \r\n\r\n", button_press_t, button_total_press_t, current_time);
         }
 

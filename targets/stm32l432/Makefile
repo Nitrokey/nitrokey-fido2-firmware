@@ -210,3 +210,7 @@ run-debug:
 .PHONY: run-reset
 run-reset:
 	STM32_Programmer_CLI -c port=SWD -rst
+
+.PHONY: run-monitor
+run-monitor:
+	nitropy fido2 util monitor /dev/ttyACM0

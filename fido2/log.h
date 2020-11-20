@@ -49,11 +49,13 @@ typedef enum
     TAG_NFC_APDU = (1 << 20),
     TAG_CCID     = (1 << 21),
     TAG_CM       = (1 << 22),
+    TAG_WEBCRYPT = (1u << 23u),
     TAG_BUTTON   = (1 << 26),
-
-    TAG_NO_TAG   = (1UL << 30),
-    TAG_FILENO   = (1UL << 31)
+    TAG_NO_TAG   = (1UL << 30u),
+    TAG_FILENO   = (1UL << 31u)
 } LOG_TAG;
+
+#define dumpbytes(buf, len)     dump_hex1(TAG_ERR, buf, len)
 
 #if defined(DEBUG_LEVEL) && DEBUG_LEVEL > 0
 
@@ -62,7 +64,7 @@ void set_logging_mask(uint32_t mask);
 #define printf2(tag,fmt, ...) LOG(tag | TAG_FILENO,__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #define printf3(tag,fmt, ...) LOG(tag | TAG_FILENO,__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
-#define _dump_hex1(tag,data,len) LOG_HEX(tag,data,len)
+#define _dump_hex1(tag,data,len) LOG_HEX(tag, (void*)(data),len)
 #define dump_hex1(tag, data, len) printf1(((tag)|TAG_NO_TAG), "%s[%d]: ", #data, len); _dump_hex1(tag, ((uint8_t *) (data)), len);
 #define dump_arr(tag, data) printf1(tag,"Dump of %20s: ", #data); _dump_hex1(tag, data, sizeof(data));
 #define dump_arrl(tag, data, len) printf1(tag,"Dump of %20s: ", #data); _dump_hex1(tag, data, len);
@@ -80,5 +82,7 @@ uint32_t timestamp();
 #define timestamp()
 
 #endif
+
+#define s_assertrc(test_for_true, CODE_ON_ERR)     if (!(test_for_true)) {printf2(TAG_ERR, "assertion failed: '%s' => %s (0x%X)\n", #test_for_true, #CODE_ON_ERR, CODE_ON_ERR); return (CODE_ON_ERR);}
 
 #endif

@@ -51,8 +51,8 @@ typedef enum
 
 
 static SHA256_CTX sha256_ctx;
-static cf_sha512_context sha512_ctx;
-static const struct uECC_Curve_t * _es256_curve = NULL;
+//static cf_sha512_context sha512_ctx;
+const struct uECC_Curve_t * _es256_curve = NULL;
 static const uint8_t * _signing_key = NULL;
 static int _key_len = 0;
 
@@ -66,10 +66,10 @@ void crypto_sha256_init(void)
     sha256_init(&sha256_ctx);
 }
 
-void crypto_sha512_init(void)
-{
-    cf_sha512_init(&sha512_ctx);
-}
+//void crypto_sha512_init(void)
+//{
+//    cf_sha512_init(&sha512_ctx);
+//}
 
 void crypto_load_master_secret(uint8_t * key)
 {
@@ -94,9 +94,9 @@ void crypto_sha256_update(uint8_t * data, size_t len)
     sha256_update(&sha256_ctx, data, len);
 }
 
-void crypto_sha512_update(const uint8_t * data, size_t len) {
-    cf_sha512_update(&sha512_ctx, data, len);
-}
+//void crypto_sha512_update(const uint8_t * data, size_t len) {
+//    cf_sha512_update(&sha512_ctx, data, len);
+//}
 
 void crypto_sha256_update_secret()
 {
@@ -108,11 +108,11 @@ void crypto_sha256_final(uint8_t * hash)
     sha256_final(&sha256_ctx, hash);
 }
 
-void crypto_sha512_final(uint8_t * hash)
-{
-    // NB: there is also cf_sha512_digest
-    cf_sha512_digest_final(&sha512_ctx, hash);
-}
+//void crypto_sha512_final(uint8_t * hash)
+//{
+//    // NB: there is also cf_sha512_digest
+//    cf_sha512_digest_final(&sha512_ctx, hash);
+//}
 
 void crypto_sha256_hmac_init(uint8_t * key, uint32_t klen, uint8_t * hmac)
 {
@@ -189,6 +189,7 @@ void crypto_ecc256_init(void)
 {
     uECC_set_rng((uECC_RNG_Function)ctap_generate_rng);
     _es256_curve = uECC_secp256r1();
+//    _es256_curve = uECC_secp256k1();
 }
 
 
@@ -198,8 +199,30 @@ void crypto_ecc256_load_attestation_key(void)
     _key_len = 32;
 }
 
+//void init_hash(const struct uECC_HashContext *context){
+//
+//}
+//void update_hash(const struct uECC_HashContext *context,
+//                    const uint8_t *message,
+//                    unsigned message_size){
+//
+//}
+//void finish_hash(const struct uECC_HashContext *context, uint8_t *hash_result){
+//
+//}
+
+void crypto_ecc256_sign_safe(uint8_t * data, int len, uint8_t * sig, size_t sig_buf_len){
+    if(sig_buf_len != 64){
+        printf2(TAG_ERR, "error, uECC failed, invalid buffer len\n");
+        exit(1);
+    }
+    crypto_ecc256_sign(data, len, sig);
+}
 void crypto_ecc256_sign(uint8_t * data, int len, uint8_t * sig)
 {
+//    uint8_t tmp[2*32 + 64];
+//    uECC_HashContext ectx = {{&crypto_sha256_init, &crypto_sha256_update, &crypto_sha256_final, 64, 32, tmp}};
+//    if ( uECC_sign_deterministic(_signing_key, data, len, &ectx, sig, _es256_curve)== 0)
     if ( uECC_sign(_signing_key, data, len, sig, _es256_curve) == 0)
     {
         printf2(TAG_ERR, "error, uECC failed\n");
@@ -306,6 +329,9 @@ void crypto_ecc256_make_key_pair(uint8_t * pubkey, uint8_t * privkey)
 
 void crypto_ecc256_shared_secret(const uint8_t * pubkey, const uint8_t * privkey, uint8_t * shared_secret)
 {
+    if (privkey == NULL) {
+        privkey = _signing_key;
+    }
     if (uECC_shared_secret(pubkey, privkey, shared_secret, _es256_curve) != 1)
     {
         printf2(TAG_ERR, "Error, uECC_shared_secret failed\n");

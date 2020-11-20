@@ -75,6 +75,13 @@ typedef struct
     uint8_t payload[MAX_PAYLOAD_SIZE];
 }__attribute__((packed)) wallet_request;
 
+typedef struct
+{
+    uint8_t operation;
+    uint8_t tag[4];
+    uint8_t payload[255-4-1];
+}__attribute__((packed)) webcrypt_request;
+
 
 typedef enum
 {
@@ -85,6 +92,7 @@ typedef enum
     WalletVersion= 0x14,
     WalletRng = 0x15,
     WalletBootloader = 0x20,
+    WalletWebcrypt = 0x22,
 } WalletOperation;
 
 

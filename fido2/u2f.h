@@ -50,8 +50,6 @@
 #define U2F_SW_WRONG_DATA                   0x6a80
 #define U2F_SW_INSUFFICIENT_MEMORY          0x9210
 
-// Delay in milliseconds to wait for user input
-#define U2F_MS_USER_INPUT_WAIT              3000
 
 struct u2f_request_apdu
 {
@@ -108,6 +106,7 @@ int8_t u2f_authenticate_credential(struct u2f_key_handle * kh, uint8_t key_handl
 int8_t u2f_response_writeback(const uint8_t * buf, uint16_t len);
 void u2f_reset_response();
 void u2f_set_writeback_buffer(CTAP_RESPONSE * resp);
+int8_t u2f_new_keypair_from_hash(struct u2f_key_handle * kh, uint8_t * appid, uint8_t * pubkey, uint8_t* key_src_hash);
 
 int16_t u2f_version();
 

@@ -22,6 +22,7 @@
 #include "device.h"
 #include "log.h"
 #include "util.h"
+#include "extensions/extensions.h"
 
 #define RK_NUM  50
 
@@ -254,6 +255,7 @@ void device_init(int argc, char *argv[])
     ctaphid_init();
 
     ctap_init( 1 );
+    extensions_init();
 }
 
 
@@ -265,6 +267,60 @@ void delay(uint32_t ms)
     nanosleep(&ts,NULL);
 }
 
+
+void heartbeat()
+{
+
+}
+
+void ctaphid_write_block(uint8_t * data)
+{
+    /*printf("<< "); dump_hex(data, 64);*/
+    usbhid_send(data);
+}
+
+void do_migration_if_required(){
+
+}
+
+const bool _up_disabled = false;
+
+int ctap_user_presence_test(uint32_t d)
+{
+    if (_up_disabled)
+    {
+        return 2;
+    }
+    return 1;
+}
+
+int8_t u2f_get_user_feedback(){
+    return ctap_user_presence_test(0);
+}
+void feedback_show_error() {
+    // flash LED lights
+    // enter endless loop
+    while (1) {
+    }
+}
+
+int ctap_user_verification(uint8_t arg)
+{
+    return 1;
+}
+
+
+uint32_t ctap_atomic_count(uint32_t amount)
+{
+    static uint32_t counter1 = 25;
+    counter1 += (amount + 1);
+    return counter1;
+}
+
+//int ctap_get_status_data(uint8_t * dst){
+//    printf2(TAG_ERR,"ctap_get_status_data not imple\n");
+//    return 0;
+//}
 
 int ctap_generate_rng(uint8_t * dst, size_t num)
 {
@@ -477,10 +533,21 @@ void ctap_overwrite_rk(int index, CTAP_residentKey * rk)
 
 
 int ctap_get_status_data(uint8_t * ctap_buffer) {
-  memset(ctap_buffer, 42, 10);
+    printf2(TAG_ERR,"ctap_get_status_data not implemented\n");
+//  memset(ctap_buffer, 42, 10);
   return 0;
+}
+
+bool is_in_first_10_seconds(void) {
+    return false;
 }
 
 
 
+int ctap_user_presence_test_reset(uint32_t up_delay) {
+    return 1;
+}
 
+int ctap_user_presence_test_config(uint32_t up_delay) {
+    return 1;
+}

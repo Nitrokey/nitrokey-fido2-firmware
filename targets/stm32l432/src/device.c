@@ -32,6 +32,7 @@
 #include "sense.h"
 #include "gpio.h"
 #include "bsp.h"
+#include "extensions/extensions.h"
 
 #define LOW_FREQUENCY        1
 #define HIGH_FREQUENCY       0
@@ -345,6 +346,7 @@ void device_init()
     usbhid_init();
     ctaphid_init();
     ctap_init();
+    extensions_init();
 
     device_migrate();
 
@@ -1018,4 +1020,12 @@ void _Error_Handler(char *file, int line)
     while(1)
     {
     }
+}
+
+void feedback_show_error() {
+  printf1(TAG_ERR, "Show error\n");
+  // flash LED lights
+  // enter endless loop
+  while (1) {
+  }
 }

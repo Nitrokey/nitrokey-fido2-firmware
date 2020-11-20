@@ -161,7 +161,7 @@ static void dump_signature_der(uint8_t * sig)
     len = ctap_encode_der_sig(sig, sigder);
     u2f_response_writeback(sigder, len);
 }
-static int8_t u2f_load_key(struct u2f_key_handle * kh, uint8_t khl, uint8_t * appid)
+int8_t u2f_load_key(struct u2f_key_handle * kh, uint8_t khl, uint8_t * appid)
 {
     crypto_ecc256_load_key((uint8_t*)kh, khl, NULL, 0);
     return 0;
@@ -177,15 +177,22 @@ static void u2f_make_auth_tag(struct u2f_key_handle * kh, uint8_t * appid, uint8
     memmove(tag, hashbuf, CREDENTIAL_TAG_SIZE);
 }
 
-int8_t u2f_new_keypair(struct u2f_key_handle * kh, uint8_t * appid, uint8_t * pubkey)
-{
-    ctap_generate_rng(kh->key, U2F_KEY_HANDLE_KEY_SIZE);
+
+int8_t u2f_new_keypair(struct u2f_key_handle * kh, uint8_t * appid, uint8_t * pubkey){
+    return u2f_new_keypair_from_hash(kh, appid, pubkey, NULL);
+}
+
+int8_t u2f_new_keypair_from_hash(struct u2f_key_handle *kh, uint8_t *appid, uint8_t *pubkey, uint8_t *key_src_hash) {
+    if (key_src_hash == NULL) {
+        ctap_generate_rng(kh->key, U2F_KEY_HANDLE_KEY_SIZE);
+    } else {
+        memmove(kh->key, key_src_hash, sizeof(kh->key));
+    }
     u2f_make_auth_tag(kh, appid, kh->tag);
 
     crypto_ecc256_derive_public_key((uint8_t*)kh, U2F_KEY_HANDLE_SIZE, pubkey, pubkey+32);
     return 0;
 }
-
 
 // Return 1 if authenticate, 0 if not.
 int8_t u2f_authenticate_credential(struct u2f_key_handle * kh, uint8_t key_handle_len, uint8_t * appid)
