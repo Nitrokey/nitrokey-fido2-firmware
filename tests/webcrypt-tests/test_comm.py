@@ -174,7 +174,7 @@ def test_helper_round(param):
     assert result == round_to_next(x, n)
 
 
-def encrypt_AES_GCM(msg, secretKey):
+def encrypt_AES(msg, secretKey):
     # PKCS#7 padding
     len_rounded = round_to_next(len(msg), 16)
     msg = msg.ljust(len_rounded, int.to_bytes(len_rounded - len(msg), 1, 'little'))
@@ -185,7 +185,6 @@ def encrypt_AES_GCM(msg, secretKey):
 
 
 def test_decrypt(nkfido2_client):
-    global curve
     assert "KEYHANDLE" in STATE, "test_generate needs to be run first"
 
     msg = b'Text to be encrypted by ECC public key and ' \
@@ -198,7 +197,7 @@ def test_decrypt(nkfido2_client):
     ecdh.load_received_public_key_bytes(STATE["PUBKEY"])
     secretKey = ecdh.generate_sharedsecret_bytes()
     ephem_pub_bin = local_public_key.to_string()
-    ciphertext = encrypt_AES_GCM(msg, secretKey)
+    ciphertext = encrypt_AES(msg, secretKey)
 
     data_len = struct.pack("<H", len(ciphertext))
 
