@@ -14,6 +14,7 @@ addons:
       - python3-setuptools
       - python3-wheel
       - make
+      - cmake
 #services:
 #  - docker
 before_install:
@@ -22,6 +23,8 @@ before_install:
     - sudo apt-get install -y gcc-arm-embedded
     - pip3 install -U pip
     - pip3 install pynitrokey==0.3.2
+    - pip3 install pipenv
 script:
   - export CC=gcc-8
   - make travis
+  - make -C tests/webcrypt-tests CI
