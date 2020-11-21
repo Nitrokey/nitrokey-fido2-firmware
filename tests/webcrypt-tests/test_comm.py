@@ -102,7 +102,7 @@ def test_generate(nkfido2_client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY)
     pprint(read_data)
     assert isinstance(read_data, dict)
-    assert all(x in read_data for x in ["PUBKEY", "KEYHANDLE"])
+    assert check_keys_in_received_dictionary(read_data, ["PUBKEY", "KEYHANDLE"])
     global STATE
     STATE = read_data
 
@@ -112,7 +112,7 @@ def test_generate_from_data(nkfido2_client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
     pprint(read_data)
     assert isinstance(read_data, dict)
-    assert all(x in read_data for x in ["PUBKEY", "KEYHANDLE"])
+    assert check_keys_in_received_dictionary(read_data, ["PUBKEY", "KEYHANDLE"])
     global STATE
     STATE = read_data
 
@@ -143,7 +143,7 @@ def test_sign(nkfido2_client, curve):
     read_data = send_and_receive_cbor(nkfido2_client, Command.SIGN, data)
     pprint(read_data)
     assert isinstance(read_data, dict)
-    assert all(x in read_data for x in ["INHASH", "SIGNATURE"])
+    assert check_keys_in_received_dictionary(read_data, ["INHASH", "SIGNATURE"])
     assert hash_data == read_data["INHASH"]
 
     signature__hex = read_data["SIGNATURE"].hex()
@@ -223,7 +223,7 @@ def test_decrypt(nkfido2_client):
     pprint(read_data)
 
     assert isinstance(read_data, dict)
-    assert all(x in read_data for x in ["DATA"])
+    assert check_keys_in_received_dictionary(read_data, ["DATA"])
 
     print("decrypted msg device:", read_data["DATA"])
     assert msg in read_data["DATA"]
@@ -232,7 +232,7 @@ def test_decrypt(nkfido2_client):
 def test_status(nkfido2_client: NKFido2Client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.STATUS)
     print(read_data)
-    assert all(x in read_data for x in ["UNLOCKED", "VERSION", "SLOTS"])
+    assert check_keys_in_received_dictionary(read_data, ["UNLOCKED", "VERSION", "SLOTS"])
 
 
 def send_and_receive_cbor(*args, **kwargs):
@@ -241,9 +241,13 @@ def send_and_receive_cbor(*args, **kwargs):
     return read_data
 
 
+def check_keys_in_received_dictionary(data: dict, keys: list):
+    return all(x in data for x in keys)
+
+
 def test_initialize_simple(nkfido2_client: NKFido2Client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.INITIALIZE_SEED)
-    assert all(x in read_data for x in ["MASTER", "SALT"])
+    assert check_keys_in_received_dictionary(read_data, ["MASTER", "SALT"])
 
 
 def test_initialize(nkfido2_client: NKFido2Client):
@@ -260,7 +264,7 @@ def test_restore_simple(nkfido2_client: NKFido2Client):
     data = {"MASTER": b'1' * 32, "SALT": b'2' * 8}
     read_data = send_and_receive_cbor(nkfido2_client, Command.RESTORE_FROM_SEED, data)
     print(read_data)
-    assert all(x in read_data for x in ["HASH"])
+    assert check_keys_in_received_dictionary(read_data, ["HASH"])
 
 
 @pytest.mark.parametrize("test_input", [
@@ -283,6 +287,6 @@ def test_restore(nkfido2_client: NKFido2Client, test_input):
 
 def test_PIN_attempts(nkfido2_client: NKFido2Client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.PIN_ATTEMPTS)
-    assert all(x in read_data for x in ["PIN_ATTEMPTS"])
+    assert check_keys_in_received_dictionary(read_data, ["PIN_ATTEMPTS"])
     print(read_data)
     assert int.from_bytes(read_data["PIN_ATTEMPTS"], 'little', signed=False) == 8
