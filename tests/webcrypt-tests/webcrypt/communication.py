@@ -116,7 +116,7 @@ def device_receive(nkfido2_client: NKFido2Client, appid=APPID) -> Tuple[int, byt
 
     data_received = b''.join(data_received)
     if print_packet_debug_info:
-        my_print(f'All data received: {Counter(data_received).most_common(20)}')
+        my_print(f'All data received: {Counter(data_received).most_common(10)}')
 
     data_len = int.from_bytes(data_received[0:2], 'little')
     command_id = int.from_bytes(data_received[2:3], 'little')

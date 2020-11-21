@@ -24,7 +24,6 @@ import functools
 import hmac
 import struct
 from hashlib import sha256
-from pprint import pprint
 
 import ecdsa
 import pytest
@@ -36,7 +35,8 @@ from tinyec import registry
 
 from conftest import TEST_DATA, fixture_data_big, fixture_data_random, TEST_DATA_SMALL, cbor_loads
 from webcrypt.communication import device_receive, device_send, send_and_receive, set_temporary_password
-from webcrypt.helpers import compare_cbor_dict
+from webcrypt.helpers import compare_cbor_dict, log_data
+from webcrypt.llog import log
 from webcrypt.types import Command
 
 SALT = b'salt' * 4
@@ -90,7 +90,7 @@ def helper_login(nkfido2_client: NKFido2Client, PIN: bytes, expected_error=None)
 
 @functools.lru_cache(maxsize=None)
 def test_setup_session(nkfido2_client):
-    print('Setting session')
+    log.debug('Setting session')
 
 STATE = {
     "PUBKEY": b"",
@@ -100,7 +100,7 @@ STATE = {
 
 def test_generate(nkfido2_client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY)
-    pprint(read_data)
+    log.debug(read_data)
     assert isinstance(read_data, dict)
     assert check_keys_in_received_dictionary(read_data, ["PUBKEY", "KEYHANDLE"])
     global STATE
@@ -110,7 +110,7 @@ def test_generate(nkfido2_client):
 def test_generate_from_data(nkfido2_client):
     data = {"HASH": b"test"}
     read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
-    pprint(read_data)
+    log.debug(read_data)
     assert isinstance(read_data, dict)
     assert check_keys_in_received_dictionary(read_data, ["PUBKEY", "KEYHANDLE"])
     global STATE
@@ -141,14 +141,14 @@ def test_sign(nkfido2_client, curve):
     hash_data = sha256(message).digest()
     data = {'HASH': hash_data, "KEYHANDLE": STATE["KEYHANDLE"]}
     read_data = send_and_receive_cbor(nkfido2_client, Command.SIGN, data)
-    pprint(read_data)
+    log.debug(read_data)
     assert isinstance(read_data, dict)
     assert check_keys_in_received_dictionary(read_data, ["INHASH", "SIGNATURE"])
     assert hash_data == read_data["INHASH"]
 
     signature__hex = read_data["SIGNATURE"].hex()
     pubkey__hex = STATE["PUBKEY"].hex()
-    print([signature__hex, pubkey__hex, message])
+    log.debug([signature__hex, pubkey__hex, message])
     if curve == 'secp256k1':
         vk = ecdsa.VerifyingKey.from_string(bytes.fromhex(pubkey__hex), curve=ecdsa.SECP256k1,
                                             hashfunc=sha256)
@@ -178,7 +178,7 @@ def encrypt_AES(msg, secretKey):
     # PKCS#7 padding
     len_rounded = round_to_next(len(msg), 16)
     msg = msg.ljust(len_rounded, int.to_bytes(len_rounded - len(msg), 1, 'little'))
-    print(f'msg={msg}')
+    log.debug(f'msg={msg}')
     aesCipher = AES.new(secretKey, AES.MODE_CBC, IV=b'\0' * 16)
     ciphertext = aesCipher.encrypt(msg)
     return ciphertext
@@ -189,7 +189,7 @@ def test_decrypt(nkfido2_client):
 
     msg = b'Text to be encrypted by ECC public key and ' \
           b'decrypted by its corresponding ECC private key'
-    print("original msg:", msg)
+    log.debug(f"original msg: {msg}")
 
     ecdh = ECDH(curve=NIST256p)
     ecdh.generate_private_key()
@@ -201,7 +201,7 @@ def test_decrypt(nkfido2_client):
 
     data_len = struct.pack("<H", len(ciphertext))
 
-    print(secretKey.hex())
+    log.debug(secretKey.hex())
     h = hmac.new(secretKey, digestmod='sha256')
     h.update(ciphertext)
     h.update(ephem_pub_bin)
@@ -216,21 +216,21 @@ def test_decrypt(nkfido2_client):
         "ECCEKEY": ephem_pub_bin,
     }
 
-    print(data)
+    log.debug(data)
 
     read_data = send_and_receive_cbor(nkfido2_client, Command.DECRYPT, data)
-    pprint(read_data)
+    log.debug(read_data)
 
     assert isinstance(read_data, dict)
     assert check_keys_in_received_dictionary(read_data, ["DATA"])
 
-    print("decrypted msg device:", read_data["DATA"])
+    log.debug(f"decrypted msg device: {read_data['DATA']}")
     assert msg in read_data["DATA"]
 
 
 def test_status(nkfido2_client: NKFido2Client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.STATUS)
-    print(read_data)
+    log.debug(read_data)
     assert check_keys_in_received_dictionary(read_data, ["UNLOCKED", "VERSION", "SLOTS"])
 
 
@@ -262,7 +262,7 @@ def test_initialize(nkfido2_client: NKFido2Client):
 def test_restore_simple(nkfido2_client: NKFido2Client):
     data = {"MASTER": b'1' * 32, "SALT": b'2' * 8}
     read_data = send_and_receive_cbor(nkfido2_client, Command.RESTORE_FROM_SEED, data)
-    print(read_data)
+    log.debug(read_data)
     assert check_keys_in_received_dictionary(read_data, ["HASH"])
 
 
@@ -287,5 +287,5 @@ def test_restore(nkfido2_client: NKFido2Client, test_input):
 def test_PIN_attempts(nkfido2_client: NKFido2Client):
     read_data = send_and_receive_cbor(nkfido2_client, Command.PIN_ATTEMPTS)
     assert check_keys_in_received_dictionary(read_data, ["PIN_ATTEMPTS"])
-    print(read_data)
+    log.debug(read_data)
     assert int.from_bytes(read_data["PIN_ATTEMPTS"], 'little', signed=False) == 8
