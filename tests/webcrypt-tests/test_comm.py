@@ -99,10 +99,7 @@ STATE = {
 
 
 def test_generate(nkfido2_client):
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.GENERATE_KEY)
-    assert read_data_bytes
-    print(read_data_bytes.hex())
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY)
     pprint(read_data)
     assert isinstance(read_data, dict)
     assert all(x in read_data for x in ["PUBKEY", "KEYHANDLE"])
@@ -112,28 +109,22 @@ def test_generate(nkfido2_client):
 
 def test_generate_from_data(nkfido2_client):
     data = {"HASH": b"test"}
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
-    assert read_data_bytes
-    print(read_data_bytes.hex())
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
     pprint(read_data)
     assert isinstance(read_data, dict)
     assert all(x in read_data for x in ["PUBKEY", "KEYHANDLE"])
     global STATE
     STATE = read_data
 
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
     assert read_data["PUBKEY"] == STATE["PUBKEY"]
 
     data = {"HASH": b"test2"}
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
     assert read_data["PUBKEY"] != STATE["PUBKEY"]
 
     data = {"HASH": b"test"}
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.GENERATE_KEY_FROM_DATA, data)
     assert read_data["PUBKEY"] == STATE["PUBKEY"]
 
 
@@ -149,10 +140,7 @@ def test_sign(nkfido2_client, curve):
     message = b"test_message"
     hash_data = sha256(message).digest()
     data = {'HASH': hash_data, "KEYHANDLE": STATE["KEYHANDLE"]}
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.SIGN, data)
-    assert read_data_bytes
-    print(read_data_bytes.hex())
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.SIGN, data)
     pprint(read_data)
     assert isinstance(read_data, dict)
     assert all(x in read_data for x in ["INHASH", "SIGNATURE"])
@@ -231,10 +219,7 @@ def test_decrypt(nkfido2_client):
 
     print(data)
 
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.DECRYPT, data)
-    assert read_data_bytes
-    print(read_data_bytes.hex())
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.DECRYPT, data)
     pprint(read_data)
 
     assert isinstance(read_data, dict)
@@ -245,8 +230,7 @@ def test_decrypt(nkfido2_client):
 
 
 def test_status(nkfido2_client: NKFido2Client):
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.STATUS)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.STATUS)
     print(read_data)
     assert all(x in read_data for x in ["UNLOCKED", "VERSION", "SLOTS"])
 
@@ -258,8 +242,7 @@ def send_and_receive_cbor(*args, **kwargs):
 
 
 def test_initialize_simple(nkfido2_client: NKFido2Client):
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.INITIALIZE_SEED)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.INITIALIZE_SEED)
     assert all(x in read_data for x in ["MASTER", "SALT"])
 
 
@@ -275,8 +258,7 @@ def test_initialize(nkfido2_client: NKFido2Client):
 
 def test_restore_simple(nkfido2_client: NKFido2Client):
     data = {"MASTER": b'1' * 32, "SALT": b'2' * 8}
-    success, read_data_bytes = send_and_receive(nkfido2_client, Command.RESTORE_FROM_SEED, data)
-    read_data = cbor_loads(read_data_bytes)
+    read_data = send_and_receive_cbor(nkfido2_client, Command.RESTORE_FROM_SEED, data)
     print(read_data)
     assert all(x in read_data for x in ["HASH"])
 
