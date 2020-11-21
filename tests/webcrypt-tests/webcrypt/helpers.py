@@ -25,13 +25,15 @@ from pprint import pprint
 
 from fido2 import cbor
 
+from webcrypt.llog import log_data
+
 
 def compare_cbor_dict(read_data_bytes: bytes, test_data: dict) -> None:
     assert read_data_bytes, "Read data are empty"
-    print(f'Record stats: CBOR length {len(read_data_bytes)}')
+    log_data(f'Record stats: CBOR length {len(read_data_bytes)}')
     read_data = cbor.decode(read_data_bytes)
-    print(Counter(read_data_bytes))
-    pprint(read_data)
+    log_data(Counter(read_data_bytes))
+    log_data(read_data)
     assert not isinstance(read_data, int)
     for k, v in test_data.items():
         k: bytes

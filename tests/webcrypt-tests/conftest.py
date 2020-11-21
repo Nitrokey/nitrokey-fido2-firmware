@@ -26,6 +26,8 @@ import cbor
 import pytest
 from pynitrokey.fido2.client import NKFido2Client as NKFido2Client
 
+from webcrypt.helpers import log_data
+
 REAL_HARDWARE = False
 
 
@@ -50,7 +52,7 @@ def nkfido2_client(request) -> NKFido2Client:
         pynitrokey.fido2.force_udp_backend()
     nkfido2_client = pynitrokey.fido2.client.NKFido2Client()
     nkfido2_client.find_device()
-    print(f'\nExchange selected: {nkfido2_client.exchange}\n')
+    log_data(f'\nExchange selected: {nkfido2_client.exchange}\n')
     return nkfido2_client
 
 

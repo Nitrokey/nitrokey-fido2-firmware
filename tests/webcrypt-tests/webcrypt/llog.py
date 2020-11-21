@@ -22,14 +22,22 @@
 #
 import logging
 
-logging.basicConfig(format='* %(relativeCreated)6dms %(filename)s:%(lineno)d %(message)s', level=logging.INFO)
-log = logging.getLogger('comm')
+LOG_FORMAT = '* %(relativeCreated)6dms %(filename)s:%(lineno)d %(message)s'
 
 
-def set_debug_messages2(a: int):
-    if a == 1:
-        logging.basicConfig(format='* %(relativeCreated)6dms %(filename)s:%(lineno)d %(message)s', level=logging.INFO)
-    elif a == 0:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s',
-                            handlers=[logging.FileHandler("activation.log")])
-        # handlers=[logging.FileHandler("activation.log"), logging.StreamHandler()])
+def get_logger():
+    logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
+    log = logging.getLogger('webcrypt')
+    # ch = logging.StreamHandler()
+    # ch.setLevel(logging.DEBUG)
+    # formatter = logging.Formatter(LOG_FORMAT)
+    # ch.setFormatter(formatter)
+    # log.addHandler(ch)
+    return log
+
+
+log = get_logger()
+
+
+def log_data(x):
+    log.debug(x)
