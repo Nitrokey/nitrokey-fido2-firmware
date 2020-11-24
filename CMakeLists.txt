@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.12)
 project(nitrokey-fido2)
 
 SET(CMAKE_C_COMPILER /usr/local/bin/gcc)
