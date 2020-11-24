@@ -34,3 +34,4 @@ clean:
 clean-full: clean
 	pipenv uninstall --all
 	-rm Pipfile.lock
+	cd $(SIMDIR) && $(MAKE) clean
