@@ -7,9 +7,7 @@ all: CI
 
 $(SIM):
 	mkdir -p $(SIMDIR)
-	cd $(SIMDIR)
-	cmake ..
-	$(MAKE) -j2
+	cd $(SIMDIR) &&	cmake .. && $(MAKE) -j2
 
 .PHONY: pipenv
 pipenv: Pipfile.lock
@@ -28,3 +26,11 @@ CI: $(SIM) pipenv
 	sleep 1
 	# start tests
 	pipenv run pytest test_comm.py  -svx # --log-cli-level=DEBUG
+
+.PHONY: clean clean-full
+clean:
+	-rm -v *.bin *.log $(SIM)
+
+clean-full: clean
+	pipenv uninstall --all
+	-rm Pipfile.lock
