@@ -200,13 +200,6 @@ uint8_t ctap_get_info(CborEncoder * encoder)
                     check_ret(ret);
                 }
 
-                ret = cbor_encode_text_stringz(&options, "credentialMgmtPreview");
-                check_ret(ret);
-                {
-                    ret = cbor_encode_boolean(&options, 1);
-                    check_ret(ret);
-                }
-
                 ret = cbor_encode_text_string(&options, "clientPin", 9);
                 check_ret(ret);
                 {
@@ -214,7 +207,12 @@ uint8_t ctap_get_info(CborEncoder * encoder)
                     check_ret(ret);
                 }
 
-
+                ret = cbor_encode_text_stringz(&options, "credentialMgmtPreview");
+                check_ret(ret);
+                {
+                    ret = cbor_encode_boolean(&options, 1);
+                    check_ret(ret);
+                }
 
 
             }
