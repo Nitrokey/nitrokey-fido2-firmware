@@ -13,11 +13,10 @@ RUN apt-get update  \
     python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
-ENV GCC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update"
-ENV GCC_NAME="gcc-arm-none-eabi-8-2019-q3-update"
-ENV GCC_SHA256="b50b02b0a16e5aad8620e9d7c31110ef285c1dde28980b1a9448b764d77d8f92 gcc.tar.bz2"
-ENV GCC_MD5="6341f11972dac8de185646d0fbd73bfc gcc.tar.bz2"
-ENV PATH="/opt/${GCC_NAME}/bin/:${PATH}"
+ENV GCC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2018q4/gcc-arm-none-eabi-8-2018-q4-major-linux.tar.bz2?revision=d830f9dd-cd4f-406d-8672-cca9210dd220?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2018-q4-major"
+ENV GCC_NAME="gcc-arm-none-eabi-8-2018-q4-major"
+ENV GCC_SHA256="fb31fbdfe08406ece43eef5df623c0b2deb8b53e405e2c878300f7a1f303ee52 gcc.tar.bz2"
+ENV GCC_MD5="f55f90d483ddb3bcf4dae5882c2094cd gcc.tar.bz2"
 
 # Install ARM compiler
 RUN set -eux; \
