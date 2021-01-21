@@ -16,7 +16,7 @@ function build() {
     what="${part}"
 
     rm -rf release/*
-    make ${what} VERSION_FULL=${version} RELEASE=${release}
+    make ${what} RELEASE=${release}
     mkdir -p ${out_dir}/${output}/
     cp release/* ${out_dir}/${output}/
 }
@@ -25,5 +25,5 @@ build debug-release-buildv debug 0
 build release-buildv release 1
 
 arm-none-eabi-gcc --version | head -1
-find ${out_dir} | xargs sha256sum || true
+find ${out_dir} | xargs sha256sum | sort || true
 echo "done"
