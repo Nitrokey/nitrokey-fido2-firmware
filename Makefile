@@ -86,25 +86,6 @@ update:
 	git rebase origin/master
 	git submodule update --init --recursive
 
-DOCKER_TOOLCHAIN_IMAGE := "solokeys/solo-firmware-toolchain"
-
-docker-build-toolchain:
-	docker build -t $(DOCKER_TOOLCHAIN_IMAGE) .
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION}
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION_MAJ}
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION_MAJ}.${SOLO_VERSION_MIN}
-
-uncached-docker-build-toolchain:
-	docker build --no-cache -t $(DOCKER_TOOLCHAIN_IMAGE) .
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION}
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION_MAJ}
-	docker tag $(DOCKER_TOOLCHAIN_IMAGE):latest $(DOCKER_TOOLCHAIN_IMAGE):${SOLO_VERSION_MAJ}.${SOLO_VERSION_MIN}
-
-docker-build-all:
-	docker run --rm -v "$(CURDIR)/builds:/builds" \
-					-v "$(CURDIR):/solo" \
-					-u $(shell id -u ${USER}):$(shell id -g ${USER}) \
-				    $(DOCKER_TOOLCHAIN_IMAGE) "solo/in-docker-build.sh" ${SOLO_VERSION_FULL}
 
 CPPCHECK_FLAGS=--quiet --error-exitcode=2
 
@@ -127,13 +108,6 @@ clean:
 full-clean: clean
 	rm -rf venv
 
-test-docker:
-	rm -rf builds/*
-	$(MAKE) uncached-docker-build-toolchain
-	# Check if there are 4 docker images/tas named "solokeys/solo-firmware-toolchain"
-	NTAGS=$$(docker images | grep -c "solokeys/solo-firmware-toolchain") && [ $$NTAGS -eq 4 ]
-	$(MAKE) docker-build-all
-
 travis:
 	$(MAKE) test VENV=". ../../venv/bin/activate;"
 	#$(MAKE) test-docker
@@ -143,3 +117,5 @@ travis:
 simulation: main
 	-rm -v authenticator_state*.bin resident_keys.bin
 	while true; do ./main; sleep 0.1; done;
+
+include docker_build.mk
