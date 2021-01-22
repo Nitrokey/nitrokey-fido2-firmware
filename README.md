@@ -33,7 +33,13 @@ See documentation: https://docs.nitrokey.com/fido2/windows/#touch-button-and-led
 ## Nitrokey Reset
 See documentation: https://docs.nitrokey.com/fido2/windows/#nitrokey-reset.
 
-# Development (No Hardware Needed)
+
+## pynitrokey
+Take a look at [pynitrokey](https://github.com/Nitrokey/pynitrokey) for key management and client applications development.
+
+# Development
+
+## Simulation (No Hardware Needed)
 
 Clone this repository and build it
 
@@ -60,6 +66,16 @@ In another shell, you can run Solokey's [test suite](https://github.com/solokeys
 
 You can find more details in Solokey's [documentation](https://docs.solokeys.io/solo/), including how to build on the the NUCLEO-L432KC development board.
 
+
+## Firmware Build
+
+Firmware can be built in a Docker container by calling:
+```text
+make docker-build-toolchain
+make docker-build-all
+```
+
+This will result in a debug and release firmwares in the `./builds` directory.
 
 # Contributors
 
