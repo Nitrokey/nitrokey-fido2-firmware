@@ -521,15 +521,6 @@ static int ctap_make_extensions(CTAP_extensions * ext, uint8_t * ext_encoder_buf
                     check_ret(ret);
                 }
             }
-            if (hmac_secret_requested_is_valid) {
-                {
-                    ret = cbor_encode_text_stringz(&extension_output_map, "hmac-secret");
-                    check_ret(ret);
-
-                    ret = cbor_encode_boolean(&extension_output_map, 1);
-                    check_ret(ret);
-                }
-            }
             if (cred_protect_is_valid) {
                 {
                     ret = cbor_encode_text_stringz(&extension_output_map, "credProtect");
@@ -539,6 +530,16 @@ static int ctap_make_extensions(CTAP_extensions * ext, uint8_t * ext_encoder_buf
                     check_ret(ret);
                 }
             }
+            if (hmac_secret_requested_is_valid) {
+                {
+                    ret = cbor_encode_text_stringz(&extension_output_map, "hmac-secret");
+                    check_ret(ret);
+
+                    ret = cbor_encode_boolean(&extension_output_map, 1);
+                    check_ret(ret);
+                }
+            }
+
             ret = cbor_encoder_close_container(&extensions, &extension_output_map);
             check_ret(ret);
 
