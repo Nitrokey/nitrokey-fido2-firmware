@@ -27,7 +27,7 @@
 
 static bool use_udp = true;
 
-struct ResidentKeyStore {
+extern struct ResidentKeyStore {
     CTAP_residentKey rks[RK_NUM];
 } RK_STORE;
 

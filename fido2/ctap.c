@@ -565,6 +565,7 @@ static unsigned int get_credential_id_size(int type)
     return sizeof(CredentialId);
 }
 
+#ifndef USING_PC
 #include "gpio.h"
 
 /**
@@ -607,6 +608,12 @@ int ctap2_user_presence_test(const uint8_t ctap_command)
         return CTAP2_ERR_ACTION_TIMEOUT;
     }
 }
+#else
+int ctap2_user_presence_test(const uint8_t ctap_command){
+    return 0;
+}
+
+#endif
 
 static int ctap_make_auth_data(struct rpId * rp, CborEncoder * map, uint8_t * auth_data_buf, uint32_t * len, CTAP_credInfo * credInfo, CTAP_extensions * extensions)
 {
