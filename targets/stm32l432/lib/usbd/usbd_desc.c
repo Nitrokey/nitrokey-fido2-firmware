@@ -161,18 +161,22 @@ uint8_t *USBD_HID_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
     // Match the same alg as the DFU to make serial number
     volatile uint8_t * UUID = (volatile uint8_t *)0x1FFF7590;
     const char hexdigit[] = "0123456789ABCDEF";
-    uint8_t uuid[6];
+    uint8_t uuid[6]  = {0}; // initialize USB serial number to 0
     uint8_t uuid_str[13];
     uint8_t c;
     int i;
     uuid_str[12] = 0;
+    uint8_t hidesn = 0; // TODO move hide USB serial number to targets/stm32l432/src/memory_layout.h
 
-    uuid[0] = UUID[11];
-    uuid[1] = UUID[10] + UUID[2];
-    uuid[2] = UUID[9];
-    uuid[3] = UUID[8] + UUID[0];
-    uuid[4] = UUID[7];
-    uuid[5] = UUID[6];
+    if (hidesn == 0)
+    {
+      uuid[0] = UUID[11];
+      uuid[1] = UUID[10] + UUID[2];
+      uuid[2] = UUID[9];
+      uuid[3] = UUID[8] + UUID[0];
+      uuid[4] = UUID[7];
+      uuid[5] = UUID[6];
+    }
 
     // quick method to convert to hex string
     for (i = 0; i < 6; i++)
