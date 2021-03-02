@@ -521,15 +521,6 @@ static int ctap_make_extensions(CTAP_extensions * ext, uint8_t * ext_encoder_buf
                     check_ret(ret);
                 }
             }
-            if (hmac_secret_requested_is_valid) {
-                {
-                    ret = cbor_encode_text_stringz(&extension_output_map, "hmac-secret");
-                    check_ret(ret);
-
-                    ret = cbor_encode_boolean(&extension_output_map, 1);
-                    check_ret(ret);
-                }
-            }
             if (cred_protect_is_valid) {
                 {
                     ret = cbor_encode_text_stringz(&extension_output_map, "credProtect");
@@ -539,6 +530,16 @@ static int ctap_make_extensions(CTAP_extensions * ext, uint8_t * ext_encoder_buf
                     check_ret(ret);
                 }
             }
+            if (hmac_secret_requested_is_valid) {
+                {
+                    ret = cbor_encode_text_stringz(&extension_output_map, "hmac-secret");
+                    check_ret(ret);
+
+                    ret = cbor_encode_boolean(&extension_output_map, 1);
+                    check_ret(ret);
+                }
+            }
+
             ret = cbor_encoder_close_container(&extensions, &extension_output_map);
             check_ret(ret);
 
@@ -744,12 +745,28 @@ int ctap_encode_der_sig(const uint8_t * const in_sigbuf, uint8_t * const out_sig
     uint8_t lead_s = 0;  // leading zeros
     uint8_t lead_r = 0;
     for (i=0; i < 32; i++)
-        if (in_sigbuf[i] == 0) lead_r++;
-        else break;
+    {
+        if (in_sigbuf[i] == 0)
+        {
+            lead_r++;
+        }
+        else
+        {
+            break;
+        }
+    }
 
     for (i=0; i < 32; i++)
-        if (in_sigbuf[i+32] == 0) lead_s++;
-        else break;
+    {
+        if (in_sigbuf[i+32] == 0)
+        {
+            lead_s++;
+        }
+        else
+        {
+            break;
+        }
+    }
 
     int8_t pad_s = ((in_sigbuf[32 + lead_s] & 0x80) == 0x80);
     int8_t pad_r = ((in_sigbuf[0 + lead_r] & 0x80) == 0x80);
@@ -1200,13 +1217,13 @@ int ctap_filter_invalid_credentials(CTAP_getAssertion * GA)
             if (memcmp(rk.id.rpIdHash, rpIdHash, 32) == 0)
             {
                 printf1(TAG_GA, "RK %d is a rpId match!\r\n", i);
-                if (count == ALLOW_LIST_MAX_SIZE-1)
+                if (count >= ALLOW_LIST_MAX_SIZE)
                 {
                     printf2(TAG_ERR, "not enough ram allocated for matching RK's (%d).  Skipping.\r\n", count);
                     break;
                 }
                 GA->creds[count].type = PUB_KEY_CRED_PUB_KEY;
-                memmove(&(GA->creds[count].credential), &rk, sizeof(CTAP_residentKey));
+                memmove(&(GA->creds[count].credential), &rk, sizeof(struct Credential));
                 count++;
             }
         }
