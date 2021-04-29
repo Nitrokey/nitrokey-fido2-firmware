@@ -77,6 +77,55 @@ make docker-build-all
 
 This will result in a debug and release firmwares in the `./builds` directory.
 
+## Firmware size
+
+For the Nitrokey FIDO2 2.4.0 release, the total binary size is less than 84 kB (22kB bootloader included) in the release (size optimized) mode.
+This information can be seen during the build or verified by hand by loading the hex image - both presented below:
+
+```text
+# shown during the build - bootloader
+Memory region         Used Size  Region Size  %age Used
+           flash:       20292 B        20 KB     99.08%
+       flash_cfg:           4 B       2040 B      0.20%
+             ram:       17896 B        48 KB     36.41%
+           sram2:          0 GB        16 KB      0.00%
+arm-none-eabi-size bootloader.elf
+   text    data     bss     dec     hex filename
+  19892     404   17496   37792    93a0 bootloader.elf
+
+# actual image
+
+Memory region         Used Size  Region Size  %age Used
+           flash:       62148 B     159736 B     38.91%
+             ram:       29680 B        48 KB     60.38%
+           sram2:         656 B        16 KB      4.00%
+
+arm-none-eabi-size solo.elf
+   text    data     bss     dec     hex filename
+  61492     656   29680   91828   166b4 solo.elf
+
+```
+
+Verifying the same in Python:
+```python
+import intelhex # requires intelhex package (tested 2.3.0)
+i = intelhex.IntelHex()
+i.loadfile(open('release/nitrokey-fido2-firmware-2.4.0.nitrokey-2-gc073c7a-all-to_flash.hex'))
+a = len(i)
+print(a)
+# 83132
+# or
+a = list(y-x for x,y in i.segments())
+# [20292, 62148, 2, 8, 4, 678]
+print(sum(a))
+# 83132
+```
+
+User data right now is 38 kB, which makes a total of 119 kB minimum flash size required.
+
+From the user data region, 20 kB are reserved for the FIDO2 RKs. Minimal user space required is 8 kB (without the RKs, including attestation certificate/key and device key) but can be shrunk since most of it is wasted in padding.
+
+
 # Contributors
 
 Contributors are welcome. The ultimate goal is to have a FIDO2 security key supporting USB, NFC, and BLE interfaces, that can run on a variety of MCUs.

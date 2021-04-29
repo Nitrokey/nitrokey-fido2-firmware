@@ -27,7 +27,7 @@ desc | bootloader |       application    | bootloader data       |  secrets/data
 
 MEMORY
 {
-    flash (rx)      : ORIGIN = 0x08000000 + 20K, LENGTH = 216K - 20K - 8
+    flash (rx)      : ORIGIN = 0x08000000 + 20K, LENGTH = 216K - 20K - 8 - 38K -2K
     ram (xrw)       : ORIGIN = 0x20000000, LENGTH = 48K
     sram2 (rw)      : ORIGIN = 0x10000000, LENGTH = 16K
 }
