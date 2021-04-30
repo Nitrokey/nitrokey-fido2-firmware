@@ -8,7 +8,7 @@
 #define _MEMORY_LAYOUT_H_
 
 #define PAGE_SIZE		2048
-#define PAGES			128
+#define PAGES			64
 
 // Pages 119-127 are data
 // Location of counter page and it's backup page
@@ -68,7 +68,7 @@ struct flash_memory_st{
 typedef struct flash_memory_st flash_memory_st;
 
 #include <assert.h>
-static_assert(sizeof(flash_memory_st) == 256*1024, "Data structure doesn't match flash size");
+static_assert(sizeof(flash_memory_st) == 128*1024, "Data structure doesn't match flash size");
 
 #define ATTESTATION_CONFIGURED_TAG      0xaa551e79
 
