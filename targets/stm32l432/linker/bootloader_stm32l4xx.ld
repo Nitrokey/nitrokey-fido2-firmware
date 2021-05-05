@@ -17,12 +17,12 @@ flash_cfg is for storing bootloader data, like last used firmware version.
 bootloader_configuration should be equal to (APPLICATION_END_PAGE) page address, from targets/stm32l432/src/memory_layout.h:30; and equal to flash_cfg origin
 */
 
-bootloader_configuration = 0x08000000 + (128-20)*1024+8;
+bootloader_configuration = 0x08000000 + (128-40)*1024+8;
 
 MEMORY
 {
     flash (rx)      : ORIGIN = 0x08000000, LENGTH = 20K
-    flash_cfg (rx)  : ORIGIN = 0x08000000 + (128-20)*1024+8, LENGTH = 2K-8
+    flash_cfg (rx)  : ORIGIN = 0x08000000 + (128-40)*1024+8, LENGTH = 2K-8
     ram (xrw)       : ORIGIN = 0x20000000, LENGTH = 48K
     sram2 (rw)      : ORIGIN = 0x10000000, LENGTH = 16K
 }
