@@ -2,7 +2,7 @@ DEBUG ?= 0
 HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
 SOLO=nitropy fido2 util
-
+PAGES ?= 128
 
 # development - debug enabled, debug console, debug bootloader keys and certificates, no flash protection
 # test - development minus debug console
@@ -18,17 +18,15 @@ include build/common.mk
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
 BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
-merge_hex=$(SOLO) mergehex
-
 KEY_PATH ?= "../../keys/attestation/device_key-dummy.hex"
 KEY=$(shell cat $(KEY_PATH))
 ATTEST_PATH ?= "../../keys/attestation/device_cert.der"
-merge_hex_release=$(SOLO) mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
+merge_hex_release=$(SOLO) mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock --pages $(PAGES)
 
 ATTEST_PATH_DEV ?= "../../keys/attestation/dev/device_cert.der"
 KEY_PATH_DEV ?= "../../keys/attestation/dev/device_key.hex"
 KEY_DEV=$(shell cat $(KEY_PATH_DEV))
-merge_hex_dev=$(SOLO) mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
+merge_hex_dev=$(SOLO) mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock --pages $(PAGES)
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
@@ -42,11 +40,11 @@ endif
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 .PHONY: show-warnings
@@ -58,13 +56,13 @@ show-warnings:
 	@echo
 
 firmware-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)'
 
 bootloader-nonverifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE)' DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0
 
 bootloader-verifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0 2>&1 | tee build-bootloader.log
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0 2>&1 | tee build-bootloader.log
 	test -f bootloader.hex || false
 
 
