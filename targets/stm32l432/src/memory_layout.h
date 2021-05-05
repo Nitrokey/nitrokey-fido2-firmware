@@ -9,7 +9,7 @@
 
 #define PAGE_SIZE		2048
 #ifndef PAGES
-#error Setting pages to 128
+#error PAGES value not specified
 #define PAGES			128
 
 #elif PAGES == 128
