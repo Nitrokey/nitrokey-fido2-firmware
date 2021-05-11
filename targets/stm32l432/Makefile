@@ -77,7 +77,7 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
 	sha256sum  $(signamedev)-app-to_sign.hex $(signamedev)-all-to_flash.hex *.hex | sort
-	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
+	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json --pages $(PAGES)
 	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
 
