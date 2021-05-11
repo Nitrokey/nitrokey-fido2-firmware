@@ -1,0 +1,83 @@
+stages:
+  - pull-github
+  - build
+  - deploy
+
+variables:
+  GIT_STRATEGY: clone			#This seems to have no effect also set in webinterface
+  GIT_DEPTH: 0					#This seems to have no effect also set in webinterface
+  GIT_SUBMODULE_STRATEGY: recursive
+
+pull:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger" && $CI_COMMIT_BRANCH == "master"'
+  image: nitrokey/pull:latest
+  tags:
+    - docker
+  stage: pull-github
+  before_script:
+    - apt-get update -y
+  script:
+    - chmod +x ./ci-scripts/pull.sh
+    - ./ci-scripts/pull.sh nitrokey-fido2-firmware
+
+build:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+  tags:
+    - lxc
+  stage: build
+  script:
+    - make ci
+  artifacts:
+    paths:
+      - builds/*
+
+upload-nightly:
+  stage: deploy
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  tags:
+    - docker
+  image: nitrokey/nightly-upload:latest
+  before_script:
+    - apt-get update -y
+  script:
+    - chmod +x ./ci-scripts/nightly_upload.sh
+    - zip -r builds.zip builds
+    - ./ci-scripts/nightly_upload.sh builds.zip
+
+
+build-simulation:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  image: ubuntu:20.04
+  tags:
+    - lxc
+  stage: build
+  before_script:
+    - apt update -y
+    - apt install -y git
+    - apt install -y make
+    - apt install -y gcc
+    - apt install -y python3
+    - git submodule update --init --recursive
+  script:
+    - make all
+  allow_failure: true #TODO remove this
+
+deploy-release:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+  image: nitrokey/publish-git:latest
+  tags:
+    - docker
+  stage: deploy
+  before_script:
+    - apt-get update -y
+  script:
+    - chmod +x ./ci-scripts/release.sh
+    - ./ci-scripts/release.sh
