@@ -209,6 +209,10 @@ run-debug:
 run-reset:
 	STM32_Programmer_CLI -c port=SWD -rst
 
+.PHONY: run-download
+run-download:
+	STM32_Programmer_CLI -c port=SWD -u 0x8000000 $$(($(PAGES)*2*1024)) flash_dump-$(PAGES).bin
+
 .PHONY: run-monitor
 run-monitor:
 	nitropy fido2 util monitor /dev/nitrokey-fido2-serial
