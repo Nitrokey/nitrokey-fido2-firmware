@@ -325,7 +325,9 @@ void device_init()
 
     if (! tsc_sensor_exists())
     {
+#ifdef NK_ENABLE_NFC
         _NFC_status = nfc_init();
+#endif
     }
 
     if (_NFC_status == NFC_IS_ACTIVE)
@@ -666,7 +668,9 @@ void device_manage(void)
 #endif
 #ifndef IS_BOOTLOADER
 	if(device_is_nfc())
+#ifdef NK_ENABLE_NFC
     nfc_loop();
+#endif
 #endif
     run_drivers();
 }

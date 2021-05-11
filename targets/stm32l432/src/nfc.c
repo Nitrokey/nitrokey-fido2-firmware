@@ -12,6 +12,8 @@
 
 #include "ctap_errors.h"
 
+#ifdef NK_ENABLE_NFC
+
 #define IS_IRQ_ACTIVE()         (1  == (LL_GPIO_ReadInputPort(SOLO_AMS_IRQ_PORT) & SOLO_AMS_IRQ_PIN))
 
 // chain buffer for 61XX responses
@@ -1055,3 +1057,4 @@ int nfc_loop(void)
     return len;
 
 }
+#endif
