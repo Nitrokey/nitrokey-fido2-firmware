@@ -70,7 +70,7 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(VERSION_FULL)
-signamedev=release/nitrokey-fido2-firmware-dev-$(ver)
+signamedev=release/nitrokey-fido2-firmware-dev-$(ver)-$(PAGES)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	mkdir -p release/
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
@@ -82,10 +82,10 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 	@echo "done"
 
 .PHONY: release-buildv
-signame1=release/nitrokey-fido2-firmware-$(ver)
+signame1=release/nitrokey-fido2-firmware-$(ver)-$(PAGES)
 signame=$(signame1).json
 ifeq ($(RELEASE),0)
-signame1=release/nitrokey-fido2-firmware-$(ver)-test
+signame1=release/nitrokey-fido2-firmware-$(ver)-test-$(PAGES)
 endif
 
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
