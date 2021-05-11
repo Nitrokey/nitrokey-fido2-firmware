@@ -40,7 +40,7 @@ endif
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) PAGES=$(PAGES) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 firmware-debug-1:
@@ -59,10 +59,10 @@ firmware-debug-2:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)'
 
 bootloader-nonverifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) PAGES=$(PAGES) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0
 
 bootloader-verifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0 2>&1 | tee build-bootloader.log
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) PAGES=$(PAGES) EXTRA_DEFINES='$(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0 2>&1 | tee build-bootloader.log
 	test -f bootloader.hex || false
 
 
