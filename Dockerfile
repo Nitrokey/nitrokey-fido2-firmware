@@ -28,6 +28,6 @@ RUN set -eux; \
 
 ENV PATH="/opt/${GCC_NAME}/bin/:${PATH}"
 
-RUN pip install -U pynitrokey
+RUN pip install -U git+https://github.com/Nitrokey/pynitrokey
 RUN pip install -U fido2==0.8.1
 RUN nitropy version && arm-none-eabi-gcc --version | head -1
