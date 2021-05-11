@@ -62,15 +62,15 @@ ECC_CFLAGS = $(CFLAGS) -DuECC_PLATFORM=5 -DuECC_OPTIMIZATION_LEVEL=4 -DuECC_SQUA
 all: $(TARGET).elf
 	$(SZ) $^
 
-%.o: %.c
+%.o: %.c $(LDSCRIPT)
 	@echo "*** $<"
-	@$(CC) $^ $(HW)  $(CFLAGS) -o $@
+	@$(CC) $< $(HW)  $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
 	@echo "*** $<"
 	@$(CC) $^ $(HW)  -O3 $(ECC_CFLAGS) -o $@
 
-%.elf: $(OBJ) $(LDSCRIPT)
+%.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
 	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	@echo "*** Built version: $(VERSION_FLAGS)"

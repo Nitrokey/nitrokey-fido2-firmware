@@ -56,9 +56,9 @@ all: $(TARGET).elf
 	$(SZ) $^
 
 
-%.o: %.c
+%.o: %.c $(LDSCRIPT)
 	@echo "*** bootloader: $<"
-	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@$(CC) $< $(HW)  -Os $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
 	@echo "*** $<"
@@ -75,7 +75,7 @@ endif
 $(LDSCRIPT): $(LDSCRIPT).in
 	sed 's/__PAGES__/$(PAGES)/g' < $< >$@
 
-%.elf: $(OBJ) $(LDSCRIPT)
+%.elf: $(OBJ)
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	$(SZ) $@
 
