@@ -68,7 +68,14 @@ all: $(TARGET).elf
 	@echo "*** bootloader: $<"
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
 
-%.elf: $(OBJ)
+ifndef PAGES
+PAGES=64
+$(warning PAGES is not defined - setting to new value: "$(PAGES)")
+endif
+$(LDSCRIPT): $(LDSCRIPT).in
+	sed 's/__PAGES__/$(PAGES)/g' < $< >$@
+
+%.elf: $(OBJ) $(LDSCRIPT)
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	$(SZ) $@
 
@@ -77,4 +84,5 @@ all: $(TARGET).elf
 	@echo "Bootloader built flags: $(CFLAGS)"
 
 clean:
-	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ)
+	-cp $(LDSCRIPT){,-} -v
+	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ) $(LDSCRIPT)

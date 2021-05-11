@@ -70,7 +70,7 @@ all: $(TARGET).elf
 	@echo "*** $<"
 	@$(CC) $^ $(HW)  -O3 $(ECC_CFLAGS) -o $@
 
-%.elf: $(OBJ)
+%.elf: $(OBJ) $(LDSCRIPT)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
 	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	@echo "*** Built version: $(VERSION_FLAGS)"
@@ -80,9 +80,10 @@ all: $(TARGET).elf
 %.hex: %.elf
 	$(SZ) $^
 	$(CP) -O ihex $^ $(TARGET).hex
+	$(CP) -O binary $^ $(TARGET).bin
 
 clean:
-	@rm -f *.o src/*.o *.elf  bootloader/*.o $(OBJ)
+	@rm -f *.o src/*.o *.elf  bootloader/*.o $(OBJ) $(LDSCRIPT)
 
 
 cbor:
@@ -91,3 +92,10 @@ cbor:
 LDFLAGS="$(LDFLAGS_LIB)" \
 CFLAGS="$(CFLAGS) -Os -g3  -DCBOR_PARSER_MAX_RECURSIONS=3"
 
+
+ifndef PAGES
+PAGES=64
+$(warning PAGES is not defined - setting to new value: "$(PAGES)")
+endif
+$(LDSCRIPT): $(LDSCRIPT).in
+	sed 's/__PAGES__/$(PAGES)/g' < $< >$@
