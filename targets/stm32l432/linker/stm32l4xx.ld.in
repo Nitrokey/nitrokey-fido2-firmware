@@ -24,7 +24,10 @@ desc | bootloader |       application    | bootloader data       |  secrets/data
  */
 
 /* Current firmware version number is concatenated to the firmware code - see .flag marker */
-/* flash length is (APPLICATION_END_PAGE-20*1024), where 20K is bootloader */
+/* flash length is (APPLICATION_END_PAGE-20*1024), where 20K is bootloader
+Template parameters:
+PAGES=__PAGES__
+*/
 
 MEMORY
 {

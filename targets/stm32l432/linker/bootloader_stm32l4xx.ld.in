@@ -15,6 +15,9 @@ _MIN_STACK_SIZE = 0x400;
 /*
 flash_cfg is for storing bootloader data, like last used firmware version.
 bootloader_configuration should be equal to (APPLICATION_END_PAGE) page address, from targets/stm32l432/src/memory_layout.h:30; and equal to flash_cfg origin
+
+Template parameters:
+PAGES=__PAGES__
 */
 
 bootloader_configuration = 0x08000000 + (__PAGES__*2-40)*1024+8;
