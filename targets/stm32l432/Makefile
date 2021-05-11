@@ -2,7 +2,9 @@ DEBUG ?= 0
 HWREV ?= 3
 SZ ?= $(PREFIX)arm-none-eabi-size
 SOLO=nitropy fido2 util
+PAGES ?= 128
 
+PAGESHR = $(shell echo $$(( $(PAGES)*2 ))kB )
 
 # development - debug enabled, debug console, debug bootloader keys and certificates, no flash protection
 # test - development minus debug console
@@ -18,17 +20,15 @@ include build/common.mk
 APPMAKE=build/application.mk VERSION_FULL=${VERSION_FULL}
 BOOTMAKE=build/bootloader.mk VERSION_FULL=${VERSION_FULL}
 
-merge_hex=$(SOLO) mergehex
-
 KEY_PATH ?= "../../keys/attestation/device_key-dummy.hex"
 KEY=$(shell cat $(KEY_PATH))
 ATTEST_PATH ?= "../../keys/attestation/device_cert.der"
-merge_hex_release=$(SOLO) mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock
+merge_hex_release=$(SOLO) mergehex --attestation-key "$(KEY)" --attestation-cert $(ATTEST_PATH) --lock --pages $(PAGES)
 
 ATTEST_PATH_DEV ?= "../../keys/attestation/dev/device_cert.der"
 KEY_PATH_DEV ?= "../../keys/attestation/dev/device_key.hex"
 KEY_DEV=$(shell cat $(KEY_PATH_DEV))
-merge_hex_dev=$(SOLO) mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock
+merge_hex_dev=$(SOLO) mergehex --attestation-key "$(KEY_DEV)" --attestation-cert $(ATTEST_PATH_DEV) --lock --pages $(PAGES)
 
 .PHONY: all all-hacker all-locked debugboot-app debugboot-boot boot-sig-checking boot-no-sig build-release-locked build-release build-release build-hacker build-debugboot clean clean2 flash flash_dfu flashboot detach cbor test
 
@@ -42,11 +42,11 @@ endif
 # The following are the main targets for reproducible builds.
 # TODO: better explanation
 firmware:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) PAGES=$(PAGES) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 .PHONY: show-warnings
@@ -58,13 +58,13 @@ show-warnings:
 	@echo
 
 firmware-debug-2:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) $(TEST_MODE_DEFINE)'
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=2 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)'
 
 bootloader-nonverifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE)' DEBUG=0
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) PAGES=$(PAGES) EXTRA_DEFINES='-DSOLO_HACKER $(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0
 
 bootloader-verifying:
-	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) EXTRA_DEFINES='$(TEST_MODE_DEFINE)' DEBUG=0 2>&1 | tee build-bootloader.log
+	$(MAKE) -f $(BOOTMAKE) -j8 bootloader.hex PREFIX=$(PREFIX) PAGES=$(PAGES) EXTRA_DEFINES='$(TEST_MODE_DEFINE) -DPAGES=$(PAGES)' DEBUG=0 2>&1 | tee build-bootloader.log
 	test -f bootloader.hex || false
 
 
@@ -72,22 +72,22 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(VERSION_FULL)
-signamedev=release/nitrokey-fido2-firmware-dev-$(ver)
+signamedev=release/nitrokey-fido2-firmware-dev-$(ver)-$(PAGESHR)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	mkdir -p release/
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
 	sha256sum  $(signamedev)-app-to_sign.hex $(signamedev)-all-to_flash.hex *.hex | sort
-	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json
+	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json --pages $(PAGES)
 	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
 
 .PHONY: release-buildv
-signame1=release/nitrokey-fido2-firmware-$(ver)
+signame1=release/nitrokey-fido2-firmware-$(ver)-$(PAGESHR)
 signame=$(signame1).json
 ifeq ($(RELEASE),0)
-signame1=release/nitrokey-fido2-firmware-$(ver)-test
+signame1=release/nitrokey-fido2-firmware-$(ver)-test-$(PAGESHR)
 endif
 
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
@@ -210,6 +210,10 @@ run-debug:
 .PHONY: run-reset
 run-reset:
 	STM32_Programmer_CLI -c port=SWD -rst
+
+.PHONY: run-download
+run-download:
+	STM32_Programmer_CLI -c port=SWD -u 0x8000000 $$(($(PAGES)*2*1024)) flash_dump-$(PAGES).bin
 
 .PHONY: run-monitor
 run-monitor:

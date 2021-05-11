@@ -56,9 +56,9 @@ all: $(TARGET).elf
 	$(SZ) $^
 
 
-%.o: %.c
+%.o: %.c $(LDSCRIPT)
 	@echo "*** bootloader: $<"
-	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+	@$(CC) $< $(HW)  -Os $(CFLAGS) -o $@
 
 ../../crypto/micro-ecc/uECC.o: ../../crypto/micro-ecc/uECC.c
 	@echo "*** $<"
@@ -67,6 +67,13 @@ all: $(TARGET).elf
 %.o: %.s
 	@echo "*** bootloader: $<"
 	@$(CC) $^ $(HW)  -Os $(CFLAGS) -o $@
+
+ifndef PAGES
+PAGES=64
+$(warning PAGES is not defined - setting to new value: "$(PAGES)")
+endif
+$(LDSCRIPT): $(LDSCRIPT).in
+	sed 's/__PAGES__/$(PAGES)/g' < $< >$@
 
 %.elf: $(OBJ)
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
@@ -77,4 +84,5 @@ all: $(TARGET).elf
 	@echo "Bootloader built flags: $(CFLAGS)"
 
 clean:
-	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ)
+	-cp $(LDSCRIPT){,-} -v
+	rm -f *.o src/*.o bootloader/*.o *.elf  $(OBJ) $(LDSCRIPT)
