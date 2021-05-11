@@ -4,6 +4,8 @@ SZ ?= $(PREFIX)arm-none-eabi-size
 SOLO=nitropy fido2 util
 PAGES ?= 128
 
+PAGESHR = $(shell echo $$(( $(PAGES)*2 ))kB )
+
 # development - debug enabled, debug console, debug bootloader keys and certificates, no flash protection
 # test - development minus debug console
 # release - production keys and certificate, flash and debug access protection, no debug console
@@ -70,7 +72,7 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(VERSION_FULL)
-signamedev=release/nitrokey-fido2-firmware-dev-$(ver)-$(PAGES)
+signamedev=release/nitrokey-fido2-firmware-dev-$(ver)-$(PAGESHR)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	mkdir -p release/
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
@@ -82,10 +84,10 @@ debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debu
 	@echo "done"
 
 .PHONY: release-buildv
-signame1=release/nitrokey-fido2-firmware-$(ver)-$(PAGES)
+signame1=release/nitrokey-fido2-firmware-$(ver)-$(PAGESHR)
 signame=$(signame1).json
 ifeq ($(RELEASE),0)
-signame1=release/nitrokey-fido2-firmware-$(ver)-test-$(PAGES)
+signame1=release/nitrokey-fido2-firmware-$(ver)-test-$(PAGESHR)
 endif
 
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
