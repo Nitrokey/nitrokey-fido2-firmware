@@ -100,10 +100,14 @@ int solo_is_locked();
 
 
 #if DEBUG_LEVEL > 0 || defined(NK_TEST_MODE)
+#define STRINGIFY(a) _STRINGIFY(a)
+#define _STRINGIFY(a) #a
 #warning "Selected development name"
-#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " SOLO_VERSION
+#define SOLO_PRODUCT_NAME "Nitrokey FIDO2 Development " STRINGIFY(PAGES) " " SOLO_VERSION
 #else
 #define SOLO_PRODUCT_NAME "Nitrokey FIDO2 " SOLO_VERSION
+#undef STRINGIFY
+#undef _STRINGIFY
 #endif
 
 #include "app-common.h"
