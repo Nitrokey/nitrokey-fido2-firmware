@@ -46,9 +46,9 @@ firmware:
 	test -f solo.hex || false
 
 ifeq ($(PAGES),64)
-	ifeq ($(RELEASE),0)
+ifeq ($(RELEASE),0)
 	$(info *** Disabling additional debug messages for 64-pages development version)
-	endif
+endif
 DEV_DEBUG:=0
 else
 DEV_DEBUG:=1
