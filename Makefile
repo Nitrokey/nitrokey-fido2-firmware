@@ -36,7 +36,7 @@ CFLAGS += -DAES256=1  -DSOLO_EXPERIMENTAL=1 -DDEBUG_LEVEL=1
 name = main
 
 .PHONY: all $(LIBCBOR) $(LIBSOLO) black blackcheck cppcheck wink fido2-test clean full-clean ci test clean version
-all: main
+all: $(name)
 
 tinycbor/Makefile crypto/tiny-AES-c/aes.c:
 	git submodule update --init
