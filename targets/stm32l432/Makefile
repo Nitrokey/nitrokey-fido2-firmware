@@ -45,8 +45,18 @@ firmware:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) PAGES=$(PAGES) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
+ifeq ($(PAGES),64)
+ifeq ($(RELEASE),0)
+	$(info *** Disabling additional debug messages for 64-pages development version)
+endif
+DEV_DEBUG:=0
+else
+DEV_DEBUG:=1
+endif
+
+
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=1 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=$(DEV_DEBUG) EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 .PHONY: show-warnings
@@ -72,22 +82,23 @@ full-clean: clean2
 
 .PHONY: debug-release-buildv
 ver=$(VERSION_FULL)
-signamedev=release/nitrokey-fido2-firmware-dev-$(ver)-$(PAGESHR)
+signamedev=release/nitrokey-fido2-firmware-$(PAGESHR)-dev-$(ver)
 debug-release-buildv: | full-clean cbor bootloader-verifying clean firmware-debug-1 show-warnings
 	mkdir -p release/
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signamedev)-all-to_flash.hex
 	cp solo.hex $(signamedev)-app-to_sign.hex
+	cp *buildinfo release/
 	sha256sum  $(signamedev)-app-to_sign.hex $(signamedev)-all-to_flash.hex *.hex | sort
 	$(SOLO) sign ../../keys/bootloader-dev.pem solo.hex $(signamedev).json --pages $(PAGES)
 	sha256sum $(signamedev).json > $(signamedev).json.sha2
 	@echo "done"
 
 .PHONY: release-buildv
-signame1=release/nitrokey-fido2-firmware-$(ver)-$(PAGESHR)
+signame1=release/nitrokey-fido2-firmware-$(PAGESHR)-$(ver)
 signame=$(signame1).json
 ifeq ($(RELEASE),0)
-signame1=release/nitrokey-fido2-firmware-$(ver)-test-$(PAGESHR)
+signame1=release/nitrokey-fido2-firmware-$(PAGESHR)-$(ver)-test
 endif
 
 release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warnings
@@ -96,6 +107,7 @@ release-buildv: | full-clean cbor bootloader-verifying clean firmware show-warni
 	$(VENV) $(merge_hex) solo.hex bootloader.hex all.hex
 	cp all.hex $(signame1)-all-to_flash.hex
 	cp solo.hex $(signame1)-app-to_sign.hex
+	cp *buildinfo release/
 	sha256sum  $(signame1)-app-to_sign.hex $(signame1)-all-to_flash.hex *.hex | sort
 	ls -la release/
 	@echo "done"

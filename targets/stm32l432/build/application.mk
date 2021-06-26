@@ -52,12 +52,14 @@ DEFINES = -DDEBUG_LEVEL=$(DEBUG) -D$(CHIP) -DAES256=1  -DUSE_FULL_LL_DRIVER -DAP
 CFLAGS=$(INC) -c $(DEFINES)   -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -fdata-sections -ffunction-sections \
 	-fomit-frame-pointer $(HW) $(VERSION_FLAGS) -Os -g3
 LDFLAGS_LIB=$(HW) $(SEARCH) -specs=nano.specs  -specs=nosys.specs  -Wl,--gc-sections -lnosys
-LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref -Wl,-Bstatic -ltinycbor
+LDFLAGS_INFO=-Wl,--print-memory-usage -Wl,--print-gc-sections
+LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref -Wl,-Bstatic -ltinycbor $(LDFLAGS_INFO)
 
 ECC_CFLAGS = $(CFLAGS) -DuECC_PLATFORM=5 -DuECC_OPTIMIZATION_LEVEL=4 -DuECC_SQUARE_FUNC=1 -DuECC_SUPPORT_COMPRESSED_POINT=0
 
 
 .PRECIOUS: %.o
+include build/buildinfo.mk
 
 all: $(TARGET).elf
 	$(SZ) $^
@@ -72,15 +74,15 @@ all: $(TARGET).elf
 
 %.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
-	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
+	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ 2>&1 | tee $(TARGET)-linking.buildinfo
 	@echo "*** Built version: $(VERSION_FLAGS)"
 	@echo "*** Built flags: $(DEFINES)"
 	@echo "*** Built CFLAGS: $(CFLAGS)"
 
-%.hex: %.elf
-	$(SZ) $^
-	$(CP) -O ihex $^ $(TARGET).hex
-	$(CP) -O binary $^ $(TARGET).bin
+%.hex: %.elf $(TARGET).buildinfo
+	$(SZ) $<
+	$(CP) -O ihex $< $(TARGET).hex
+	$(CP) -O binary $< $(TARGET).bin
 
 clean:
 	@rm -f *.o src/*.o *.elf  bootloader/*.o $(OBJ) $(LDSCRIPT)

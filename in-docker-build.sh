@@ -1,6 +1,4 @@
 #!/bin/bash -xe
-version=$1
-
 cp -rf /solo-base/ /solo/
 
 cd /solo/targets/stm32l432
@@ -23,9 +21,10 @@ function build() {
 }
 
 build debug-release-buildv debug-256 0 128
+build debug-release-buildv debug-128 0 64
 build release-buildv release-256 1 128
 build release-buildv release-128 1 64
 
 arm-none-eabi-gcc --version | head -1
-find ${out_dir} | xargs sha256sum | sort || true
+find ${out_dir} -type f | xargs sha256sum | sort || true
 echo "done"
