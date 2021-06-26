@@ -51,6 +51,7 @@ LDFLAGS=$(HW) $(LDFLAGS_LIB) -T$(LDSCRIPT) -Wl,-Map=$(TARGET).map,--cref  -Wl,-B
 
 
 .PRECIOUS: %.o
+include build/buildinfo.mk
 
 all: $(TARGET).elf
 	$(SZ) $^
@@ -79,8 +80,8 @@ $(LDSCRIPT): $(LDSCRIPT).in
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
 	$(SZ) $@
 
-%.hex: %.elf
-	$(CP) -O ihex $^ $(TARGET).hex
+%.hex: %.elf $(TARGET).buildinfo
+	$(CP) -O ihex $< $(TARGET).hex
 	@echo "Bootloader built flags: $(CFLAGS)"
 
 clean:
