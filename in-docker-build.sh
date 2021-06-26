@@ -27,5 +27,5 @@ build release-buildv release-256 1 128
 build release-buildv release-128 1 64
 
 arm-none-eabi-gcc --version | head -1
-find ${out_dir} | xargs sha256sum | sort || true
+find ${out_dir} -type f | xargs sha256sum | sort || true
 echo "done"
