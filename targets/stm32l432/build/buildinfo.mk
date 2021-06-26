@@ -1,4 +1,10 @@
 
+$(TARGET)-linking.buildinfo: $(TARGET).elf
+
+$(TARGET)-sections.buildinfo: $(TARGET)-linking.buildinfo
+	grep -o -E "removing unused section '.*?' in file '.*?'" $< | sort | uniq -c | sort -k1rn > $@
+
+
 .PHONY: $(TARGET).buildinfo
 $(TARGET).buildinfo:
 	date > $@

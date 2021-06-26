@@ -81,7 +81,7 @@ $(LDSCRIPT): $(LDSCRIPT).in
 	$(CC) $^ $(HW) $(LDFLAGS) -o $@ 2>&1 | tee $(TARGET)-linking.buildinfo
 	$(SZ) $@
 
-%.hex: %.elf $(TARGET).buildinfo
+%.hex: %.elf $(TARGET).buildinfo $(TARGET)-sections.buildinfo
 	$(CP) -O ihex $< $(TARGET).hex
 	@echo "Bootloader built flags: $(CFLAGS)"
 

@@ -79,7 +79,7 @@ all: $(TARGET).elf
 	@echo "*** Built flags: $(DEFINES)"
 	@echo "*** Built CFLAGS: $(CFLAGS)"
 
-%.hex: %.elf $(TARGET).buildinfo
+%.hex: %.elf $(TARGET).buildinfo $(TARGET)-sections.buildinfo
 	$(SZ) $<
 	$(CP) -O ihex $< $(TARGET).hex
 	$(CP) -O binary $< $(TARGET).bin
