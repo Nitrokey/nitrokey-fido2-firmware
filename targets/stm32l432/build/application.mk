@@ -58,6 +58,7 @@ ECC_CFLAGS = $(CFLAGS) -DuECC_PLATFORM=5 -DuECC_OPTIMIZATION_LEVEL=4 -DuECC_SQUA
 
 
 .PRECIOUS: %.o
+include build/buildinfo.mk
 
 all: $(TARGET).elf
 	$(SZ) $^
@@ -72,15 +73,15 @@ all: $(TARGET).elf
 
 %.elf: $(OBJ)
 	@echo $(CC) 'FILES' $(HW) $(LDFLAGS) -o $@
-	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ -Wl,--print-memory-usage
+	@$(CC) $^ $(HW) $(LDFLAGS) -o $@ 2>&1 | tee $(TARGET)-linking.buildinfo
 	@echo "*** Built version: $(VERSION_FLAGS)"
 	@echo "*** Built flags: $(DEFINES)"
 	@echo "*** Built CFLAGS: $(CFLAGS)"
 
-%.hex: %.elf
-	$(SZ) $^
-	$(CP) -O ihex $^ $(TARGET).hex
-	$(CP) -O binary $^ $(TARGET).bin
+%.hex: %.elf $(TARGET).buildinfo
+	$(SZ) $<
+	$(CP) -O ihex $< $(TARGET).hex
+	$(CP) -O binary $< $(TARGET).bin
 
 clean:
 	@rm -f *.o src/*.o *.elf  bootloader/*.o $(OBJ) $(LDSCRIPT)
