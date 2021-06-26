@@ -45,8 +45,16 @@ firmware:
 	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) PAGES=$(PAGES) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
+ifeq ($(PAGES),64)
+$(info Disabling additional debug messages for 64-pages development version)
+DEV_DEBUG:=0
+else
+DEV_DEBUG:=1
+endif
+
+
 firmware-debug-1:
-	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=0 EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
+	$(MAKE) -f $(APPMAKE) -j8 solo.hex PREFIX=$(PREFIX) DEBUG=$(DEV_DEBUG) EXTRA_DEFINES='-DHWREV=$(HWREV) -DPAGES=$(PAGES) $(TEST_MODE_DEFINE)' 2>&1 | tee build.log
 	test -f solo.hex || false
 
 .PHONY: show-warnings
